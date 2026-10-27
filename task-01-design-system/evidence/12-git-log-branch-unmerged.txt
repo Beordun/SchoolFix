@@ -1,0 +1,28 @@
+================================================================================
+GIT LOG: UNMERGED REGRESSION BRANCH DELETION PROOF
+================================================================================
+Timestamp: 2026-10-27T17:28:00+01:00
+Target Branch: experiment/deliberate-token-regression
+Action: Branch explicitly deleted without merging into main.
+
+1. BRANCH DELETION COMMAND OUTPUT:
+$ git branch -D experiment/deliberate-token-regression
+Deleted branch experiment/deliberate-token-regression (was 4285eec).
+
+2. REFLOG AUDIT TRAIL (PROVES COMMITTED EXPERIMENT WAS ABANDONED):
+$ git reflog -n 8
+3067635 HEAD@{0}: checkout: moving from experiment/deliberate-token-regression to main
+4285eec HEAD@{1}: commit: test(regression): sever token referencing by hardcoding raw hex on primary role
+3067635 HEAD@{2}: checkout: moving from main to experiment/deliberate-token-regression
+3067635 HEAD@{3}: commit: feat(task-1): complete token compiler and screen proof
+abb3694 HEAD@{4}: commit (initial): first commit
+
+3. CURRENT COMMIT GRAPH ON MAIN (CLEAN OF REGRESSION):
+$ git log --graph --oneline -n 5
+* 3067635 feat(task-1): complete token compiler and screen proof
+* abb3694 first commit
+
+CONCLUSION:
+The deliberate token regression commit (4285eec) was successfully isolated on the
+experimental branch and pruned without merging into the main deployment line.
+================================================================================
