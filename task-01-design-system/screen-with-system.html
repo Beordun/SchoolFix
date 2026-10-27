@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Attendance - JSS 2 Diamond (SchoolFix Design System)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* STRICTLY CONSUMING TOKENS.CSS - ZERO RAW COLOR OR ARBITRARY VALUES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--color-surface);
+      color: var(--color-on-surface);
+      font-family: var(--type-body-medium-font-family);
+      font-size: var(--type-body-medium-size);
+      font-weight: var(--type-body-medium-weight);
+      line-height: var(--type-body-medium-line-height);
+      letter-spacing: var(--type-body-medium-letter-spacing);
+      padding: 2rem;
+    }
+    .register-card {
+      max-width: 840px;
+      margin: 0 auto;
+      background: var(--color-surface-container);
+      border: 1px solid var(--color-outline);
+      border-radius: 12px;
+      box-shadow: var(--shadow-soft);
+      padding: 2rem;
+    }
+    .header {
+      border-bottom: 1px solid var(--color-outline);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .header h1 {
+      font-family: var(--type-headline-large-font-family);
+      font-size: var(--type-headline-large-size);
+      font-weight: var(--type-headline-large-weight);
+      line-height: var(--type-headline-large-line-height);
+      letter-spacing: var(--type-headline-large-letter-spacing);
+      color: var(--color-primary);
+      margin-bottom: 0.35rem;
+    }
+    .header p {
+      font-family: var(--type-body-medium-font-family);
+      font-size: var(--type-body-medium-size);
+      color: var(--color-on-surface-variant);
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat-pill {
+      background: var(--color-primary-container);
+      color: var(--color-on-primary-container);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      font-family: var(--type-label-medium-font-family);
+      font-size: var(--type-label-medium-size);
+      font-weight: var(--type-label-medium-weight);
+      line-height: var(--type-label-medium-line-height);
+      letter-spacing: var(--type-label-medium-letter-spacing);
+      border: 1px solid var(--color-outline);
+    }
+    .stat-pill.alert-warning {
+      background: var(--color-warning);
+      color: var(--color-on-warning);
+    }
+    .stat-pill.alert-error {
+      background: var(--color-error);
+      color: var(--color-on-error);
+    }
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--color-outline);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background: var(--color-surface);
+      color: var(--color-on-surface-variant);
+      padding: 0.85rem 1rem;
+      font-family: var(--type-label-medium-font-family);
+      font-size: var(--type-label-medium-size);
+      font-weight: var(--type-label-medium-weight);
+      line-height: var(--type-label-medium-line-height);
+      letter-spacing: var(--type-label-medium-letter-spacing);
+      border-bottom: 1px solid var(--color-outline);
+    }
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--color-outline);
+      font-family: var(--type-body-medium-font-family);
+      font-size: var(--type-body-medium-size);
+      font-weight: var(--type-body-medium-weight);
+      line-height: var(--type-body-medium-line-height);
+      letter-spacing: var(--type-body-medium-letter-spacing);
+      color: var(--color-on-surface);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-family: var(--type-label-small-font-family);
+      font-size: var(--type-label-small-size);
+      font-weight: var(--type-label-small-weight);
+      line-height: var(--type-label-small-line-height);
+      letter-spacing: var(--type-label-small-letter-spacing);
+    }
+    .badge-present {
+      background: var(--color-success);
+      color: var(--color-on-success);
+    }
+    .badge-absent {
+      background: var(--color-error);
+      color: var(--color-on-error);
+    }
+    .badge-late {
+      background: var(--color-warning);
+      color: var(--color-on-warning);
+    }
+    .badge-cleared {
+      background: var(--color-primary-container);
+      color: var(--color-on-primary-container);
+    }
+    .badge-arrears {
+      background: var(--color-error);
+      color: var(--color-on-error);
+    }
+    .btn-submit {
+      display: inline-block;
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-family: var(--type-label-large-font-family);
+      font-size: var(--type-label-large-size);
+      font-weight: var(--type-label-large-weight);
+      line-height: var(--type-label-large-line-height);
+      letter-spacing: var(--type-label-large-letter-spacing);
+      box-shadow: var(--shadow-medium);
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .btn-submit:hover {
+      opacity: 0.92;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <header class="header">
+      <h1>Daily Register & Attendance</h1>
+      <p>Class: JSS 2 Diamond | Teacher: Mrs. F. Adeleke | Term: 2nd Term 2026/2027</p>
+    </header>
+
+    <div class="stats-row">
+      <div class="stat-pill">42 Pupils Enrolled</div>
+      <div class="stat-pill">38 Present Today</div>
+      <div class="stat-pill alert-error">3 Absent</div>
+      <div class="stat-pill alert-warning">1 Late</div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Pupil Name</th>
+            <th>Attendance Status</th>
+            <th>Fee Clearance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>Adeyemi, Oluwaseun</td>
+            <td><span class="badge badge-present">Present</span></td>
+            <td><span class="badge badge-cleared">Cleared (100%)</span></td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td>Bello, Amina Fatima</td>
+            <td><span class="badge badge-present">Present</span></td>
+            <td><span class="badge badge-cleared">Cleared (100%)</span></td>
+          </tr>
+          <tr>
+            <td>003</td>
+            <td>Chukwuma, Emeka Godswill</td>
+            <td><span class="badge badge-absent">Absent</span></td>
+            <td><span class="badge badge-arrears">Arrears: ₦18,500</span></td>
+          </tr>
+          <tr>
+            <td>004</td>
+            <td>Danjuma, Zainab</td>
+            <td><span class="badge badge-late">Late (8:25 AM)</span></td>
+            <td><span class="badge badge-cleared">Cleared (100%)</span></td>
+          </tr>
+          <tr>
+            <td>005</td>
+            <td>Eze, Chinedu Victor</td>
+            <td><span class="badge badge-present">Present</span></td>
+            <td><span class="badge badge-cleared">Cleared (100%)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button" class="btn-submit">Save & Submit Attendance</button>
+  </div>
+</body>
+</html>

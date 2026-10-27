@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Attendance - JSS 2 Diamond (Unsystematized)</title>
+  <style>
+    /* BUILT WITHOUT DESIGN SYSTEM TOKENS - Generic ad-hoc styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #111827;
+      padding: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+    }
+    .header {
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 24px;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-badge {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .stat-badge.alert {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      background: #f9fafb;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #4b5563;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .badge-present {
+      background: #ecfdf5;
+      color: #047857;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-absent {
+      background: #fef2f2;
+      color: #b91c1c;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-late {
+      background: #fffbeb;
+      color: #b45309;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-save {
+      margin-top: 20px;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Daily Register & Attendance</h1>
+      <p>Class: JSS 2 Diamond | Teacher: Mrs. F. Adeleke | Term: 2nd Term 2026/2027</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-badge">42 Pupils Enrolled</div>
+      <div class="stat-badge">38 Present Today</div>
+      <div class="stat-badge alert">3 Absent</div>
+      <div class="stat-badge alert">1 Late</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Roll No</th>
+          <th>Student Name</th>
+          <th>Attendance Status</th>
+          <th>Exam Clearance Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>001</td>
+          <td>Adeyemi, Oluwaseun</td>
+          <td><span class="badge-present">Present</span></td>
+          <td>Cleared (100% Paid)</td>
+        </tr>
+        <tr>
+          <td>002</td>
+          <td>Bello, Amina Fatima</td>
+          <td><span class="badge-present">Present</span></td>
+          <td>Cleared (100% Paid)</td>
+        </tr>
+        <tr>
+          <td>003</td>
+          <td>Chukwuma, Emeka Godswill</td>
+          <td><span class="badge-absent">Absent</span></td>
+          <td>Arrears Pending (₦18,500)</td>
+        </tr>
+        <tr>
+          <td>004</td>
+          <td>Danjuma, Zainab</td>
+          <td><span class="badge-late">Late (8:25 AM)</span></td>
+          <td>Cleared (100% Paid)</td>
+        </tr>
+        <tr>
+          <td>005</td>
+          <td>Eze, Chinedu Victor</td>
+          <td><span class="badge-present">Present</span></td>
+          <td>Cleared (100% Paid)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn-save">Submit Daily Register</button>
+  </div>
+</body>
+</html>
