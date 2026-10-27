@@ -5,6 +5,14 @@
  * DO NOT EDIT DIRECTLY. Re-run `node scripts/build-tokens.js` to update.
  */
 
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('./fonts/BricolageGrotesque.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* ==========================================================================
      PRIVATE PRIMITIVE TOKENS (Internal Referencing Only - Do Not Consume Directly)
