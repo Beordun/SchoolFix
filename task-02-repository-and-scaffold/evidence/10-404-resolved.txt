@@ -1,0 +1,21 @@
+================================================================================
+DELIBERATE BREAKAGE 2: 404 RESOLUTION (RECOVERY EVIDENCE)
+================================================================================
+Target URL: http://localhost:3000/portal/grades
+Timestamp: 2026-10-27T19:47:43.339Z
+HTTP Status Code: 404 Not Found
+Measured Load Duration: 280.59 ms
+
+1. RESOLUTION ARCHITECTURE:
+Implemented custom app/not-found.tsx conforming strictly to SchoolFix design tokens:
+- Uses --color-surface and --color-surface-container backgrounds.
+- Employs Bricolage Grotesque typography (--type-headline-medium-*, --type-body-medium-*).
+- Warns user with HTTP 404 status pill using --color-warning role.
+- Provides a clear recovery link leading back to '/' using --color-primary.
+
+2. VERIFICATION CHECKS:
+- HTTP 404 Status Code Preserved: YES (404)
+- Branded Headline Present: YES ("This record or portal view does not exist.")
+- Single Recovery Action Available: YES ("Return to SchoolFix Home ->")
+- Zero Raw Styling Values: Confirmed (pure semantic CSS variables).
+================================================================================

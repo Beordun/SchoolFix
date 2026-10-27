@@ -1,0 +1,57 @@
+================================================================================
+DELIBERATE BREAKAGE 3: NESTED FOLDER RESOLUTION (DUAL FIX EVIDENCE)
+================================================================================
+Timestamp: 2026-10-27T20:52:00+01:00
+Target Repository: C:\Users\DT001\Desktop\SchoolFix
+
+The nested folder error was resolved using BOTH mandatory approaches:
+
+--------------------------------------------------------------------------------
+FIX METHOD 1: CHANGING DIRECTORY (MANUAL OPERATIONAL WORKAROUND)
+--------------------------------------------------------------------------------
+Command executed:
+$ cd SchoolFix
+$ npm run dev
+
+Terminal Output:
+> schoolfix@1.0.0 dev
+> next dev
+
+   ▲ Next.js 14.2.35
+   - Local:        http://localhost:3000
+   ✓ Ready in 2.9s
+
+Analysis:
+Navigating into the inner directory resolves the path so npm can locate package.json.
+Trade-off: This breaks CI/CD automated deployment scripts, Dockerfiles, and git root
+anchors that expect package.json to reside in the repository root.
+
+--------------------------------------------------------------------------------
+FIX METHOD 2: RESCAFFOLDING IN-PLACE AT REPOSITORY ROOT (PERMANENT STRUCTURAL FIX)
+--------------------------------------------------------------------------------
+Prompt instructed to agent:
+"You created an unwanted nested subdirectory. Flatten the project structure: move package.json,
+tsconfig.json, next.config.mjs, prisma/, and app/ directly into the repository root
+(C:\Users\DT001\Desktop\SchoolFix\), remove the empty inner folder, and verify that
+running 'npm run dev' from the root executes cleanly."
+
+Verification Command (Run from C:\Users\DT001\Desktop\SchoolFix):
+$ pwd
+C:\Users\DT001\Desktop\SchoolFix
+
+$ ls package.json tsconfig.json app/
+package.json   tsconfig.json   app/
+
+$ npm run dev
+> schoolfix@1.0.0 dev
+> next dev
+
+   ▲ Next.js 14.2.35
+   - Local:        http://localhost:3000
+   ✓ Ready in 2.8s
+   GET / 200 in 182ms
+
+CONCLUSION:
+Both fixes proven. Method 2 was adopted as the permanent standard: all configurations
+and source folders live directly at the top level of the git repository.
+================================================================================

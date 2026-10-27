@@ -1,0 +1,207 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  ABANDONED
+}
+
+enum PaymentChannel {
+  BANK_TRANSFER
+  CARD
+  CASH
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String    // Argon2id hash (never SHA)
+  fullName         String
+  role             Role      @default(PARENT)
+  isVerified       Boolean   @default(false)
+  verificationCode String?
+  codeExpiresAt    DateTime?
+
+  // Compliance & Deletion Lifecycle
+  isAnonymized     Boolean   @default(false)
+  deletedAt        DateTime?
+  scheduledPurgeAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions    Session[]
+  students    Student[]                @relation("ParentStudents")
+  assignments TeacherClassAssignment[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique // SHA-256 hash of raw cookie token
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionToken])
+}
+
+model ClassArm {
+  id           String                   @id @default(uuid())
+  name         String                   // e.g., "JSS 1 Gold", "Primary 4 Blue"
+  students     Student[]
+  assessments  Assessment[]
+  feeSchedules FeeSchedule[]
+  teachers     TeacherClassAssignment[]
+  createdAt    DateTime                 @default(now())
+}
+
+model TeacherClassAssignment {
+  id         String   @id @default(uuid())
+  teacherId  String
+  teacher    User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classArmId String
+  classArm   ClassArm @relation(fields: [classArmId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+
+  @@unique([teacherId, classArmId])
+  @@index([teacherId])
+  @@index([classArmId])
+}
+
+model FeeSchedule {
+  id             String   @id @default(uuid())
+  classArmId     String
+  classArm       ClassArm @relation(fields: [classArmId], references: [id], onDelete: Restrict)
+  term           String   // e.g., "First Term 2026/2027"
+  expectedAmount Decimal  @db.Decimal(12, 2)
+  createdAt      DateTime @default(now())
+
+  @@unique([classArmId, term])
+  @@index([classArmId])
+}
+
+model Student {
+  id           String           @id @default(uuid())
+  admissionNum String           @unique
+  fullName     String
+  classArmId   String
+  classArm     ClassArm         @relation(fields: [classArmId], references: [id], onDelete: Restrict)
+  parentId     String?
+  parent       User?            @relation("ParentStudents", fields: [parentId], references: [id], onDelete: SetNull)
+  
+  attendance   Attendance[]
+  assessments  Assessment[]
+  payments     Payment[]
+  attempts     PaymentAttempt[]
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([classArmId])
+  @@index([parentId])
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime         @db.Date
+  status    AttendanceStatus @default(PRESENT)
+  createdAt DateTime         @default(now())
+
+  @@unique([studentId, date])
+  @@index([date])
+}
+
+model Assessment {
+  id         String   @id @default(uuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classArmId String
+  classArm   ClassArm @relation(fields: [classArmId], references: [id], onDelete: Restrict)
+  subject    String
+  term       String
+  caScore    Decimal  @default(0.00) @db.Decimal(5, 2)
+  examScore  Decimal  @default(0.00) @db.Decimal(5, 2)
+  totalScore Decimal  @default(0.00) @db.Decimal(5, 2)
+  grade      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([studentId, subject, term])
+  @@index([classArmId, term])
+}
+
+model Payment {
+  id            String         @id @default(uuid())
+  studentId     String
+  student       Student        @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  amount        Decimal        @db.Decimal(12, 2)
+  term          String
+  reference     String         @unique
+  channel       PaymentChannel @default(BANK_TRANSFER)
+  receiptNumber String         @unique
+  verifiedBy    String
+  verifiedAt    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+
+  @@index([studentId])
+  @@index([reference])
+}
+
+model PaymentAttempt {
+  id            String         @id @default(uuid())
+  studentId     String
+  student       Student        @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  amount        Decimal        @db.Decimal(12, 2)
+  term          String
+  reference     String         @unique
+  channel       PaymentChannel
+  status        PaymentStatus  @default(PENDING)
+  failureReason String?
+  createdAt     DateTime       @default(now())
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model DocumentChunk {
+  id         String                 @id @default(uuid())
+  title      String
+  content    String                 @db.Text
+  metadata   Json
+  embedding  Unsupported("vector")?
+  createdAt  DateTime               @default(now())
+
+  @@index([title])
+}

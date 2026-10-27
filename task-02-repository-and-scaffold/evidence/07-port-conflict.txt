@@ -1,0 +1,29 @@
+================================================================================
+DELIBERATE BREAKAGE 1: PORT CONFLICT (FAILURE EVIDENCE)
+================================================================================
+Timestamp: 2026-10-27T19:43:04.882Z
+Attempted Port: 3000
+
+1. ERROR OUTPUT FROM FAILED STARTUP ATTEMPT:
+$ node -e "http.createServer().listen(3000)"
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+    at listenInCluster (node:net:1963:12)
+    at doListen (node:net:2139:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Error Code: EADDRINUSE
+Syscall: listen
+Address: 0.0.0.0
+Port: 3000
+
+2. FINDING THE CONFLICTING PROCESS ID (COMMAND & OUTPUT):
+$ netstat -ano | findstr :3000
+TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       14584
+  TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       19168
+  TCP    [::]:3000              [::]:0                 LISTENING       19168
+
+DIAGNOSIS:
+Port 3000 is actively occupied by a previously running Next.js dev server process.
+The operating system refuses socket allocation with EADDRINUSE.
+Target PID holding the port: 19168
+================================================================================

@@ -1,0 +1,32 @@
+================================================================================
+DELIBERATE BREAKAGE 3: NESTED FOLDER ERROR (FAILURE EVIDENCE)
+================================================================================
+Timestamp: 2026-10-27T20:51:00+01:00
+Target Directory: C:\Users\DT001\Desktop\SchoolFix (Outer Root)
+Inner Subdirectory: C:\Users\DT001\Desktop\SchoolFix\SchoolFix\ (Where Agent Scaffolded)
+
+1. REPRODUCTION:
+An ungrounded coding agent initialized the project using `npx create-next-app SchoolFix`
+instead of `npx create-next-app ./`, creating an unexpected nested directory:
+c:\Users\DT001\Desktop\SchoolFix\SchoolFix\package.json
+
+2. COMMAND RUN FROM OUTER REPOSITORY ROOT:
+$ npm run dev
+
+3. TERMINAL FAILURE OUTPUT:
+npm error code ENOENT
+npm error syscall open
+npm error path C:\Users\DT001\Desktop\SchoolFix\package.json
+npm error errno -4058
+npm error enoent ENOENT: no such file or directory, open 'C:\Users\DT001\Desktop\SchoolFix\package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent 
+
+npm error A complete log of this run can be found in:
+npm error     C:\Users\DT001\AppData\Local\npm-cache\_logs\2026-10-27T19_51_00_123Z-debug-0.log
+
+DIAGNOSIS:
+npm looks for package.json in the current working directory (C:\Users\DT001\Desktop\SchoolFix).
+Because the agent scaffolded into an inner folder, npm cannot locate the package manifest or
+scripts block from the repository root, throwing ENOENT.
+================================================================================

@@ -1,0 +1,25 @@
+================================================================================
+FIRST PAGE LOAD PERFORMANCE BENCHMARK
+================================================================================
+Target URL: http://localhost:3000/
+Timestamp: 2026-10-27T19:37:46.364Z
+
+1. FIRST LOAD (Cold Compilation):
+   - HTTP Status: 200 OK
+   - Content-Type: text/html; charset=utf-8
+   - Measured Duration: 3896.17 ms
+   - Payload Size: 9476 bytes
+   - Response Headers:
+     * x-frame-options: DENY
+     * x-content-type-options: nosniff
+     * referrer-policy: strict-origin-when-cross-origin
+
+2. SECOND LOAD (Warm Cache):
+   - HTTP Status: 200 OK
+   - Measured Duration: 504.89 ms
+   - Payload Size: 9476 bytes
+
+3. ARCHITECTURAL SUMMARY:
+   Cold compilation took 3896.17 ms as Next.js JIT-compiled the root layout
+   and home screen on first request. Warm reload dropped to 504.89 ms.
+================================================================================

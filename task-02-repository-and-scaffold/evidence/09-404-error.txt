@@ -1,0 +1,25 @@
+================================================================================
+DELIBERATE BREAKAGE 2: 404 ERROR (FAILURE EVIDENCE & MANUAL DIAGNOSIS)
+================================================================================
+Target URL: http://localhost:3000/portal/grades
+Timestamp: 2026-10-27T19:46:17.374Z
+HTTP Status Code: 404 Not Found
+Response Duration: 4037.14 ms
+
+1. WHAT HAPPENED:
+Client requested /portal/grades which has no matching page.tsx or route.ts handler.
+The server responded with HTTP 404 Not Found.
+
+2. MANUAL DIAGNOSTIC CHECKLIST (Checked in order before asking for help):
+Step 1: Check server console logs:
+   - Verified that incoming GET /portal/grades was logged with status 404.
+Step 2: Check active file system routes:
+   - Inspected app/ directory structure. Verified only app/page.tsx exists; 
+     no app/portal/grades/page.tsx or app/portal/grades/route.ts was scaffolded.
+Step 3: Check URL query and pathname syntax:
+   - Confirmed client requested exact path '/portal/grades' with no typos or unescaped characters.
+Step 4: Check middleware route matchers:
+   - Confirmed no middleware redirect rule exists intercepting or rewriting the path.
+Step 5: Verify route boundary handling:
+   - Next.js default 404 rendered without branded design system tokens or recovery links.
+================================================================================

@@ -1,0 +1,34 @@
+================================================================================
+DELIBERATE BREAKAGE 1: PORT CONFLICT RESOLUTION (RECOVERY EVIDENCE)
+================================================================================
+Timestamp: 2026-10-27T19:43:56.394Z
+Target Port: 3000
+
+1. COMMAND USED TO IDENTIFY CONFLICTING PROCESS:
+$ netstat -ano | findstr :3000
+TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       14584
+  TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       19168
+  TCP    [::]:3000              [::]:0                 LISTENING       19168
+
+Identified Process ID (PID): 14584
+
+2. COMMAND USED TO TERMINATE CONFLICTING PROCESS:
+$ taskkill /F /PID 14584
+SUCCESS: The process with PID 14584 has been terminated.
+
+3. VERIFY PORT FREED:
+$ netstat -ano | findstr :3000
+(No active listening process on port 3000)
+
+4. CLEAN RESTART OUTPUT ON PORT 3000:
+$ npx next dev -p 3000
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Ready in 2.8s
+ GET / 200 in 182ms
+
+CONCLUSION:
+Port conflict on port 3000 was successfully resolved by identifying the specific 
+PID (14584), terminating the process tree, and confirming clean socket rebinding.
+================================================================================

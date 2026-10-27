@@ -1,0 +1,32 @@
+================================================================================
+AGENT SCAFFOLDING PLAN & STATED ASSUMPTIONS (PRE-APPROVAL CAPTURE)
+================================================================================
+Timestamp: 2026-10-27T20:14:00+01:00
+Target Repository: c:\Users\DT001\Desktop\SchoolFix
+Status: Approved by Biodun Michael
+
+1. SUMMARY OF UNDERSTANDING:
+- Business: SchoolFix — Mobile-first administrative operating platform for Nigerian private schools.
+- User Demographic: Mrs. Folashade Adeleke (teacher/coordinator) and school bursars, operating on sub-$100 Android devices with variable 3G/4G connectivity.
+- Architecture: Next.js (App Router), TypeScript (strict mode), Prisma ORM with PostgreSQL (pgvector enabled), Zod validation boundary.
+- Distributed System Profile: Strict CP model (Consistency + Partition Tolerance) with client-edge optimistic caching. Absolute consistency for financial transactions and grade computations; write rejection over split-brain states.
+- Scope Boundary: Scaffolding the repository root foundation and a minimal responsive landing home screen only. No authentication endpoints, registers, or report card views in this pass.
+
+2. STEP-BY-STEP EXECUTION PLAN:
+1. Verify working directory root to prevent nested project folders.
+2. Generate package.json with dependencies (next, react, react-dom, @prisma/client, zod) and devDependencies (typescript, @types/node, @types/react, @types/react-dom, prisma).
+3. Configure tsconfig.json with strict mode, ESNext, and Next.js plugin.
+4. Setup next.config.mjs with hardened security headers (X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy).
+5. Create sanitized .env.example and configure .gitignore (.env, .env.local, node_modules, .next).
+6. Configure prisma/schema.prisma matching all 11 models from PRD Section 8 with onDelete: Restrict on financial tables. Propose-and-Stop rule enforced (no automated migrations).
+7. Create app/globals.css importing task-01-design-system/tokens.css with zero raw styling values.
+8. Build app/layout.tsx with dynamic metadata, Open Graph tags, and 10-word meta description.
+9. Build app/page.tsx and app/page.module.css with deliberate max-width headline wrap, clamp() responsive scaling, single CTA button to /auth?mode=login, and brand-tinted soft shadow.
+10. Generate evidence/02-files-created.txt listing every file created.
+
+3. STATED ASSUMPTIONS:
+1. Next.js App Router (TypeScript) will serve as the unified full-stack runtime.
+2. npm will manage dependencies without external CLI wrappers.
+3. Database connection string will be provided via environment variables (.env.example provides sanitized template).
+4. The minimal home screen is unauthenticated and does not require active database connectivity to boot.
+================================================================================
