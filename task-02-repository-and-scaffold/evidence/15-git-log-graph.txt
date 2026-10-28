@@ -1,0 +1,22 @@
+﻿=== STEP 9: GIT BRANCHING, PULL REQUEST & UNMERGED DELETION PROOF ===
+Machine / Local Repository: SchoolFix
+Execution Timestamp: 2026-10-28T17:04:49+01:00
+Active Branch: main
+Remote Origin: https://github.com/Beordun/SchoolFix.git
+Pull Request URL: https://github.com/Beordun/SchoolFix/pull/1 (feature/information-design -> main)
+
+--- 1. GIT LOG GRAPH (--graph --all --oneline) ---
+*   9f12b9d Merge pull request #1 from feature/information-design |\   | * 231054f feat(information-design): implement dynamic head metadata, custom favicon, deliberate headline wrap, and responsive clamp |/   * 50cd80a feat(task-2): implement database write verification, root documentation, and working tree analysis * 4a707e3 chore: scaffold repository, database schema, and initial application structure for SchoolFix * b9160bd fix(typography): embed local Bricolage Grotesque font to bypass network font proxy * a1f73f2 feat(task-1): complete all deliverables, evidence, and interview defense * 3067635 feat(task-1): complete token compiler and screen proof * abb3694 first commit
+
+--- 2. UNMERGED BRANCH DELETION PROOF (git reflog showing feature/discarded-badge creation & deletion) ---
+9f12b9d HEAD@{0}: checkout: moving from feature/discarded-badge to main ed33345 HEAD@{1}: commit: feat(experimental): add unapproved promotional discount banner to hero 9f12b9d HEAD@{2}: checkout: moving from main to feature/discarded-badge 9f12b9d HEAD@{3}: merge feature/information-design: Merge made by the 'ort' strategy. 50cd80a HEAD@{4}: checkout: moving from feature/information-design to main 231054f HEAD@{5}: commit: feat(information-design): implement dynamic head metadata, custom favicon, deliberate headline wrap, and responsive clamp 50cd80a HEAD@{6}: checkout: moving from main to feature/information-design 50cd80a HEAD@{7}: commit: feat(task-2): implement database write verification, root documentation, and working tree analysis
+
+--- 3. STEP 9 SPECIFICATION COMPLIANCE SUMMARY ---
+1. Left main branch after initial push: Checked out 'feature/information-design'
+2. Step 10 implementation performed strictly on feature/information-design (commit 231054f)
+3. Pushed feature/information-design to origin (https://github.com/Beordun/SchoolFix.git)
+4. Merged into main with non-fast-forward merge commit (commit 9f12b9d)
+5. Created secondary experimental branch 'feature/discarded-badge' (commit ed33345)
+6. Switched to main and deleted 'feature/discarded-badge' unmerged:
+   Command: git branch -D feature/discarded-badge
+   Result: Deleted branch feature/discarded-badge (was ed33345).
