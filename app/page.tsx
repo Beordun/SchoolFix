@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import RegistrationForm from './components/RegistrationForm';
 import styles from './page.module.css';
 
 export default function HomePage() {
@@ -28,12 +29,8 @@ export default function HomePage() {
           Digitising continuous assessment marks, daily registers, and audit-compliant tuition ledgers on low-bandwidth mobile networks.
         </p>
 
-        {/* Unified Call to Action (Collapses login/signup choice) */}
-        <div>
-          <Link href="/auth?mode=login" className={styles.primaryCta} id="portal-cta-btn">
-            Access School Portal &rarr;
-          </Link>
-        </div>
+        {/* Database-Writing Registration Form for Step 6 Verification */}
+        <RegistrationForm />
       </main>
 
       <footer className={styles.footer}>

@@ -1,0 +1,91 @@
+=== STEP 6 EVIDENCE: DATABASE WRITE VERIFICATION (HTTP 201 CREATED) ===
+Platform: SchoolFix (Next.js App Router 14.2.35 + PostgreSQL 16 + Prisma ORM 5.22.0)
+Endpoint: POST /api/register
+Execution Host: localhost:3000
+Database: schoolfix_db (PostgreSQL port 5432)
+Timestamp: 2026-10-28T12:49:18.434Z
+
+--- SUBMITTING REQUEST 1 ---
+Client Request:
+POST /api/register HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+Payload:
+{
+  "fullName": "Folashade Adeleke",
+  "email": "folashade.adeleke.1793191758435@schoolfix.internal",
+  "password": "[REDACTED]"
+}
+
+Server Log Output:
+[HTTP 201 Created] New parent user registered: ID=27db5cbb-3ded-49dc-b237-749cebe43b8c, Email=folashade.adeleke.1793191758435@schoolfix.internal, CreatedAt=2026-10-28T12:49:18.963Z
+POST /api/register 201 in 586ms
+
+Response:
+HTTP/1.1 201 Created
+Content-Type: application/json
+{
+  "success": true,
+  "message": "Parent registration successfully recorded.",
+  "user": {
+    "id": "27db5cbb-3ded-49dc-b237-749cebe43b8c",
+    "fullName": "Folashade Adeleke",
+    "email": "folashade.adeleke.1793191758435@schoolfix.internal",
+    "role": "PARENT",
+    "createdAt": "2026-10-28T12:49:18.963Z"
+  }
+}
+
+--- SUBMITTING REQUEST 2 (Timestamp Separation) ---
+Client Request:
+POST /api/register HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+Payload:
+{
+  "fullName": "Chukwudi Okafor",
+  "email": "chukwudi.okafor.1793191761023@schoolfix.internal",
+  "password": "[REDACTED]"
+}
+
+Server Log Output:
+[HTTP 201 Created] New parent user registered: ID=9775ba4e-f2e2-4cf6-bc2b-e1cd21954d2a, Email=chukwudi.okafor.1793191761023@schoolfix.internal, CreatedAt=2026-10-28T12:49:21.095Z
+POST /api/register 201 in 73ms
+
+Response:
+HTTP/1.1 201 Created
+Content-Type: application/json
+{
+  "success": true,
+  "message": "Parent registration successfully recorded.",
+  "user": {
+    "id": "9775ba4e-f2e2-4cf6-bc2b-e1cd21954d2a",
+    "fullName": "Chukwudi Okafor",
+    "email": "chukwudi.okafor.1793191761023@schoolfix.internal",
+    "role": "PARENT",
+    "createdAt": "2026-10-28T12:49:21.095Z"
+  }
+}
+
+--- DATABASE INSPECTION VERIFICATION ---
+Query: SELECT id, email, "fullName", role, "createdAt" FROM "User" ORDER BY "createdAt" ASC;
+Database: schoolfix_db | Host: localhost:5432 | Total Rows: 2
+
+Row 1:
+  id:        27db5cbb-3ded-49dc-b237-749cebe43b8c
+  email:     folashade.adeleke.1793191758435@schoolfix.internal
+  fullName:  Folashade Adeleke
+  role:      PARENT
+  createdAt: 2026-10-28T12:49:18.963Z
+
+Row 2:
+  id:        9775ba4e-f2e2-4cf6-bc2b-e1cd21954d2a
+  email:     chukwudi.okafor.1793191761023@schoolfix.internal
+  fullName:  Chukwudi Okafor
+  role:      PARENT
+  createdAt: 2026-10-28T12:49:21.095Z
+
+Status Code Analysis:
+Both requests returned explicit HTTP status code 201 (Created), confirming that records were not merely accepted in memory or mocked with an HTTP 200 OK, but were physically committed to persistent relational storage with distinct primary keys and timestamps.

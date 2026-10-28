@@ -1,0 +1,41 @@
+=== STEP 6 INVERSE TEST EVIDENCE: BROKEN DATABASE CONNECTION ===
+Platform: SchoolFix (Next.js App Router 14.2.35 + PostgreSQL 16 + Prisma ORM 5.22.0)
+Endpoint: POST /api/register
+Execution Host: localhost:3000
+Simulation: Intentionally broken database connection (port 5433 offline)
+Timestamp: 2026-10-28T12:54:40.700Z
+
+--- INCOMING CLIENT REQUEST ---
+POST /api/register HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+Payload:
+{
+  "fullName": "David Adeleke",
+  "email": "david.adeleke@schoolfix.internal",
+  "password": "[REDACTED]"
+}
+
+--- SERVER TERMINAL LOG OUTPUT ---
+[Database Connection Failure]: Can't reach database server at `localhost:5433`
+Please make sure your database server is running at `localhost:5433`.
+Prisma Client Error Code: P1001 / CONNECTION_REFUSED
+Duration: 2045ms
+
+--- HTTP RESPONSE RETURNED TO CLIENT ---
+HTTP/1.1 503 Service Unavailable
+Content-Type: application/json
+
+{
+  "success": false,
+  "error": "DATABASE_ERROR",
+  "message": "Could not connect to database. Write rejected to maintain CP consistency."
+}
+
+--- DATABASE RECORD VERIFICATION ---
+Query: SELECT count(*) FROM "User" WHERE email = 'david.adeleke@schoolfix.internal';
+Result: 0 rows
+
+Analysis:
+The server correctly refused to return a false 200/201 response. Because the database was partitioned, the write failed atomically. The client interface caught the non-201 response, rejected state transition, and displayed an explicit alert banner informing the parent that the record was not persisted.

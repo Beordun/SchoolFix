@@ -11,6 +11,7 @@ const path = require('path');
 
 // 1. Locate Token File
 const possibleInputPaths = [
+  path.resolve(__dirname, '../design-tokens/design-tokens.tokens.json'),
   path.resolve(__dirname, '../design-tokens.tokens.json'),
   path.resolve(__dirname, 'design-tokens.tokens.json'),
   path.resolve(__dirname, '../task-01-design-system/evidence/06-tokens-complete.json')
@@ -202,6 +203,7 @@ ${typographyClasses.join('\n')}
 // 6. Write Output File
 const outputPaths = [
   path.resolve(__dirname, '../task-01-design-system/tokens.css'),
+  path.resolve(__dirname, '../design-tokens/tokens.css'),
   path.resolve(__dirname, '../tokens.css')
 ];
 
