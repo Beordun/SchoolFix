@@ -172,16 +172,16 @@ SchoolFix/
 - [x] 15 typography styles with $1.4\times$ line height & 2 intentional divergences
 - [x] Brand-tinted shadows, token compiler (`scripts/build-tokens.js`), and intentional regression proof
 
-### Task 2: Repository Scaffolding & Diagnostics (Status: In Progress)
+### Task 2: Repository Scaffolding & Diagnostics (Status: Completed)
 - [x] Scaffolding prompt documentation (`docs/scaffold-prompt.md`)
 - [x] Execution plan, model choices, and server startup logs (`evidence/01` to `04`)
 - [x] 3 server breaks and recoveries: nested folder, port conflict, 404 (`evidence/05` to `10`)
-- [ ] **Step 6:** DB write verification (`201 Created`), false-success break & write-up (`docs/false-success.md`)
-- [ ] **Step 7:** Root `README.md` (7 mandatory sections) & `docs/readme-test.md`
-- [ ] **Step 8:** Hand-drawn working tree diagram (`evidence/14-working-tree-drawing.jpg`) & `docs/working-tree.md`
-- [ ] **Step 9:** Git branching, pull request proof, unmerged deletion (`evidence/15-git-log-graph.txt`)
-- [ ] **Step 10:** Information design (dynamic titles, <10-word description, OG tags, clamp heading) & `docs/information-design.md`
-- [ ] Task 2 `README.md`, `docs/defects.md`, and 15 interview answers (`docs/interview-answers.md`)
+- [x] **Step 6:** DB write verification (`201 Created`), false-success break & write-up (`docs/false-success.md`)
+- [x] **Step 7:** Root `README.md` (7 mandatory sections) & `docs/readme-test.md`
+- [x] **Step 8:** Hand-drawn working tree diagram (`docs/working-tree.md`, photo `evidence/14-working-tree-drawing.jpg`)
+- [x] **Step 9:** Git branching, pull request proof, unmerged deletion (`evidence/15-git-log-graph.txt`, [PR #1](https://github.com/Beordun/SchoolFix/pull/1))
+- [x] **Step 10:** Information design (dynamic titles, <10-word description, OG tags, clamp heading) & `docs/information-design.md`, `evidence/16` to `20`
+- [x] Task 2 `README.md`, `docs/defects.md`, and 15 interview answers (`docs/interview-answers.md`)
 
 ### Task 3: Client Validation, SPA Auth & Accessibility (Pending)
 - Single-page conditional authentication routing (`/auth?mode=login|register|reset`)
