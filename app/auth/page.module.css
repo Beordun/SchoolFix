@@ -1,0 +1,105 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+.header {
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--color-outline);
+  background-color: var(--color-surface-container);
+}
+
+.logoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logoIcon {
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-family: var(--type-title-large-font-family);
+  font-size: var(--type-title-large-size);
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+}
+
+.card {
+  max-width: 480px;
+  width: 90%;
+  margin: 3.5rem auto;
+  padding: 2.5rem 2rem;
+  background-color: var(--color-surface-container);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-large, 12px);
+  box-shadow: var(--shadow-medium);
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-family: var(--type-label-small-font-family);
+  font-size: var(--type-label-small-size);
+  font-weight: var(--type-label-small-weight);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-outline);
+}
+
+.title {
+  font-family: var(--type-headline-medium-font-family);
+  font-size: var(--type-headline-medium-size);
+  font-weight: 600;
+  line-height: var(--type-headline-medium-line-height);
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.description {
+  font-family: var(--type-body-medium-font-family);
+  font-size: var(--type-body-medium-size);
+  font-weight: var(--type-body-medium-weight);
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+  margin-bottom: 2rem;
+}
+
+.actionGroup {
+  display: flex;
+  justify-content: center;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  font-family: var(--type-label-large-font-family);
+  font-size: var(--type-label-large-size);
+  font-weight: var(--type-label-large-weight);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: var(--size-touch-target, 2.75rem);
+}
+
+.backButton:hover {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
