@@ -18,13 +18,22 @@
 }
 
 .logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+}
+
+.logoIcon {
+  flex-shrink: 0;
+}
+
+.brandTitle {
   font-family: var(--type-title-large-font-family);
   font-size: var(--type-title-large-size);
   font-weight: 700;
   color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   letter-spacing: -0.5px;
 }
 
@@ -34,6 +43,7 @@
   font-weight: var(--type-label-medium-weight);
   color: var(--color-on-surface-variant);
   transition: color 0.2s ease;
+  cursor: pointer;
 }
 
 .navLink:hover {
@@ -66,35 +76,40 @@
   border: 1px solid var(--color-outline);
 }
 
-/* Deliberate headline wrapping with max-width and responsive clamp() */
+/* Deliberate headline shape: max-width 22ch forces balanced 2-line break */
 .headline {
   font-family: var(--type-display-large-font-family);
-  font-size: clamp(2rem, 4vw + 1rem, 3.75rem);
+  font-size: clamp(1.85rem, 4vw + 0.75rem, 3.5rem);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.035em;
   color: var(--color-primary);
-  max-width: 680px;
+  max-width: 620px;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 1.5rem;
   text-wrap: balance;
 }
 
 .subheading {
   font-family: var(--type-body-large-font-family);
-  font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
+  font-size: clamp(0.95rem, 1.2vw + 0.45rem, 1.25rem);
   font-weight: var(--type-body-large-weight);
   line-height: 1.5;
   color: var(--color-on-surface-variant);
   max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 2.5rem;
 }
 
-/* Unified Action: Single button collapsing login/signup choice */
+/* Single unified CTA: rem padding, tokenized label, touch-target compliant */
 .primaryCta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.875rem 2rem;
+  padding: 0.75rem 1.75rem;
+  min-height: var(--size-touch-target, 2.75rem);
   border-radius: 8px;
   background-color: var(--color-primary);
   color: var(--color-on-primary);
@@ -102,6 +117,8 @@
   font-size: var(--type-label-large-size);
   font-weight: var(--type-label-large-weight);
   letter-spacing: var(--type-label-large-letter-spacing);
+  line-height: var(--type-label-large-line-height);
+  text-decoration: none;
   box-shadow: var(--shadow-medium);
   transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
@@ -111,6 +128,11 @@
   opacity: 0.94;
   transform: translateY(-1px);
   box-shadow: var(--shadow-hard);
+}
+
+.primaryCta:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .primaryCta:active {

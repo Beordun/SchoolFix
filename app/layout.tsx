@@ -3,19 +3,44 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'SchoolFix — Attendance & Tuition Clarity',
+    default: 'SchoolFix — Mobile-First Attendance & Tuition Reconciliation',
     template: '%s | SchoolFix',
   },
   description: 'Mobile-first school records and fee reconciliation for African schools.',
-  openGraph: {
-    title: 'SchoolFix — Attendance & Tuition Clarity',
-    description: 'Mobile-first school records and fee reconciliation for African schools.',
-    type: 'website',
-    siteName: 'SchoolFix',
-    locale: 'en_NG',
+  keywords: [
+    'school management',
+    'tuition reconciliation',
+    'continuous assessment',
+    'attendance register',
+    'Nigerian private schools',
+  ],
+  authors: [{ name: 'SchoolFix Engineering' }],
+  creator: 'SchoolFix',
+  publisher: 'SchoolFix Technologies',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://schoolfix.internal',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
+  openGraph: {
+    title: 'SchoolFix — Mobile-First Attendance & Tuition Reconciliation',
+    description: 'Mobile-first school records and fee reconciliation for African schools.',
+    url: 'https://schoolfix.internal',
+    siteName: 'SchoolFix',
+    locale: 'en_NG',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SchoolFix — Mobile-First Attendance & Tuition Reconciliation',
+    description: 'Mobile-first school records and fee reconciliation for African schools.',
   },
 };
 

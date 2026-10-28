@@ -7,11 +7,17 @@ export default function HomePage() {
     <div className={styles.mainContainer}>
       <header className={styles.navbar}>
         <Link href="/" className={styles.logo} aria-label="SchoolFix Home">
-          <span>SchoolFix</span>
+          <svg className={styles.logoIcon} viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+            <rect width="32" height="32" rx="8" fill="var(--color-primary)" />
+            <path d="M16 6 L6 11 L16 16 L26 11 Z" fill="var(--color-surface)" />
+            <path d="M10 13.5 V19 C10 22 16 25 16 25 C16 25 22 22 22 19 V13.5 L16 16.5 Z" fill="var(--color-primary-container)" opacity="0.9" />
+          </svg>
+          <span className={styles.brandTitle}>SchoolFix</span>
         </Link>
         <nav aria-label="Main Navigation">
-          <Link href="/auth?mode=login" className={styles.navLink}>
-            Portal Sign In
+          {/* Collapsed Choice: Single unified portal entry point */}
+          <Link href="/auth?mode=login" className={styles.primaryCta}>
+            Enter School Portal &rarr;
           </Link>
         </nav>
       </header>
