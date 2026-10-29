@@ -1,0 +1,69 @@
+=== STEP 7 EVIDENCE: DIRECT ENDPOINT REQUEST — TASK 3 VS TASK 4 COMPARISON ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16)
+Target Endpoint: POST http://localhost:3000/api/register
+Execution Timestamp: 2026-10-29T17:06:43Z
+
+================================================================================
+PART 1: THE IDENTICAL MALICIOUS BYPASS REQUEST PAYLOAD
+================================================================================
+{
+  "fullName": "Bypass Attacker",
+  "email": "attacker.1793283640108@schoolfix.internal",
+  "password": "PasswordWithSpaces123"
+  // OMITTED: phone (11-digit Nigerian NCC structure)
+  // OMITTED: acceptedTerms (Mandatory NDPA 2023 legal consent)
+}
+
+================================================================================
+PART 2: TASK 3 RESPONSE (DEFENSELESS SERVER BOUNDARY)
+Citation: task-03-client-validation/evidence/16-direct-request-command-and-response.txt
+Timestamp: 2026-10-29T14:20:40Z
+================================================================================
+HTTP Status Code: 201 Created
+Response Body:
+{
+  "success": true,
+  "message": "Parent registration successfully recorded.",
+  "user": {
+    "id": "5d8e9b4e-76d3-4f6b-84d0-02dd50411ae5",
+    "fullName": "Bypass Attacker",
+    "email": "attacker.1793283640108@schoolfix.internal",
+    "role": "PARENT",
+    "createdAt": "2026-10-29T14:20:40.590Z"
+  }
+}
+Forensic Result:
+Database row created without a phone number and without NDPA consent.
+Client-side rules enforced: 0 of 5.
+
+================================================================================
+PART 3: TASK 4 RESPONSE (HARDENED ZOD SERVER BOUNDARY)
+Citation: task-04-server-security/evidence/12-direct-request-before-and-after.txt
+Timestamp: 2026-10-29T17:06:43Z
+================================================================================
+HTTP Status Code: 400 Bad Request
+Response Body:
+{
+  "success": false,
+  "error": "VALIDATION_FAILED",
+  "message": "The submitted registration data failed server boundary validation.",
+  "issues": {
+    "phone": [
+      "Nigerian phone number is required"
+    ],
+    "acceptedTerms": [
+      "You must accept the NDPA Privacy Policy and Terms of Service"
+    ]
+  }
+}
+Forensic Result:
+The request terminated at the API boundary in 0.0958 ms.
+Zero database rows created.
+The direct request was completely stopped and refused.
+
+================================================================================
+PART 4: ARCHITECTURAL LESSON & CONCLUSION
+================================================================================
+In Task 3, we proved that client-side forms provide zero security. An attacker simply writes 10 lines of Node.js to invoke the HTTP endpoint directly, bypassing all UI error banners, red borders, and disabled buttons.
+
+In Task 4, by enforcing strict Zod boundary validation schemas at the Next.js API route layer, the server acts as the authoritative source of truth. Every rule previously enforced in the browser (Nigerian phone numbering structure, mandatory NDPA privacy consent, minimum name parts, and password complexity) is verified before the request touches the database, argon2 hasher, or downstream workers.

@@ -1,0 +1,48 @@
+=== STEP 4 EVIDENCE: EMPIRICAL TIMING BENCHMARK (ARGON2ID VS SHA-256) ===
+Platform: SchoolFix (Intel/AMD x64 Windows Host, Node.js v20.17.0)
+Timestamp: 2026-10-29T16:14:49Z
+Input Plaintext: "StMonicaSchool2026@Secure"
+Benchmark Script: scripts/benchmark-hashing.js (10 Iterations)
+
+--- CONFIGURATION ---
+Argon2id Parameters:
+  - Algorithm: Argon2id (RFC 9106)
+  - Memory Cost: 65,536 KiB (64 MiB)
+  - Iterations (Time Cost): 3
+  - Parallelism: 4 threads
+SHA-256 Parameters:
+  - Algorithm: SHA-256 (FIPS 180-4 via Node.js crypto)
+  - Iterations: 1
+  - Memory: 0 KiB (Registers only)
+
+--- RAW RUN TIMINGS ---
+Argon2id (ms):
+  Run 1:  84.40 ms
+  Run 2:  82.65 ms
+  Run 3:  82.17 ms
+  Run 4:  84.90 ms
+  Run 5:  81.35 ms
+  Run 6:  81.86 ms
+  Run 7:  82.03 ms
+  Run 8:  80.04 ms
+  Run 9:  82.62 ms
+  Run 10: 80.06 ms
+
+SHA-256 (ms):
+  Run 1:  0.7318 ms
+  Run 2:  0.0298 ms
+  Run 3:  0.0192 ms
+  Run 4:  0.0163 ms
+  Run 5:  0.0257 ms
+  Run 6:  0.0214 ms
+  Run 7:  0.0132 ms
+  Run 8:  0.0077 ms
+  Run 9:  0.0264 ms
+  Run 10: 0.0280 ms
+
+--- AGGREGATE SUMMARY ---
+Average Argon2id Duration: 82.21 ms
+Average SHA-256 Duration:   0.0920 ms (91.95 µs)
+Speed Ratio: Argon2id is 894x slower than SHA-256 per hash on this hardware.
+Defender Single-Hash Budget: ~82.21 ms (imperceptible to human user during login)
+Attacker Guess Cost: 64 MiB RAM + ~82 ms CPU per candidate password.

@@ -1,0 +1,69 @@
+=== STEP 3 EVIDENCE: THE THREE-STEP MIGRATION PATTERN (EXPAND -> BACKFILL -> CONTRACT) ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma 5.22.0)
+Execution Timestamp: 2026-10-29T16:07:30Z
+Target Table: "User" (Populated with existing record: Folashade Adeleke, ID: 51e2ccc9-8849-464b-a8a8-1ab18ab084e0)
+Target Column: nin (National Identification Number, Required String)
+
+--- PHASE 1: EXPAND (ADD AS OPTIONAL / NULLABLE) ---
+Schema Definition: nin String? // Optional
+Command: npx prisma migrate dev --name add_optional_nin
+Output:
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "schoolfix_db", schema "public" at "localhost:5432"
+
+Applying migration `20261029160541_add_optional_nin`
+
+The following migration(s) have been created and applied from new schema changes:
+
+migrations/
+  └─ 20261029160541_add_optional_nin/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Migration SQL Applied:
+ALTER TABLE "User" ADD COLUMN "nin" TEXT;
+
+--- PHASE 2: MIGRATE / BACKFILL DATA ---
+Script Executed: scripts/backfill-nin.js
+Command: node --env-file=.env.local scripts/backfill-nin.js
+Output:
+=== STEP 2: DATA BACKFILL ===
+Timestamp: 2026-10-29T16:06:13.921Z
+Rows backfilled with generated NIN: 1
+Sample updated record: {
+  id: '51e2ccc9-8849-464b-a8a8-1ab18ab084e0',
+  fullName: 'Folashade Adeleke',
+  email: 'folashade@schoolfix.internal',
+  nin: 'NIN-aca2b467f2c'
+}
+
+Verification: 0 rows in "User" table contain NULL for "nin".
+
+--- PHASE 3: CONTRACT (ALTER COLUMN TO NOT NULL / REQUIRED) ---
+Schema Definition: nin String // Required
+Command: npx prisma migrate dev --name make_nin_required --skip-generate
+Output:
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "schoolfix_db", schema "public" at "localhost:5432"
+
+Applying migration `20261029160708_make_nin_required`
+
+The following migration(s) have been created and applied from new schema changes:
+
+migrations/
+  └─ 20261029160708_make_nin_required/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Migration SQL Applied:
+ALTER TABLE "User" ALTER COLUMN "nin" SET NOT NULL;
+
+--- SUMMARY CONCLUSION ---
+The required column "nin" was successfully introduced into a populated production database without downtime, data loss, or constraint violations.
+1. `add_optional_nin` added the column without breaking existing code.
+2. The asynchronous backfill worker populated existing records.
+3. `make_nin_required` locked the column to enforce strict data integrity.

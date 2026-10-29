@@ -197,12 +197,21 @@ SchoolFix/
 - [x] Git hard rollback experiment to commit `171a725` excising regression `ad4d501` (`docs/rollback.md`)
 - [x] Task 3 `README.md`, defects log (`docs/defects.md`), and 14 interview answers (`docs/interview-answers.md`)
 
-### Task 4: Server Security, Hashing & Background Jobs (Status: Active)
-- Slow hashing benchmark (Argon2id with 65,536 KiB memory, 3 iterations, parallelism 4 vs SHA-256) & arithmetic calculations
-- Boundary Zod validation, rate limiting trigger + IP bypass evidence
-- Async background verification email flow & 3 failure states
+### Task 4: Server Security, Hashing & Background Jobs (Status: Completed)
+- [x] Frozen 11-model relational schema with separate `PaymentAttempt` dual-ledger (`docs/schema.md`)
+- [x] Three-step zero-downtime migration pattern (`evidence/05-required-column-three-steps.txt`) & drift error forensics (`evidence/06-drift-error.txt`)
+- [x] Slow hashing benchmark: Argon2id (65,536 KiB, 3 iterations, 4 parallelism) vs SHA-256 (82.21ms vs 0.092ms, 894× slower) (`evidence/08-timing-argon-vs-sha.txt`, `docs/hashing.md`)
+- [x] Normalisation and trimming: email lowercasing and password whitespace trimming (`evidence/09-email-case-normalised.png`, `evidence/10-password-trim-working.png`)
+- [x] Boundary Zod validation timing (0.0958ms) & Task 3 direct bypass attack refusal with `HTTP 400 Bad Request` (`evidence/11`, `evidence/12`, `docs/validation-placement.md`)
+- [x] Sliding window rate limiting: triggered lockout `HTTP 429` (`evidence/13-rate-limit-triggered.png`) and defeated via IP rotation (`evidence/14-rate-limit-defeated.txt`, `docs/rate-limiting.md`)
+- [x] k-Anonymity breached password verification rejecting leaked passwords (`evidence/15-breach-check-rejection.png`, `docs/breach-check.md`)
+- [x] SMTP diagnostics: ordinary password failure (`evidence/16`) and App Password resolution (`evidence/17`)
+- [x] CSPRNG 6-digit OTP verification with 10-minute expiry & background email worker (3,085ms sync vs 438ms background job in `evidence/18`)
+- [x] Three verification failure states tested and evidenced: expired code, wrong code, code reused (`evidence/19` through `22`, `docs/verification-design.md`)
+- [x] Branded transactional email with Task 1 design tokens (`evidence/23-rendered-email.png`, `docs/email-copy.md`)
+- [x] Task 4 `README.md`, 4 skipped controls (`docs/not-implemented.md`), defect log (`docs/defects.md`), and 19 interview answers (`docs/interview-answers.md`)
 
-### Task 5: Sessions, Legal Deletion & Final Defense (Pending)
+### Task 5: Sessions, Legal Deletion & Final Defense (Status: Next)
 - Cryptographic 32-byte session tokens (stored as SHA-256 in DB, delivered in `HttpOnly`/`Secure`/`SameSite=Lax` cookies)
 - Email verification soft gating vs hard gating comparison
 - Lawful 3-stage NDPA account deletion process (soft delete $\rightarrow$ 7-day grace period $\rightarrow$ scheduled anonymization purge transaction)

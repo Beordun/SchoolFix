@@ -1,0 +1,57 @@
+=== STEP 8 EVIDENCE: RATE LIMITING AND ITS LIMITS (TRIGGERED & DEFEATED) ===
+Platform: SchoolFix (Next.js 14.2.35 + In-Memory Sliding Window Rate Limiter)
+Target Endpoint: POST http://localhost:3000/api/login
+Execution Timestamp: 2026-10-29T18:08:29Z
+Configured Policy: 5 attempts per 60-second sliding window per client IP
+
+--- PART 1: TRIGGERING THE RATE LIMIT LOCKOUT ---
+Initial Client IP: 197.210.64.12 (MTN Nigeria, Lagos ASN 29465)
+Target Account: folashade@schoolfix.internal
+
+Request 1: HTTP 401 Unauthorized (Invalid credentials)
+Request 2: HTTP 401 Unauthorized (Invalid credentials)
+Request 3: HTTP 401 Unauthorized (Invalid credentials)
+Request 4: HTTP 401 Unauthorized (Invalid credentials)
+Request 5: HTTP 401 Unauthorized (Invalid credentials)
+Request 6: HTTP 429 Too Many Requests
+
+Raw Server Response for Request 6:
+HTTP Status Code: 429 Too Many Requests
+Retry-After: 60
+Content-Type: application/json
+{
+  "success": false,
+  "error": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many login attempts from IP (197.210.64.12). Locked for 60 seconds.",
+  "retryAfter": 60
+}
+
+--- PART 2: DEFEATING THE RATE LIMIT VIA IP ROTATION ---
+The attacker rotates their source IP address (via proxy, mobile APN reconnection, VPN, or spoofed proxy header):
+Rotated Client IP: 102.89.23.45 (Airtel Nigeria, Abuja ASN 37076)
+
+Request 7 Execution:
+POST /api/login HTTP/1.1
+Host: localhost:3000
+X-Forwarded-For: 102.89.23.45
+Content-Type: application/json
+{"email":"folashade@schoolfix.internal","password":"WrongPassAttempt7"}
+
+Raw Server Response for Request 7:
+HTTP Status Code: 401 Unauthorized (Bypassed the 429 Lockout!)
+{
+  "success": false,
+  "error": "INVALID_CREDENTIALS",
+  "message": "Incorrect email or password."
+}
+
+--- ARCHITECTURAL LESSON & LIMITS OF IP RATE LIMITING ---
+1. Why IP Rate Limiting Alone is Insufficient:
+   In distributed mobile environments, IP addresses are volatile. In Nigeria, mobile telcos (MTN, Airtel, Glo) employ Carrier-Grade NAT (CGNAT) where thousands of legitimate mobile subscribers share a tiny pool of public IPv4 addresses. 
+   - An attacker on a botnet or rotating residential proxy network easily defeats IP rate limiting by cycling IP addresses.
+   - Conversely, locking out a single public IP can inadvertently lock out an entire school staff room or university campus where 50 teachers browse through one shared school Wi-Fi router.
+2. The Multi-Key Defense:
+   Production security must key rate limiters on a combination of:
+   - Account identifier (Normalized Email: prevents brute-forcing a specific parent account from distributed IPs).
+   - Device fingerprints / TLS Client Hello JA4 fingerprints.
+   - Global endpoint budgets (protecting overall server capacity against DDoS).

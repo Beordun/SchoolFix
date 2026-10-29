@@ -16,6 +16,7 @@
 
 # Database Dumps & Credentials
 *.sql
+!prisma/migrations/**/*.sql
 *.dump
 *.pem
 *.key

@@ -5,14 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.css';
 
-type AuthMode = 'login' | 'register' | 'reset';
+type AuthMode = 'login' | 'register' | 'reset' | 'verify';
 
 export default function AuthCard() {
   const searchParams = useSearchParams();
   
-  // Read initial mode from URL query parameter (?mode=login|register|reset)
+  // Read initial mode from URL query parameter (?mode=login|register|reset|verify)
   const queryMode = searchParams.get('mode') as AuthMode;
-  const initialMode: AuthMode = (queryMode === 'register' || queryMode === 'reset') ? queryMode : 'login';
+  const initialMode: AuthMode = (queryMode === 'register' || queryMode === 'reset' || queryMode === 'verify') ? queryMode : 'login';
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   
@@ -23,6 +23,7 @@ export default function AuthCard() {
   const [phone, setPhone] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   // Field focus tracking for Category 1 (Empty Field) blur detection
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -32,6 +33,8 @@ export default function AuthCard() {
 
   // Disabled button explanation message (Step 7 requirement)
   const [buttonNotice, setButtonNotice] = useState<string | null>(null);
+  const [serverFeedback, setServerFeedback] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 4 & 7 Diagnostic Toggles (accessible via query params or buttons for evidence generation)
   const showAnnoyingNumberInput = searchParams.get('test_input') === 'number';
@@ -39,7 +42,7 @@ export default function AuthCard() {
 
   // Sync mode with URL without triggering server document reloads
   useEffect(() => {
-    if (queryMode && ['login', 'register', 'reset'].includes(queryMode)) {
+    if (queryMode && ['login', 'register', 'reset', 'verify'].includes(queryMode)) {
       setMode(queryMode as AuthMode);
       setButtonNotice(null);
     }
@@ -201,16 +204,56 @@ export default function AuthCard() {
               </p>
 
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   setLoginSubmitted(true);
-                  if (!validateEmailFormat(email) && !validatePassword(password)) {
-                    alert('Sign In payload verified.');
+                  setServerFeedback(null);
+                  if (loginEmailError || loginPasswordError) return;
+                  setIsSubmitting(true);
+                  try {
+                    const res = await fetch('/api/login', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, password }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                      setServerFeedback({
+                        type: 'success',
+                        message: `Authentication successful! Welcome, ${data.user.fullName}. Password trimmed & email normalized to lowercase.`,
+                      });
+                    } else {
+                      setServerFeedback({
+                        type: 'error',
+                        message: data.message || 'Incorrect email or password.',
+                      });
+                    }
+                  } catch (err: any) {
+                    setServerFeedback({ type: 'error', message: err.message || 'Network connection failed' });
+                  } finally {
+                    setIsSubmitting(false);
                   }
                 }}
                 className={styles.form}
                 noValidate
               >
+                {serverFeedback && (
+                  <div
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      marginBottom: '1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      backgroundColor: serverFeedback.type === 'success' ? '#E8F5E9' : '#FFEBEE',
+                      color: serverFeedback.type === 'success' ? '#1B5E20' : '#C62828',
+                      border: `1px solid ${serverFeedback.type === 'success' ? '#81C784' : '#EF9A9A'}`,
+                    }}
+                    role="alert"
+                  >
+                    {serverFeedback.message}
+                  </div>
+                )}
                 <div className={styles.fieldGroup}>
                   <label htmlFor="login-email" className={styles.label}>
                     Parent or Staff Email
@@ -315,7 +358,56 @@ export default function AuthCard() {
                 Register as a parent or administrator for attendance and fee clearance.
               </p>
 
-              <form onSubmit={(e) => e.preventDefault()} className={styles.form} noValidate>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setServerFeedback(null);
+                  if (!isRegisterValid) return;
+                  setIsSubmitting(true);
+                  try {
+                    const res = await fetch('/api/register', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ fullName, email, phone, password, acceptedTerms }),
+                    });
+                    const data = await res.json();
+                    if (res.status === 201 && data.success) {
+                      setServerFeedback({
+                        type: 'success',
+                        message: `Account created for ${data.user.fullName} (${data.user.email}). Check email for 6-digit confirmation OTP.`,
+                      });
+                    } else {
+                      setServerFeedback({
+                        type: 'error',
+                        message: data.message || 'Registration failed server boundary check.',
+                      });
+                    }
+                  } catch (err: any) {
+                    setServerFeedback({ type: 'error', message: err.message || 'Network error' });
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                className={styles.form}
+                noValidate
+              >
+                {serverFeedback && (
+                  <div
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      marginBottom: '1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      backgroundColor: serverFeedback.type === 'success' ? '#E8F5E9' : '#FFEBEE',
+                      color: serverFeedback.type === 'success' ? '#1B5E20' : '#C62828',
+                      border: `1px solid ${serverFeedback.type === 'success' ? '#81C784' : '#EF9A9A'}`,
+                    }}
+                    role="alert"
+                  >
+                    {serverFeedback.message}
+                  </div>
+                )}
                 {/* 1. Full Name */}
                 <div className={styles.fieldGroup}>
                   <label htmlFor="reg-fullname" className={styles.label}>
@@ -567,6 +659,114 @@ export default function AuthCard() {
                   onClick={() => switchMode('login')}
                 >
                   Back to sign in
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ==================== VERIFY VIEW ==================== */}
+          {mode === 'verify' && (
+            <div className={styles.formContainer}>
+              <h1 className={styles.title}>Verify Your Account</h1>
+              <p className={styles.subtitle}>
+                Enter the 6-digit confirmation code dispatched to your email address.
+              </p>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setServerFeedback(null);
+                  setIsSubmitting(true);
+                  try {
+                    const res = await fetch('/api/verify', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, code: otpCode }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                      setServerFeedback({
+                        type: 'success',
+                        message: 'Account successfully confirmed. You now have full access to student records.',
+                      });
+                    } else {
+                      setServerFeedback({
+                        type: 'error',
+                        message: data.message || 'Verification failed.',
+                      });
+                    }
+                  } catch (err: any) {
+                    setServerFeedback({ type: 'error', message: err.message || 'Verification network error' });
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                className={styles.form}
+                noValidate
+              >
+                {serverFeedback && (
+                  <div
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      marginBottom: '1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      backgroundColor: serverFeedback.type === 'success' ? '#E8F5E9' : '#FFEBEE',
+                      color: serverFeedback.type === 'success' ? '#1B5E20' : '#C62828',
+                      border: `1px solid ${serverFeedback.type === 'success' ? '#81C784' : '#EF9A9A'}`,
+                    }}
+                    role="alert"
+                  >
+                    {serverFeedback.message}
+                  </div>
+                )}
+
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="verify-email" className={styles.label}>
+                    Account Email
+                  </label>
+                  <input
+                    id="verify-email"
+                    type="email"
+                    className={styles.input}
+                    placeholder="Enter registered email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="verify-code" className={styles.label}>
+                    6-Digit Confirmation OTP
+                  </label>
+                  <input
+                    id="verify-code"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    className={styles.input}
+                    placeholder="e.g. 241925"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    style={{ fontSize: '1.5rem', letterSpacing: '0.3em', textAlign: 'center', fontWeight: 700 }}
+                  />
+                </div>
+
+                <button type="submit" className={styles.submitBtn}>
+                  Verify Code &rarr;
+                </button>
+              </form>
+
+              <div className={styles.footerPrompt}>
+                <span>Need to sign in instead? </span>
+                <button
+                  type="button"
+                  className={styles.inlineAction}
+                  onClick={() => switchMode('login')}
+                >
+                  Back to login
                 </button>
               </div>
             </div>
