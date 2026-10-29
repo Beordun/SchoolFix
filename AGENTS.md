@@ -183,12 +183,21 @@ SchoolFix/
 - [x] **Step 10:** Information design (dynamic titles, <10-word description, OG tags, clamp heading) & `docs/information-design.md`, `evidence/16` to `20`
 - [x] Task 2 `README.md`, `docs/defects.md`, and 15 interview answers (`docs/interview-answers.md`)
 
-### Task 3: Client Validation, SPA Auth & Accessibility (Pending)
-- Single-page conditional authentication routing (`/auth?mode=login|register|reset`)
-- 4 categories of client validation with costs to legitimate users
-- Screen reader transcript audit (NVDA / VoiceOver) & direct API endpoint bypass proof
+### Task 3: Client Validation, SPA Auth & Accessibility (Status: Completed)
+- [x] Single-page conditional authentication routing (`/auth?mode=login|register|reset`)
+- [x] 4 categories of client validation with costs to legitimate users documented
+- [x] Accessible password visibility eye toggle with screen reader focus support
+- [x] Text input with `inputMode="numeric"` preventing leading zero strip on Nigerian phone numbers
+- [x] Sensitive format hint removal for school PINs to defeat enumeration
+- [x] Field-by-field accessibility audit fixing 4 problems with NVDA/TalkBack transcripts
+- [x] Retained disabled submit buttons in tab order (`aria-disabled="true"`) with modal explanation on click
+- [x] Adversarial form testing uncovering whitespace-only password defect
+- [x] Direct endpoint request bypassing browser (`HTTP 201 Created` user `5d8e9b4e-76d3-4f6b-84d0-02dd50411ae5`)
+- [x] Client-side is not security whitepaper (`docs/client-side-is-not-security.md`)
+- [x] Git hard rollback experiment to commit `171a725` excising regression `ad4d501` (`docs/rollback.md`)
+- [x] Task 3 `README.md`, defects log (`docs/defects.md`), and 14 interview answers (`docs/interview-answers.md`)
 
-### Task 4: Server Security, Hashing & Background Jobs (Pending)
+### Task 4: Server Security, Hashing & Background Jobs (Status: Active)
 - Slow hashing benchmark (Argon2id with 65,536 KiB memory, 3 iterations, parallelism 4 vs SHA-256) & arithmetic calculations
 - Boundary Zod validation, rate limiting trigger + IP bypass evidence
 - Async background verification email flow & 3 failure states
