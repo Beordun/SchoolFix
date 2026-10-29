@@ -50,7 +50,7 @@
 .card {
   max-width: 520px;
   width: 92%;
-  margin: 3rem auto;
+  margin: 2.5rem auto;
   background-color: var(--color-surface-container);
   border: 1px solid var(--color-outline);
   border-radius: var(--radius-large, 12px);
@@ -126,7 +126,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 .fieldGroup {
@@ -184,6 +184,15 @@
   box-shadow: 0 0 0 2px var(--color-primary-container);
 }
 
+.inputError {
+  border-color: var(--color-error) !important;
+  background-color: var(--color-error-container);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 2px var(--color-error);
+}
+
 .passwordWrapper {
   position: relative;
   display: flex;
@@ -238,6 +247,24 @@
   outline-offset: 1px;
 }
 
+/* Category 4: Accessible Error State with Caution Icon */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-error);
+  font-family: var(--type-label-small-font-family);
+  font-size: var(--type-label-small-size);
+  font-weight: 500;
+  margin-top: 0.25rem;
+  line-height: 1.35;
+}
+
+.cautionIcon {
+  flex-shrink: 0;
+  color: var(--color-error);
+}
+
 .checkboxGroup {
   display: flex;
   align-items: flex-start;
@@ -263,8 +290,14 @@
   cursor: pointer;
 }
 
+/* Step 7: Disabled Button with Explanatory Notice */
+.submitWrapper {
+  width: 100%;
+}
+
 .submitBtn {
-  margin-top: 0.75rem;
+  width: 100%;
+  margin-top: 0.5rem;
   padding: 0.85rem 1.75rem;
   min-height: var(--size-touch-target, 2.75rem);
   border-radius: var(--radius-medium, 8px);
@@ -279,7 +312,7 @@
   transition: all 0.2s ease;
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   opacity: 0.94;
   transform: translateY(-1px);
   box-shadow: var(--shadow-hard);
@@ -288,6 +321,29 @@
 .submitBtn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.submitBtnDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  background-color: var(--color-outline);
+  color: var(--color-on-surface-variant);
+}
+
+.warningNotice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--color-warning-container, #FFF3E0);
+  color: var(--color-on-warning-container, #E65100);
+  border: 1px solid var(--color-warning, #FFA000);
+  font-family: var(--type-label-small-font-family);
+  font-size: var(--type-label-small-size);
+  font-weight: 500;
+  text-align: left;
 }
 
 .footerPrompt {
