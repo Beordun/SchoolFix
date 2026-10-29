@@ -1,0 +1,58 @@
+=== STEP 9 EVIDENCE: GIT COMMIT LIST & HARD ROLLBACK EXPERIMENT ===
+Platform: SchoolFix (Next.js 14.2.35)
+Repository: Beordun/SchoolFix
+Active Branch: feature/task-3-client-validation
+Execution Timestamp: 2026-10-29T14:39:35Z
+
+--- 1. DELIBERATE REGRESSION INJECTED ---
+File Modified: app/auth/AuthCard.tsx
+Description of Change: Injected an unwanted experimental security question field ("Child's Favorite Pet Name") into the registration form.
+Violation: Directly violated NDPA data minimization principles and the 3 field-justification criteria established in docs/field-justification.md.
+
+--- 2. COMMIT OF DELIBERATE MISTAKE ---
+Command: git add app/auth/AuthCard.tsx; git commit -m "feat(auth): add experimental pet name security field (deliberate mistake)"
+Machine Output:
+[feature/task-3-client-validation ad4d501] feat(auth): add experimental pet name security field (deliberate mistake)
+ 1 file changed, 13 insertions(+)
+
+Commit Hash: ad4d501
+
+--- 3. GIT LOG INSPECTION (BEFORE ROLLBACK) ---
+Command: git log -n 5 --oneline
+Output:
+ad4d501 feat(auth): add experimental pet name security field (deliberate mistake)
+171a725 feat(task-3): document form attack results and client-side bypass whitepaper
+d0644eb feat: add client-side authentication validation rules and supporting documentation
+80b9258 feat(auth): add accessible password visibility eye toggle to eliminate mistype re-entry
+811290e feat(task-3): collapse authentication pages into single-page query state machine with page count proof
+
+Target Rollback Commit: 171a725 (feat(task-3): document form attack results and client-side bypass whitepaper)
+
+--- 4. EXACT ROLLBACK COMMAND EXECUTED ---
+Command: git reset --hard 171a725
+Machine Output:
+HEAD is now at 171a725 feat(task-3): document form attack results and client-side bypass whitepaper
+
+--- 5. FORENSIC VERIFICATION & REFLOG AUDIT ---
+Command: git status
+Output:
+On branch feature/task-3-client-validation
+nothing to commit, working tree clean
+
+Command: git log -n 5 --oneline
+Output:
+171a725 feat(task-3): document form attack results and client-side bypass whitepaper
+d0644eb feat: add client-side authentication validation rules and supporting documentation
+80b9258 feat(auth): add accessible password visibility eye toggle to eliminate mistype re-entry
+811290e feat(task-3): collapse authentication pages into single-page query state machine with page count proof
+807fe83 fix(security): sanitize .env.example, README, and scripts to eliminate connection templates and test password strings
+
+Command: git reflog -n 5
+Output:
+171a725 HEAD@{0}: reset: moving to 171a725
+ad4d501 HEAD@{1}: commit: feat(auth): add experimental pet name security field (deliberate mistake)
+171a725 HEAD@{2}: commit: feat(task-3): document form attack results and client-side bypass whitepaper
+d0644eb HEAD@{3}: commit: feat: add client-side authentication validation rules and supporting documentation
+80b9258 HEAD@{4}: commit: feat(auth): add accessible password visibility eye toggle to eliminate mistype re-entry
+
+Conclusion: Commit ad4d501 was excised without hallucination. Working tree and HEAD are cleanly restored to verified commit 171a725.
