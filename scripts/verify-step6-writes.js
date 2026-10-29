@@ -38,11 +38,10 @@ async function run() {
   console.log('=== STEP 6: DATABASE WRITE VERIFICATION (HTTP 201 CREATED) ===');
   console.log(`Execution Timestamp: ${new Date().toISOString()}`);
 
-  // Test Submission 1
   const payload1 = {
     fullName: 'Folashade Adeleke',
     email: `folashade.adeleke.${Date.now()}@schoolfix.internal`,
-    password: 'SecureSchoolPass2026!',
+    password: 'TestPassword_' + Date.now(),
   };
 
   console.log('\n--- SUBMITTING REQUEST 1 ---');
@@ -55,15 +54,13 @@ async function run() {
   console.log(`Latency: ${latency1}ms`);
   console.log('Response Body:', JSON.stringify(res1.data, null, 2));
 
-  // Small delay for distinct sequential timestamps
   console.log('\nWaiting 2000ms for timestamp separation...');
   await new Promise((r) => setTimeout(r, 2000));
 
-  // Test Submission 2
   const payload2 = {
     fullName: 'Chukwudi Okafor',
     email: `chukwudi.okafor.${Date.now()}@schoolfix.internal`,
-    password: 'ParentSecure2026!',
+    password: 'TestPassword_' + Date.now(),
   };
 
   console.log('\n--- SUBMITTING REQUEST 2 ---');

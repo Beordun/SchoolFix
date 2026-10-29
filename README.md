@@ -42,8 +42,7 @@ npm install
 # 3. Create your local environment configuration
 cp .env.example .env.local
 
-# 4. Open .env.local in an editor and set your local PostgreSQL connection string:
-# DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/schoolfix_db?schema=public"
+# 4. Open .env.local in an editor and set your local DATABASE_URL (see Section 5 below)
 
 # 5. Synthesize Prisma client types
 npx prisma generate

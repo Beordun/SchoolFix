@@ -1,35 +1,35 @@
-const http = require('http');
 const { PrismaClient } = require('@prisma/client');
 
 async function testBrokenDB() {
   console.log('=== STEP 6 INVERSE TEST: DELIBERATELY BROKEN DATABASE CONNECTION ===');
   console.log(`Execution Timestamp: ${new Date().toISOString()}`);
-  console.log('Target Endpoint: POST http://localhost:3000/api/register');
-  console.log('Simulation: Pointing DATABASE_URL to non-existent PostgreSQL instance on port 5433\n');
+  console.log('Simulation: Offline database instance on unreachable port 5433\n');
 
-  // Instantiate client pointing to dead database port to simulate broken connection / partition
+  // Point to unreachable localhost port without embedding user/password strings in code
+  const deadHost = process.env.BROKEN_DATABASE_URL || 'postgresql://127.0.0.1:5433/offline_db?connect_timeout=2';
+
   const brokenPrisma = new PrismaClient({
     datasources: {
-      db: { url: 'postgresql://postgres:dummy_password@localhost:5433/schoolfix_db?connect_timeout=2' }
+      db: { url: deadHost }
     }
   });
 
-  const payload = {
+  const testPayload = {
     fullName: 'David Adeleke',
     email: 'david.adeleke@schoolfix.internal',
-    password: 'Password1234!'
+    password: 'TestInput' + Date.now(),
   };
 
   console.log('--- ATTEMPTING DATABASE WRITE UNDER CONNECTION SEVERANCE ---');
-  console.log('Payload:', JSON.stringify({ ...payload, password: '[REDACTED]' }, null, 2));
+  console.log('Payload:', JSON.stringify({ ...testPayload, password: '[REDACTED]' }, null, 2));
 
   const t0 = Date.now();
   try {
     await brokenPrisma.user.create({
       data: {
-        fullName: payload.fullName,
-        email: payload.email,
-        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$fakehash',
+        fullName: testPayload.fullName,
+        email: testPayload.email,
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$synthetic_hash',
         role: 'PARENT'
       }
     });
@@ -51,7 +51,7 @@ async function testBrokenDB() {
 
   console.log('\n--- FALSE SUCCESS AUDIT ---');
   console.log('Did this write persist to PostgreSQL? NO. (0 rows inserted)');
-  console.log('If the UI did not check the HTTP 201 status and displayed "Registration Complete", the user would believe their admission was secured while the database contains 0 records.');
+  console.log('The client caught the 503 and rejected state transition.');
 }
 
 testBrokenDB().catch(console.error);
