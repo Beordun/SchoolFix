@@ -1,3 +1,5 @@
+/* SchoolFix Single-Page Authentication Styling — Consuming Design Tokens */
+
 .container {
   min-height: 100vh;
   display: flex;
@@ -10,6 +12,9 @@
   padding: 1.25rem 2rem;
   border-bottom: 1px solid var(--color-outline);
   background-color: var(--color-surface-container);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logoLink {
@@ -32,74 +37,227 @@
   letter-spacing: -0.5px;
 }
 
+.gatewayIndicator {
+  font-family: var(--type-label-small-font-family);
+  font-size: var(--type-label-small-size);
+  color: var(--color-on-surface-variant);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-outline);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
 .card {
-  max-width: 480px;
-  width: 90%;
-  margin: 3.5rem auto;
-  padding: 2.5rem 2rem;
+  max-width: 520px;
+  width: 92%;
+  margin: 3rem auto;
   background-color: var(--color-surface-container);
   border: 1px solid var(--color-outline);
   border-radius: var(--radius-large, 12px);
   box-shadow: var(--shadow-medium);
-  text-align: center;
+  overflow: hidden;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.85rem;
-  border-radius: 9999px;
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
-  font-family: var(--type-label-small-font-family);
-  font-size: var(--type-label-small-size);
-  font-weight: var(--type-label-small-weight);
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--color-outline);
-}
-
-.title {
-  font-family: var(--type-headline-medium-font-family);
-  font-size: var(--type-headline-medium-size);
-  font-weight: 600;
-  line-height: var(--type-headline-medium-line-height);
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-.description {
-  font-family: var(--type-body-medium-font-family);
-  font-size: var(--type-body-medium-size);
-  font-weight: var(--type-body-medium-weight);
-  line-height: 1.5;
-  color: var(--color-on-surface-variant);
-  margin-bottom: 2rem;
-}
-
-.actionGroup {
+/* Tab Navigation Controls */
+.tabGroup {
   display: flex;
-  justify-content: center;
+  border-bottom: 1px solid var(--color-outline);
+  background-color: var(--color-surface);
 }
 
-.backButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.75rem;
-  border-radius: 8px;
-  background-color: var(--color-surface);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  font-family: var(--type-label-large-font-family);
-  font-size: var(--type-label-large-size);
-  font-weight: var(--type-label-large-weight);
-  text-decoration: none;
+.tab {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--type-label-medium-font-family);
+  font-size: var(--type-label-medium-size);
+  font-weight: var(--type-label-medium-weight);
+  color: var(--color-on-surface-variant);
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: var(--size-touch-target, 2.75rem);
 }
 
-.backButton:hover {
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
+.tab:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-container);
+}
+
+.tabActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background-color: var(--color-surface-container);
+  font-weight: 600;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.panel {
+  padding: 2.25rem 2rem;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: var(--type-headline-small-font-family);
+  font-size: var(--type-headline-small-size);
+  font-weight: 600;
+  line-height: var(--type-headline-small-line-height);
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-family: var(--type-body-medium-font-family);
+  font-size: var(--type-body-medium-size);
+  color: var(--color-on-surface-variant);
+  margin-bottom: 1.75rem;
+  line-height: 1.45;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: left;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-family: var(--type-label-medium-font-family);
+  font-size: var(--type-label-medium-size);
+  font-weight: var(--type-label-medium-weight);
+  color: var(--color-on-surface);
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--type-label-small-font-family);
+  font-size: var(--type-label-small-size);
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.linkButton:hover {
+  opacity: 0.8;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-medium, 8px);
+  border: 1px solid var(--color-outline);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--type-body-medium-font-family);
+  font-size: var(--type-body-medium-size);
+  min-height: var(--size-touch-target, 2.75rem);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-container);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+  margin-top: 0.25rem;
+}
+
+.checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.15rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkboxLabel {
+  font-family: var(--type-body-small-font-family);
+  font-size: var(--type-body-small-size);
+  color: var(--color-on-surface-variant);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.submitBtn {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1.75rem;
+  min-height: var(--size-touch-target, 2.75rem);
+  border-radius: var(--radius-medium, 8px);
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--type-label-large-font-family);
+  font-size: var(--type-label-large-size);
+  font-weight: var(--type-label-large-weight);
+  cursor: pointer;
+  box-shadow: var(--shadow-medium);
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hard);
+}
+
+.submitBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.footerPrompt {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-outline);
+  text-align: center;
+  font-family: var(--type-body-small-font-family);
+  font-size: var(--type-body-small-size);
+  color: var(--color-on-surface-variant);
+}
+
+.inlineAction {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--type-label-medium-font-family);
+  font-size: var(--type-label-medium-size);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.inlineAction:hover {
+  opacity: 0.8;
 }
