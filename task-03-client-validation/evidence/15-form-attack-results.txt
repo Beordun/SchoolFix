@@ -1,0 +1,37 @@
+=== STEP 8 EVIDENCE: ATTACKING THE FORM THROUGH THE BROWSER UI ===
+Platform: SchoolFix (Next.js 14.2.35)
+Form Under Test: Registration View (/auth?mode=register)
+Execution Timestamp: 2026-10-29T14:20:15Z
+
+--- TEST 1: SINGLE-CHARACTER NAME ("A") ---
+- Input Value: "A"
+- Form Behavior: BLOCKED.
+- Error Displayed: "Please provide at least two names (e.g. Surname and First Name)."
+- Submit Button State: Disabled. (Attack Thwarted)
+
+--- TEST 2: TWO TOKENS WITH MINIMUM LENGTH ("A B") ---
+- Input Value: "A B"
+- Form Behavior: BLOCKED.
+- Error Displayed: "Each name part must contain at least 2 characters."
+- Submit Button State: Disabled. (Attack Thwarted)
+
+--- TEST 3: PASSWORD COMPOSED OF 8 PURE SPACES ("        ") ---
+- Input Value: "        " (8 space characters)
+- Form Behavior: VULNERABILITY FOUND / ACCEPTED BY CLIENT!
+- Analysis: The client-side check `password.length >= 8` evaluated to TRUE. Because `.trim()` was omitted on password length validation, the client treated 8 whitespace characters as a valid password, enabling the submit button.
+- Defect Documented: Client length checks without character composition rules allow blank passwords.
+
+--- TEST 4: EMAIL WITH MINIMAL STRUCTURE ("a@b") ---
+- Input Value: "a@b"
+- Form Behavior: BLOCKED.
+- Error Displayed: "Please enter a valid email format (e.g. name@school.ng)."
+- Analysis: Strict RFC regex caught the missing Top-Level Domain (.com / .ng). (Attack Thwarted)
+
+--- TEST 5: PASTED EMAIL WITH TRAILING WHITESPACE ("adeleke@schoolfix.internal   ") ---
+- Input Value: "adeleke@schoolfix.internal   "
+- Form Behavior: VULNERABILITY FOUND / INCONSISTENCY!
+- Analysis: When pasted with trailing spaces, the un-trimmed regex flagged the string as invalid, but if submitted directly without client trimming, whitespace corrupts database uniqueness lookups.
+
+--- TEST 6: FIELD AT MAXIMUM LENGTH (255+ CHARACTERS) ---
+- Input Value: "A" * 300 in Full Name
+- Form Behavior: Client input had no `maxLength` attribute, allowing massive strings to be entered and rendered, distorting mobile UI card containers.

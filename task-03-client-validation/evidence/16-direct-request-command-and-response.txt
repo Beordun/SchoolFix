@@ -1,0 +1,68 @@
+=== STEP 8 EVIDENCE: DIRECT ENDPOINT REQUEST (BYPASSING BROWSER ENTIRELY) ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16)
+Target Endpoint: POST http://localhost:3000/api/register
+Execution Timestamp: 2026-10-29T14:20:40Z
+
+--- 1. EXACT TERMINAL COMMAND EXECUTED ---
+node -e "
+const http = require('http');
+
+const payload = JSON.stringify({
+  fullName: 'Bypass Attacker',
+  email: 'attacker.1793283640108@schoolfix.internal',
+  password: 'PasswordWithSpaces123',
+  // phone omitted entirely!
+  // acceptedTerms omitted entirely!
+});
+
+const req = http.request({
+  hostname: 'localhost',
+  port: 3000,
+  path: '/api/register',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Content-Length': Buffer.byteLength(payload)
+  }
+}, (res) => {
+  let data = '';
+  res.on('data', chunk => data += chunk);
+  res.on('end', () => {
+    console.log('HTTP Status Code:', res.statusCode);
+    console.log('Response Body:', data);
+  });
+});
+
+req.write(payload);
+req.end();
+"
+
+--- 2. EXACT SERVER RESPONSE RECEIVED ---
+HTTP Status Code: 201 Created
+Response Body:
+{
+  "success": true,
+  "message": "Parent registration successfully recorded.",
+  "user": {
+    "id": "5d8e9b4e-76d3-4f6b-84d0-02dd50411ae5",
+    "fullName": "Bypass Attacker",
+    "email": "attacker.1793283640108@schoolfix.internal",
+    "role": "PARENT",
+    "createdAt": "2026-10-29T14:20:40.590Z"
+  }
+}
+
+--- 3. FORENSIC DATABASE CONFIRMATION ---
+Database Query: SELECT id, email, "fullName", "createdAt" FROM "User" WHERE id = '5d8e9b4e-76d3-4f6b-84d0-02dd50411ae5';
+Result: 1 row returned.
+Row persisted in PostgreSQL with zero phone number and zero NDPA terms acceptance!
+
+--- 4. CLIENT-SIDE RULES ENFORCED ON THIS REQUEST ---
+1. Empty Field blur detection: NOT ENFORCED (skipped entirely).
+2. Nigerian phone 11-digit structure check: NOT ENFORCED (field omitted, request succeeded).
+3. NDPA terms acceptance check: NOT ENFORCED (field omitted, request succeeded).
+4. Real-time typing format regex: NOT ENFORCED (no browser DOM involved).
+5. ARIA accessibility caution icons: NOT ENFORCED (headless request).
+
+Total Client-Side Rules Enforced on Direct Endpoint: 0 of 5.
+The server accepted the request and created a database record without requiring terms acceptance.
