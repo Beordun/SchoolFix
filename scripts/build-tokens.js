@@ -122,6 +122,10 @@ if (tokens.effect) {
 }
 
 // D. Typography (--type-*)
+// Add root font-family token alias
+typographyVars.push(`  /* Default Brand Typography Family */`);
+typographyVars.push(`  --type-font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;`);
+
 const fontSource = tokens.font || tokens.typography;
 if (fontSource) {
   for (const [styleName, fontData] of Object.entries(fontSource)) {

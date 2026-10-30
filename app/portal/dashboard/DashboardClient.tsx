@@ -1,10 +1,20 @@
 // app/portal/dashboard/DashboardClient.tsx
-// Interactive Dashboard Component consuming strictly tokens.css variables
+// SchoolFix Parent Portal Dashboard
+// Conforming strictly to ChatGPT Screen Design Specification (P01 - P05) & tokens.css
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+import { ChildProfile, PaymentTransaction } from './types';
+import Navigation, { NavTab } from './components/Navigation';
+import HomeView from './components/HomeView';
+import MyChildView from './components/MyChildView';
+import PaymentsView from './components/PaymentsView';
+import ReportsView from './components/ReportsView';
+import AccountView from './components/AccountView';
+import ChildSelectorModal from './components/ChildSelectorModal';
 
 interface DashboardClientProps {
   user: {
@@ -18,41 +28,298 @@ interface DashboardClientProps {
   expiresAt: string;
 }
 
+// Initial Nigerian School dependent student records (PRD §3, §4)
+const INITIAL_CHILDREN: ChildProfile[] = [
+  {
+    id: 'child-amara',
+    admissionNum: 'SF-2026-0142',
+    fullName: 'Amara Michael',
+    classArm: 'Primary 4 Blue',
+    session: '2026/2027 Academic Session',
+    term: 'First Term',
+    expectedFees: 150000,
+    verifiedPayments: 105000,
+    outstandingBalance: 45000,
+    attendancePercentage: 94,
+    academicAverage: 76.5,
+    academicGrade: 'B',
+    recentActivity: [
+      {
+        id: 'act-1',
+        type: 'PAYMENT',
+        title: 'Payment verified',
+        subtitle: '₦50,000 via Bank Transfer',
+        date: '12 Oct',
+        badgeText: 'Verified',
+        badgeColor: 'success',
+      },
+      {
+        id: 'act-2',
+        type: 'ASSESSMENT',
+        title: 'Mathematics score published',
+        subtitle: 'Continuous assessment: 32.00 / 40.00',
+        date: '14 Oct',
+        badgeText: 'CA Published',
+        badgeColor: 'primary',
+      },
+      {
+        id: 'act-3',
+        type: 'ATTENDANCE',
+        title: 'Present in class',
+        subtitle: 'Marked present by Class Teacher',
+        date: 'Today',
+        badgeText: 'Present',
+        badgeColor: 'success',
+      },
+    ],
+    subjects: [
+      { id: 'sub-1', subject: 'Mathematics', caScore: 32.0, examScore: 38.0, totalScore: 70.0, grade: 'A', isPublished: true },
+      { id: 'sub-2', subject: 'English Studies', caScore: 35.0, examScore: 42.0, totalScore: 77.0, grade: 'A', isPublished: true },
+      { id: 'sub-3', subject: 'Basic Science', caScore: 30.0, examScore: 40.0, totalScore: 70.0, grade: 'A', isPublished: true },
+      { id: 'sub-4', subject: 'Social Studies', caScore: 28.0, examScore: 36.0, totalScore: 64.0, grade: 'B', isPublished: true },
+      { id: 'sub-5', subject: 'Agricultural Science', caScore: 31.0, examScore: 39.0, totalScore: 70.0, grade: 'A', isPublished: true },
+    ],
+    transactions: [
+      {
+        id: 'txn-1',
+        reference: 'TXN-1234',
+        amount: 50000,
+        date: '12 Oct',
+        channel: 'BANK_TRANSFER',
+        status: 'VERIFIED',
+        receiptNumber: 'REC-2026-081',
+      },
+      {
+        id: 'txn-2',
+        reference: 'TXN-5678',
+        amount: 55000,
+        date: '15 Oct',
+        channel: 'ONLINE_CARD',
+        status: 'VERIFIED',
+        receiptNumber: 'REC-2026-092',
+      },
+    ],
+    reports: [
+      {
+        id: 'rep-1',
+        term: 'First Term',
+        session: '2026/2027 Academic Session',
+        isRestricted: true,
+        outstandingBalance: 45000,
+        attendanceDays: 47,
+        totalSchoolDays: 50,
+      },
+      {
+        id: 'rep-2',
+        term: 'Third Term',
+        session: '2025/2026 Academic Session',
+        isRestricted: false,
+        outstandingBalance: 0,
+        overallAverage: 84.2,
+        overallGrade: 'A',
+        classPosition: '3rd of 34',
+        attendanceDays: 58,
+        totalSchoolDays: 60,
+        teacherRemarks: 'Amara is an exceptionally diligent pupil with outstanding analytical capabilities.',
+      },
+    ],
+  },
+  {
+    id: 'child-daniel',
+    admissionNum: 'SF-2024-0089',
+    fullName: 'Daniel Michael',
+    classArm: 'JSS 1 Gold',
+    session: '2026/2027 Academic Session',
+    term: 'First Term',
+    expectedFees: 180000,
+    verifiedPayments: 180000,
+    outstandingBalance: 0,
+    attendancePercentage: 98,
+    academicAverage: 82.4,
+    academicGrade: 'A',
+    recentActivity: [
+      {
+        id: 'act-d1',
+        type: 'PAYMENT',
+        title: 'Tuition fully settled',
+        subtitle: '100% reconciled for First Term',
+        date: '08 Oct',
+        badgeText: 'Cleared',
+        badgeColor: 'success',
+      },
+      {
+        id: 'act-d2',
+        type: 'ASSESSMENT',
+        title: 'Basic Technology score published',
+        subtitle: 'Continuous assessment: 36.00 / 40.00',
+        date: '16 Oct',
+        badgeText: 'CA Published',
+        badgeColor: 'primary',
+      },
+    ],
+    subjects: [
+      { id: 'sub-d1', subject: 'Mathematics', caScore: 36.0, examScore: 48.0, totalScore: 84.0, grade: 'A', isPublished: true },
+      { id: 'sub-d2', subject: 'English Studies', caScore: 34.0, examScore: 46.0, totalScore: 80.0, grade: 'A', isPublished: true },
+      { id: 'sub-d3', subject: 'Basic Technology', caScore: 35.0, examScore: 49.0, totalScore: 84.0, grade: 'A', isPublished: true },
+      { id: 'sub-d4', subject: 'Business Studies', caScore: 33.0, examScore: 48.0, totalScore: 81.0, grade: 'A', isPublished: true },
+    ],
+    transactions: [
+      {
+        id: 'txn-d1',
+        reference: 'TXN-8841',
+        amount: 180000,
+        date: '08 Oct',
+        channel: 'BANK_TRANSFER',
+        status: 'VERIFIED',
+        receiptNumber: 'REC-2026-034',
+      },
+    ],
+    reports: [
+      {
+        id: 'rep-d1',
+        term: 'First Term',
+        session: '2026/2027 Academic Session',
+        isRestricted: false,
+        outstandingBalance: 0,
+        overallAverage: 82.4,
+        overallGrade: 'A',
+        classPosition: '1st of 30',
+        attendanceDays: 49,
+        totalSchoolDays: 50,
+        teacherRemarks: 'Daniel has shown exemplary leadership and scholastic excellence across all STEM subjects.',
+      },
+    ],
+  },
+];
+
 export default function DashboardClient({ user, sessionId, expiresAt }: DashboardClientProps) {
   const router = useRouter();
+
+  // Navigation & Multi-child State
+  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [childrenList, setChildrenList] = useState<ChildProfile[]>(INITIAL_CHILDREN);
+  const [selectedChildId, setSelectedChildId] = useState<string>('child-amara');
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false);
+
+  // Authentication & Deletion lifecycle states
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionStatus, setDeletionStatus] = useState<string | null>(null);
 
-  // Server-enforced logout with network failure edge-case handling (Step 4)
+  const selectedChild = childrenList.find((c) => c.id === selectedChildId) || childrenList[0];
+
+  // Dynamic Linking of another child (Self-service or School-assisted)
+  const handleLinkChild = (admissionNum: string, code: string, method: 'SELF' | 'ASSISTED') => {
+    const newChild: ChildProfile = {
+      id: `child-${Date.now()}`,
+      admissionNum,
+      fullName: method === 'SELF' ? `Student (${admissionNum})` : `Pending Verification (${admissionNum})`,
+      classArm: 'Primary 2 Ruby',
+      session: '2026/2027 Academic Session',
+      term: 'First Term',
+      expectedFees: 140000,
+      verifiedPayments: 0,
+      outstandingBalance: 140000,
+      attendancePercentage: 100,
+      academicAverage: 80.0,
+      academicGrade: 'A',
+      recentActivity: [
+        {
+          id: `act-${Date.now()}`,
+          type: 'ASSESSMENT',
+          title: 'Profile linked',
+          subtitle: `Enrolled under ${user.fullName}`,
+          date: 'Just now',
+          badgeText: 'Linked',
+          badgeColor: 'success',
+        },
+      ],
+      subjects: [
+        { id: `sub-new-1`, subject: 'Mathematics', caScore: 30.0, examScore: 50.0, totalScore: 80.0, grade: 'A', isPublished: true },
+        { id: `sub-new-2`, subject: 'English Studies', caScore: 32.0, examScore: 48.0, totalScore: 80.0, grade: 'A', isPublished: true },
+      ],
+      transactions: [],
+      reports: [
+        {
+          id: `rep-new-1`,
+          term: 'First Term',
+          session: '2026/2027 Academic Session',
+          isRestricted: true,
+          outstandingBalance: 140000,
+          attendanceDays: 50,
+          totalSchoolDays: 50,
+        },
+      ],
+    };
+
+    setChildrenList((prev) => [...prev, newChild]);
+    setSelectedChildId(newChild.id);
+  };
+
+  // Add payment transaction to selected child's dual-ledger
+  const handleAddTransaction = (txn: PaymentTransaction) => {
+    setChildrenList((prev) =>
+      prev.map((c) => {
+        if (c.id !== selectedChildId) return c;
+
+        const updatedTxns = [txn, ...c.transactions];
+        const newVerifiedTotal =
+          txn.status === 'VERIFIED' ? c.verifiedPayments + txn.amount : c.verifiedPayments;
+        const newOutstanding = Math.max(0, c.expectedFees - newVerifiedTotal);
+
+        return {
+          ...c,
+          verifiedPayments: newVerifiedTotal,
+          outstandingBalance: newOutstanding,
+          transactions: updatedTxns,
+          recentActivity: [
+            {
+              id: `act-${Date.now()}`,
+              type: 'PAYMENT',
+              title: txn.status === 'VERIFIED' ? 'Payment Verified' : 'Transfer Submitted',
+              subtitle: `₦${txn.amount.toLocaleString('en-NG')} • Ref: ${txn.reference}`,
+              date: 'Today',
+              badgeText: txn.status === 'VERIFIED' ? 'Verified' : 'Pending',
+              badgeColor: txn.status === 'VERIFIED' ? 'success' : 'warning',
+            },
+            ...c.recentActivity,
+          ],
+          reports: c.reports.map((r) =>
+            r.term === c.term
+              ? {
+                  ...r,
+                  outstandingBalance: newOutstanding,
+                  isRestricted: newOutstanding > 0,
+                }
+              : r
+          ),
+        };
+      })
+    );
+  };
+
+  // Server-enforced logout
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setLogoutError(null);
 
     try {
-      const res = await fetch('/api/logout', {
-        method: 'POST',
-      });
-
+      const res = await fetch('/api/logout', { method: 'POST' });
       if (!res.ok) {
         throw new Error(`Server returned HTTP ${res.status}: Failed to invalidate session on database.`);
       }
-
-      // Successful server-side revocation: navigate to login
       router.push('/auth?mode=login');
     } catch (err: any) {
       console.error('[Logout Network Failure]:', err);
-      // EDGE CASE DEFECT PREVENTION:
-      // Do NOT pretend the user is logged out if the server failed to delete the session!
       setIsLoggingOut(false);
       setLogoutError(
-        'Network error during logout: Server could not be reached to invalidate your session. You remain securely authenticated on this terminal. Retry when network is restored.'
+        'Network error during logout: Server could not be reached to invalidate your session. You remain securely authenticated on this terminal.'
       );
     }
   };
 
-  // NDPA Soft-Delete Initiation (Step 6)
+  // NDPA Soft-Delete Initiation (7-Day Lock)
   const handleInitiateDeletion = async () => {
     const confirmDelete = window.confirm(
       'NDPA Compliance Notice:\n\nUnder NDPA 2023 regulations, requesting account deletion locks your account immediately and initiates a 7-day grace period. During this period, your data remains intact for recovery. After 7 days, a scheduled purge transaction permanently anonymizes your personal records while retaining immutable payment ledgers for legal tax compliance.\n\nProceed with 7-day deletion lock?'
@@ -64,14 +331,13 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
     setDeletionStatus(null);
 
     try {
-      const res = await fetch('/api/account/delete', {
-        method: 'POST',
-      });
-
+      const res = await fetch('/api/account/delete', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setDeletionStatus(
-          `Account locked under NDPA 7-day grace period. Scheduled purge at: ${new Date(data.scheduledPurgeAt).toLocaleDateString()}. All active sessions revoked.`
+          `Account locked under NDPA 7-day grace period. Scheduled purge at: ${new Date(
+            data.scheduledPurgeAt
+          ).toLocaleDateString()}. All active sessions revoked.`
         );
         setTimeout(() => {
           router.push('/auth?mode=login');
@@ -92,118 +358,47 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
         minHeight: '100vh',
         backgroundColor: 'var(--color-surface)',
         color: 'var(--color-on-surface)',
-        padding: 'var(--spacing-medium)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        fontFamily: 'var(--type-font-family, sans-serif)',
+        fontFamily: 'var(--type-font-family)',
       }}
     >
-      <div
+      {/* Primary Responsive Navigation */}
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+        selectedChild={selectedChild}
+        totalChildrenCount={childrenList.length}
+        onOpenChildModal={() => setIsChildModalOpen(true)}
+        userFullName={user.fullName}
+        onLogout={handleLogout}
+        isLoggingOut={isLoggingOut}
+      />
+
+      {/* Main Content Area */}
+      <main
         style={{
+          flex: 1,
           width: '100%',
           maxWidth: '56rem',
+          margin: '0 auto',
+          padding: 'var(--spacing-medium)',
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--spacing-medium)',
+          paddingBottom: '5.5rem', // Space for fixed mobile bottom navigation
         }}
       >
-        {/* Top Navigation */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: 'var(--spacing-small)',
-            borderBottom: '1px solid var(--color-outline-variant)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div
-              style={{
-                width: '2.5rem',
-                height: '2.5rem',
-                borderRadius: 'var(--radius-small)',
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '1.25rem',
-              }}
-            >
-              SF
-            </div>
-            <div>
-              <h1
-                style={{
-                  fontSize: 'var(--type-title-large-size)',
-                  fontWeight: 'var(--type-title-large-weight)',
-                  color: 'var(--color-primary)',
-                  margin: 0,
-                }}
-              >
-                SchoolFix Portal
-              </h1>
-              <p
-                style={{
-                  fontSize: 'var(--type-body-small-size)',
-                  color: 'var(--color-on-surface-variant)',
-                  margin: 0,
-                }}
-              >
-                Mobile-First Attendance & Tuition Reconciliation
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Link
-              href="/portal/session-inspector"
-              style={{
-                padding: '0.5rem 0.875rem',
-                fontSize: 'var(--type-label-small-size)',
-                backgroundColor: 'var(--color-surface-container-high)',
-                color: 'var(--color-primary)',
-                borderRadius: 'var(--radius-small)',
-                textDecoration: 'none',
-                border: '1px solid var(--color-outline)',
-                fontWeight: 'bold',
-              }}
-            >
-              🔍 Cookie Inspector
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: 'var(--type-label-small-size)',
-                fontWeight: 'var(--type-label-large-weight)',
-                backgroundColor: 'var(--color-error)',
-                color: 'var(--color-on-error)',
-                borderRadius: 'var(--radius-small)',
-                border: 'none',
-                cursor: isLoggingOut ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {isLoggingOut ? 'Invalidating...' : 'Log Out'}
-            </button>
-          </div>
-        </header>
-
         {/* Logout Failure Edge-Case Alert */}
         {logoutError && (
           <div
+            className="type-body-small"
             style={{
               padding: 'var(--spacing-small)',
               backgroundColor: 'var(--color-error-container)',
               color: 'var(--color-on-error-container)',
               borderRadius: 'var(--radius-small)',
               border: '1px solid var(--color-error)',
-              fontSize: 'var(--type-body-small-size)',
             }}
           >
             <strong>⚠️ Logout Synchronization Error:</strong> {logoutError}
@@ -226,26 +421,26 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
-              <strong style={{ fontSize: 'var(--type-title-small-size)' }}>
+              <span style={{ fontSize: 'var(--type-title-large-size)' }}>⚠️</span>
+              <strong className="type-title-small">
                 Account Unverified (Soft Gating Mode Active)
               </strong>
             </div>
-            <p style={{ margin: 0, fontSize: 'var(--type-body-small-size)', lineHeight: 1.5 }}>
-              Welcome to SchoolFix! You are currently authenticated under our <strong>Soft Gating</strong> onboarding policy.
-              You have immediate access to view fee schedules and school calendar dates. However, electronic tuition payments,
-              terminal Continuous Assessment (CA) report cards, and attendance registers remain <strong>gated and locked</strong> until your email address is verified.
+            <p className="type-body-small" style={{ margin: 0 }}>
+              Welcome to SchoolFix! You are authenticated under our <strong>Soft Gating</strong> onboarding policy.
+              Electronic payments, terminal Continuous Assessment (CA) report cards, and attendance registers remain{' '}
+              <strong>gated and locked</strong> until your email address is verified.
             </p>
             <div style={{ marginTop: '0.25rem' }}>
               <Link
                 href={`/auth?mode=verify&email=${encodeURIComponent(user.email)}`}
+                className="type-label-medium"
                 style={{
                   display: 'inline-block',
                   padding: '0.5rem 1rem',
                   backgroundColor: 'var(--color-primary)',
                   color: 'var(--color-on-primary)',
                   borderRadius: 'var(--radius-small)',
-                  fontSize: 'var(--type-label-medium-size)',
                   fontWeight: 'bold',
                   textDecoration: 'none',
                 }}
@@ -256,235 +451,66 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
           </div>
         )}
 
-        {/* Verified Account Confirmation */}
-        {user.isVerified && (
-          <div
-            style={{
-              padding: 'var(--spacing-small) var(--spacing-medium)',
-              backgroundColor: 'var(--color-success-container)',
-              color: 'var(--color-on-success-container)',
-              borderRadius: 'var(--radius-small)',
-              fontSize: 'var(--type-body-small-size)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <span>✅</span>
-            <span>
-              <strong>Verified School Account:</strong> All parental clearance, terminal report cards, and fee reconciliation features are fully accessible.
-            </span>
-          </div>
-        )}
-
         {/* Deletion Status Notice */}
         {deletionStatus && (
           <div
+            className="type-body-small"
             style={{
               padding: 'var(--spacing-small)',
               backgroundColor: 'var(--color-primary-container)',
               color: 'var(--color-on-primary-container)',
               borderRadius: 'var(--radius-small)',
-              fontSize: 'var(--type-body-small-size)',
             }}
           >
             {deletionStatus}
           </div>
         )}
 
-        {/* User Identity & Active Session Card */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-surface-container-lowest)',
-            borderRadius: 'var(--radius-medium)',
-            border: '1px solid var(--color-outline-variant)',
-            padding: 'var(--spacing-medium)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-small)',
-            boxShadow: 'var(--shadow-soft)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 'var(--type-title-medium-size)',
-              color: 'var(--color-primary)',
-              margin: 0,
-            }}
-          >
-            Authenticated Account Profile
-          </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '1rem',
-              fontSize: 'var(--type-body-small-size)',
-            }}
-          >
-            <div>
-              <strong>Full Name:</strong> {user.fullName}
-            </div>
-            <div>
-              <strong>Registered Email:</strong> {user.email}
-            </div>
-            <div>
-              <strong>Portal Role:</strong>{' '}
-              <span
-                style={{
-                  backgroundColor: 'var(--color-surface-container-high)',
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: 'var(--radius-small)',
-                  fontWeight: 'bold',
-                }}
-              >
-                {user.role}
-              </span>
-            </div>
-            <div>
-              <strong>Verification Status:</strong> {user.isVerified ? 'Verified' : 'Pending Verification'}
-            </div>
-            <div>
-              <strong>Active Session ID:</strong>{' '}
-              <span style={{ fontFamily: 'monospace' }}>{sessionId}</span>
-            </div>
-            <div>
-              <strong>Session Expiry:</strong> {new Date(expiresAt).toLocaleDateString()}
-            </div>
-          </div>
-        </section>
+        {/* Dynamic Screen View Based on Active Tab */}
+        {activeTab === 'home' && (
+          <HomeView
+            child={selectedChild}
+            totalChildrenCount={childrenList.length}
+            onOpenChildModal={() => setIsChildModalOpen(true)}
+            onNavigateTab={(tab) => setActiveTab(tab)}
+            parentName={user.fullName}
+          />
+        )}
 
-        {/* Student Dependent Profile & Tuition Fee Schedule */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-surface-container-lowest)',
-            borderRadius: 'var(--radius-medium)',
-            border: '1px solid var(--color-outline-variant)',
-            padding: 'var(--spacing-medium)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-small)',
-            boxShadow: 'var(--shadow-soft)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 'var(--type-title-medium-size)',
-              color: 'var(--color-primary)',
-              margin: 0,
-            }}
-          >
-            Dependent Student Records (2026/2027 Academic Year)
-          </h2>
-          <div
-            style={{
-              border: '1px solid var(--color-outline-variant)',
-              borderRadius: 'var(--radius-small)',
-              padding: 'var(--spacing-small)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: 'var(--color-surface-container-low)',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 'bold' }}>Chinedu Alabi</div>
-              <div style={{ fontSize: 'var(--type-body-small-size)', color: 'var(--color-on-surface-variant)' }}>
-                Class: JSS 2 Diamond • Admission No: SF-2024-089
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>₦185,000 / Term</div>
-              <div
-                style={{
-                  fontSize: 'var(--type-label-small-size)',
-                  color: user.isVerified ? 'var(--color-success)' : 'var(--color-error)',
-                }}
-              >
-                {user.isVerified ? 'Tuition Reconciled: ₦0.00 Balance' : '🔒 Clearance Gated (Unverified)'}
-              </div>
-            </div>
-          </div>
-        </section>
+        {activeTab === 'child' && <MyChildView child={selectedChild} />}
 
-        {/* Administrative Protected Route Access Test (Step 10) */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-surface-container-low)',
-            borderRadius: 'var(--radius-medium)',
-            border: '1px solid var(--color-outline-variant)',
-            padding: 'var(--spacing-medium)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div>
-            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--type-title-small-size)' }}>
-              Administrative Portal (RBAC Enforcement)
-            </h3>
-            <p style={{ margin: 0, fontSize: 'var(--type-body-small-size)', color: 'var(--color-on-surface-variant)' }}>
-              Reserved strictly for School Administrators and Bursars. Tests copied-link route protection.
-            </p>
-          </div>
-          <Link
-            href="/portal/admin"
-            style={{
-              padding: '0.625rem 1.25rem',
-              backgroundColor: 'var(--color-primary-container)',
-              color: 'var(--color-on-primary-container)',
-              borderRadius: 'var(--radius-small)',
-              textDecoration: 'none',
-              fontWeight: 'bold',
-              fontSize: 'var(--type-label-medium-size)',
-            }}
-          >
-            Attempt Access to /portal/admin →
-          </Link>
-        </section>
+        {activeTab === 'payments' && (
+          <PaymentsView child={selectedChild} onAddTransaction={handleAddTransaction} />
+        )}
 
-        {/* NDPA Account Deletion Controls (Step 6) */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-surface-container-lowest)',
-            borderRadius: 'var(--radius-medium)',
-            border: '1px solid var(--color-outline-variant)',
-            padding: 'var(--spacing-medium)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div>
-            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: 'var(--type-title-small-size)', color: 'var(--color-error)' }}>
-              NDPA 2023 Account Erasure Rights
-            </h3>
-            <p style={{ margin: 0, fontSize: 'var(--type-body-small-size)', color: 'var(--color-on-surface-variant)' }}>
-              Requesting erasure locks your account for a 7-day grace period, followed by automated background anonymization.
-            </p>
-          </div>
-          <button
-            onClick={handleInitiateDeletion}
-            disabled={isDeleting}
-            style={{
-              padding: '0.625rem 1.25rem',
-              backgroundColor: 'transparent',
-              color: 'var(--color-error)',
-              border: '1px solid var(--color-error)',
-              borderRadius: 'var(--radius-small)',
-              cursor: isDeleting ? 'not-allowed' : 'pointer',
-              fontWeight: 'bold',
-              fontSize: 'var(--type-label-medium-size)',
-            }}
-          >
-            {isDeleting ? 'Scheduling Lock...' : 'Request Account Deletion (7-Day Lock)'}
-          </button>
-        </section>
-      </div>
+        {activeTab === 'reports' && (
+          <ReportsView child={selectedChild} onNavigateTab={(tab) => setActiveTab(tab)} />
+        )}
+
+        {activeTab === 'account' && (
+          <AccountView
+            user={user}
+            sessionId={sessionId}
+            expiresAt={expiresAt}
+            childrenList={childrenList}
+            onOpenChildModal={() => setIsChildModalOpen(true)}
+            onLogout={handleLogout}
+            isLoggingOut={isLoggingOut}
+            onInitiateDeletion={handleInitiateDeletion}
+            isDeleting={isDeleting}
+          />
+        )}
+      </main>
+
+      {/* Multi-Child Selector & Linking Modal */}
+      <ChildSelectorModal
+        isOpen={isChildModalOpen}
+        onClose={() => setIsChildModalOpen(false)}
+        childrenList={childrenList}
+        selectedChildId={selectedChildId}
+        onSelectChild={(id) => setSelectedChildId(id)}
+        onLinkChild={handleLinkChild}
+      />
     </div>
   );
 }

@@ -9,10 +9,11 @@ description: Enforces strict adherence to SchoolFix semantic design tokens, audi
 Enforces zero aesthetic drift and maintains `design-tokens/tokens.css` as the single source of truth for the SchoolFix application.
 
 ## Core Rules
-1. **Never use raw color values:** Writing `#4B0082`, `#111827`, `rgb(...)`, or any un-aliased color code in components or CSS is strictly forbidden.
-2. **Never consume primitive variables directly:** UI components must consume semantic CSS variables (`--color-surface`, `--color-primary`, `--color-on-primary`, `--color-error`), NEVER internal primitive scales (`--_primitive-*`).
-3. **Typography Formula:** All typography styles must map to the 15 Bricolage Grotesque tokens with $1.4\times$ line-height multipliers.
-4. **Touch Targets & Spacing:** Touch targets must be at least `var(--size-touch-target)` or `2.75rem`. Button padding must be defined in `rem` units with an explicit `border-radius: 8px`.
+1. **Universal Page & Session Coverage:** All designs, public landing pages, authenticated portals, and session screens (including session inspector, auth routes, administrative views, error boundaries, and modals) MUST strictly carry and consume the compiled semantic design tokens. No screen or developer session is exempt from token inheritance.
+2. **Never use raw color values:** Writing `#4B0082`, `#111827`, `rgb(...)`, or any un-aliased color code in components or CSS is strictly forbidden.
+3. **Never consume primitive variables directly:** UI components must consume semantic CSS variables (`--color-surface`, `--color-primary`, `--color-on-primary`, `--color-error`), NEVER internal primitive scales (`--_primitive-*`).
+4. **Typography Formula:** All typography styles must map to the 15 Bricolage Grotesque tokens with $1.4\times$ line-height multipliers.
+5. **Touch Targets & Spacing:** Touch targets must be at least `var(--size-touch-target)` or `2.75rem`. Button padding must be defined in `rem` units with an explicit `border-radius: 8px`.
 
 ## Operational Workflows
 

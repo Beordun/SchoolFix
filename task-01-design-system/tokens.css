@@ -162,6 +162,8 @@
   /* ==========================================================================
      TYPOGRAPHY TOKENS (15 Styles, Bricolage Grotesque, 1.4x Line-Height)
      ========================================================================== */
+  /* Default Brand Typography Family */
+  --type-font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* display large */
   --type-display-large-font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --type-display-large-size: 4rem; /* 64px */

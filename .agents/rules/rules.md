@@ -126,10 +126,11 @@ The agent is **strictly prohibited** from scaffolding, proposing, or generating 
 The design system at [`design-tokens/tokens.css`](file:///c:/Users/DT001/Desktop/SchoolFix/design-tokens/tokens.css) is the **single source of truth**.
 
 ### Mandatory Token Conventions
-1. **Semantic Color Roles Only:** Components must consume `--color-*` variables (`--color-surface`, `--color-primary`, `--color-on-primary`, `--color-error`, `--color-outline`). Never access primitive scales (`--_primitive-*`) in component styles.
-2. **Typography System:** Use the 15 Bricolage Grotesque typography tokens (`--type-headline-large-size`, `--type-body-medium-line-height`, etc.) with their $1.4\times$ mathematical line-height multipliers.
-3. **Elevation Shadows:** Use the brand-tinted shadow tokens (`--shadow-soft`, `--shadow-medium`, `--shadow-hard`), tinted with Primary Indigo (`#4B0082`), never muddy black.
-4. **Interactive Controls:** All interactive elements must have visible `:hover` transitions, `:focus-visible` outlines, and explicit `cursor: pointer`.
+1. **Universal Page & Session Coverage:** **ALL designs, public landing pages, authenticated portals, and session views** (including `/auth`, `/portal/dashboard`, `/portal/admin`, `/portal/session-inspector`, modal dialogs, and diagnostic/error screens) **MUST carry and consume the compiled design tokens**. No screen or developer session is exempt from token inheritance.
+2. **Semantic Color Roles Only:** Components must consume `--color-*` variables (`--color-surface`, `--color-primary`, `--color-on-primary`, `--color-error`, `--color-outline`). Never access primitive scales (`--_primitive-*`) in component styles, and never use raw `#hex` or `rgb()` color values.
+3. **Typography System:** Use the 15 Bricolage Grotesque typography tokens (`--type-headline-large-size`, `--type-body-medium-line-height`, etc.) with their $1.4\times$ mathematical line-height multipliers.
+4. **Elevation Shadows:** Use the brand-tinted shadow tokens (`--shadow-soft`, `--shadow-medium`, `--shadow-hard`), tinted with Primary Indigo (`#4B0082`), never muddy black.
+5. **Interactive Controls & Touch Targets:** All interactive elements must have visible `:hover` transitions, `:focus-visible` outlines, explicit `cursor: pointer`, and minimum touch targets of at least `var(--size-touch-target)` or `2.75rem` (44px) for mobile accessibility.
 
 ---
 
