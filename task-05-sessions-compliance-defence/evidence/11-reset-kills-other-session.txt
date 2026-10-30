@@ -1,0 +1,43 @@
+=== EVIDENCE 11: PASSWORD RESET GLOBAL SESSION REVOCATION AUDIT ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Argon2id)
+Execution Timestamp: 2026-10-30T10:36:51.126Z
+Target Environment: Windows NT Local Machine
+Test Subject: Dr. Kelechi Okafor (Reset Test) (reset.audit.parent@schoolfix.internal, ID: 084a5e17-3609-4a22-b20e-4d67f12a794c)
+
+--- 1. TWO CONCURRENT SESSIONS ESTABLISHED ---
+Session 1 (Device: Desktop Chrome):
+  Status: HTTP 200 OK
+  Raw Cookie Token: 8af836e7d3e9c85835f330c04ebece26a99b591f6c59e8df6ef36e75bb70d678
+  SHA-256 Digest in DB: 7be5c4df5634c57674cbe2ce239633be7408ca0905b71f3019e43f2f5531a3f7
+  Database Session ID: cfba8a3d-05b5-4386-8070-097c44b29760
+
+Session 2 (Device: Mobile Android):
+  Status: HTTP 200 OK
+  Raw Cookie Token: e7a83f0ec68a54c14901faea4d9c0d2d05e0c61274f73abb1351e4ddfb0722b7
+  SHA-256 Digest in DB: 9eba1a4cd7b2b46f24812f204b12a58f89adee54eba80c10a4db86813504317f
+  Database Session ID: d72bd727-560d-408a-9eef-230dfcdd34b5
+
+Verification of Active State:
+  Device 2 (Mobile) access test before reset: HTTP 200 OK (Authenticated)
+
+--- 2. PASSWORD RESET EXECUTION ---
+Trigger Endpoint: POST /api/reset
+Payload: { email: "reset.audit.parent@schoolfix.internal", newPassword: "[REDACTED_NEW_PASSWORD]" }
+Server Status: HTTP 200 OK
+Server Action:
+  1. Hashes new password with Argon2id (m=65536, t=3, p=4)
+  2. Updates User.passwordHash in PostgreSQL
+  3. Executes: DELETE FROM "Session" WHERE "userId" = '084a5e17-3609-4a22-b20e-4d67f12a794c'
+  4. Returns: "Password reset successful. All active sessions across all devices have been terminated."
+  5. Clears Device 1 Cookie: Max-Age=0
+
+--- 3. POST-RESET DATABASE & DEVICE 2 AUDIT ---
+Active Sessions in Database for User: 0
+Database Purge Verification: CONFIRMED (All concurrent sessions wiped)
+Device 2 Stale Cookie Replay Test:
+  HTTP Status: 200
+  Access Result: Denied (No active session in PostgreSQL)
+
+--- 4. INTERVIEW DEFENSE RATIONALE ---
+Why is a password reset treated differently from an ordinary profile change?
+When a user requests a password reset, the threat model assumes their credentials have been compromised or a device has been stolen. Persisting existing sessions would allow an unauthorized intruder to maintain active access even after the legitimate owner changes the password. Therefore, a password reset must atomically wipe all session records across all devices, requiring re-authentication from scratch.

@@ -1,0 +1,33 @@
+=== EVIDENCE 09: LOGOUT NETWORK FAILURE EDGE CASE (DEFECT DEMONSTRATION) ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16)
+Execution Timestamp: 2026-10-30T10:22:38.680Z
+Target Environment: Windows NT Local Machine
+Test Subject: Segun Adebayo (Logout Audit) (logout.audit.parent@schoolfix.internal)
+
+--- 1. THE DEFECTIVE PATTERN (NAIVE FRONTEND LOGOUT) ---
+In poorly constructed Single Page Applications:
+1. User clicks "Log Out".
+2. Frontend immediately executes:
+     localStorage.clear();
+     document.cookie = "session=; Max-Age=0";
+     router.push('/login');
+3. Simultaneously fires:
+     fetch('/api/logout', { method: 'POST' }); // Discarded or unawaited
+
+--- 2. THE PRODUCTION FAILURE MODE ---
+On metered, variable Nigerian mobile networks (3G/4G packet drops, phone entering elevator, data bundle exhaust):
+- The browser drops the connection before the TCP handshake completes with the backend.
+- The user sees the login screen and assumes they are logged out.
+- However, the server NEVER received the revocation request!
+- Stored Database Session Record:
+    Session ID: 4c5523ad-3d90-4fe7-b702-98512c9d588e
+    User ID: db90f6c1-8580-460c-8d4f-1a5913149afb
+    SHA-256 Digest: 1edfd4038962a56983ec49c22fa27b4ba93947992a4391c32ae0961dd8ed8abd
+    Status in PostgreSQL: STILL ACTIVE AND VALID!
+    Expires At: 2026-11-06T10:22:38.663Z
+
+--- 3. THE SECURITY DISASTER ---
+If the parent logged out on a shared cybercafé computer in Ikeja or a school staffroom desktop:
+- The subsequent user on that terminal (or an adversary who cloned the cookie from the browser process memory prior to drop) retains a fully valid bearer token.
+- Because the session row is still active in PostgreSQL, every direct API request with that cookie succeeds!
+- The parent believes their financial records are safe, while their session remains live for 7 days.

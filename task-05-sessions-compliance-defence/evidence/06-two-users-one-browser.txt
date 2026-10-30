@@ -1,0 +1,53 @@
+=== EVIDENCE 06: MULTI-USER SHARED BROWSER SESSION ISOLATION AUDIT ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma ORM)
+Execution Timestamp: 2026-10-30T10:21:58.900Z
+Target Environment: Windows NT Local Machine
+Scenario: Shared School Staffroom Terminal / Cybercafé Browser Session Overwrite
+
+--- 1. PARTICIPATING IDENTITIES ---
+Identity 1 (Teacher):
+  Name: Ibrahim Danladi (Maths Teacher)
+  Email: teacher.ibrahim@schoolfix.internal
+  Role: TEACHER
+  User ID: 40bcb4ac-d338-43c3-8469-0acbb4120dfd
+
+Identity 2 (Parent):
+  Name: Ngozi Okonjo (Parent)
+  Email: parent.ngozi@schoolfix.internal
+  Role: PARENT
+  User ID: 0883cc28-15b4-4f6a-b15e-b4c179edc9d3
+
+--- 2. EXECUTION SEQUENCE & OBSERVED BEHAVIOUR ---
+Step 1: User A logs in on shared terminal.
+  HTTP Status: 200 OK
+  Session Token A (Raw Cookie): 84c7649759172ff3a11af626609ec4a42c26d597328a874ff45b326d4d4f6400
+  Session Token A (SHA-256 in DB): 90606b723144cbf811324d78fce769866651c5cb35ee49a936f10ead7fc94d5e
+  Database Session ID: a7fef6db-06dd-4ac4-a119-2cb7f0901e81
+
+Step 2: Browser navigates to /portal/session-inspector using Token A.
+  HTTP Status: 200 OK
+  Resolved User: Ibrahim Danladi (Maths Teacher) (TEACHER)
+  Correct Identity Rendered: true
+
+Step 3: User B logs in on the SAME browser without explicit logout.
+  HTTP Status: 200 OK
+  Session Token B (Raw Cookie): e0f26c27d9a8c8d333da12b5ecbc1ace50a0610985d1c1a77a90b5f95f9175e7
+  Session Token B (SHA-256 in DB): 4d4fecf9d107862166a9cb0d6a2e6b7413b8d960ed872759bd37dcde1b382d83
+  Database Session ID: 83283a24-1837-4913-bd39-c82d1c2953f3
+  Browser Cookie Overwrite: Token A replaced by Token B in client jar.
+
+Step 4: Browser navigates to /portal/session-inspector using current Cookie.
+  HTTP Status: 200 OK
+  Resolved User: Ngozi Okonjo (Parent) (PARENT)
+  User A Stale State Leaked: NO (Isolated)
+
+--- 3. ARCHITECTURAL ISOLATION GUARANTEE ---
+1. Token Independence:
+   Token A !== Token B: CONFIRMED
+   Token A: 84c7649759172ff3a11af626609ec4a42c26d597328a874ff45b326d4d4f6400
+   Token B: e0f26c27d9a8c8d333da12b5ecbc1ace50a0610985d1c1a77a90b5f95f9175e7
+
+2. Server-Side Session Integrity:
+   Both sessions exist concurrently in the PostgreSQL 'Session' table.
+   User A's session remains active on their other devices.
+   The browser immediately adopts User B's identity upon cookie update, with zero cross-user cache bleeding.
