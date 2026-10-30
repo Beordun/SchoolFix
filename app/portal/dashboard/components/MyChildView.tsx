@@ -59,7 +59,7 @@ export default function MyChildView({ child }: MyChildViewProps) {
                 style={{
                   backgroundColor: 'var(--color-success-container)',
                   color: 'var(--color-on-success-container)',
-                  padding: '0.2rem 0.5rem',
+                  padding: '0.25rem 0.5rem',
                   borderRadius: 'var(--radius-full)',
                   fontWeight: 'bold',
                 }}
@@ -281,7 +281,7 @@ export default function MyChildView({ child }: MyChildViewProps) {
                               : sub.grade === 'B'
                               ? 'var(--color-on-primary-container)'
                               : 'var(--color-on-surface)',
-                          padding: '0.2rem 0.5rem',
+                          padding: '0.25rem 0.5rem',
                           borderRadius: 'var(--radius-small)',
                           fontWeight: 'bold',
                         }}

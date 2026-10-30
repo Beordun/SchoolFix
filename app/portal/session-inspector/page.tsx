@@ -111,8 +111,8 @@ export default async function SessionInspectorPage() {
               <span
                 style={{
                   display: 'inline-block',
-                  width: '0.625rem',
-                  height: '0.625rem',
+                  width: '0.75rem',
+                  height: '0.75rem',
                   borderRadius: '50%',
                   backgroundColor: rawToken ? 'var(--color-success)' : 'var(--color-error)',
                 }}
@@ -188,7 +188,7 @@ export default async function SessionInspectorPage() {
                       style={{
                         backgroundColor: 'var(--color-success-container)',
                         color: 'var(--color-on-success-container)',
-                        padding: '0.2rem 0.5rem',
+                        padding: '0.25rem 0.5rem',
                         borderRadius: 'var(--radius-small)',
                         fontWeight: 'bold',
                       }}
@@ -201,7 +201,7 @@ export default async function SessionInspectorPage() {
                       style={{
                         backgroundColor: 'var(--color-surface-container-high)',
                         color: 'var(--color-on-surface)',
-                        padding: '0.2rem 0.5rem',
+                        padding: '0.25rem 0.5rem',
                         borderRadius: 'var(--radius-small)',
                       }}
                     >
@@ -213,7 +213,7 @@ export default async function SessionInspectorPage() {
                       style={{
                         backgroundColor: 'var(--color-primary-container)',
                         color: 'var(--color-on-primary-container)',
-                        padding: '0.2rem 0.5rem',
+                        padding: '0.25rem 0.5rem',
                         borderRadius: 'var(--radius-small)',
                         fontWeight: 'bold',
                       }}

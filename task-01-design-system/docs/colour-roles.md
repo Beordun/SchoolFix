@@ -61,3 +61,45 @@ All contrast ratios were verified using the WCAG relative luminance formula $((L
 | `on-warning` | `warning` | `#FFFFFF` | `#8E4B00` | **6.65:1** | **PASS (AA)** | Arrears badge labels and overdue notices. |
 | `on-success` | `success` | `#FFFFFF` | `#006D2E` | **6.51:1** | **PASS (AA)** | Clearance badge text and payment stamps. |
 | `outline` | `surface` | `#79757F` | `#F8F7FA` | **4.22:1** | **DOCUMENTED** | **Non-text UI components only.** Meets WCAG 2.1 AA 1.4.11 (min 3.0:1 for graphical boundaries/borders). **Strictly prohibited for body copy or text.** |
+## 7. Extended Container Roles (Portal Dashboard)
+Added after a defect audit: the parent dashboard referenced 13 colour roles that `scripts/build-tokens.js` never emitted, so every card fill, badge tint and divider silently resolved to nothing.
+
+| Role | Primitive Source | Hex Code | Purpose / Job on UI |
+| :--- | :--- | :--- | :--- |
+| `outline-variant` | `neutral-variant 80` | `#C9C4D0` | Decorative card dividers and accordion separators. |
+| `surface-container-lowest` | `neutral 100` | `#FFFFFF` | Highest-lift cards (fee overview, modal sheets). |
+| `surface-container-low` | `neutral 95` | `#F5F0F4` | Expanded accordion panels, nested list rows. |
+| `surface-container-high` | `neutral 90` | `#E6E1E5` | Avatars, neutral pills, term status chip. |
+| `secondary` | `secondary 40` | `#752FB6` | Secondary emphasis text and icons. |
+| `secondary-container` | `secondary 90` | `#EEDBFF` | Secondary chips (e.g. grade track badges). |
+| `on-secondary-container` | `secondary 10` | `#270044` | Text on `secondary-container`. |
+| `error-container` | `error 90` | `#FFDAD6` | Restricted report card banner fill. |
+| `on-error-container` | `error 10` | `#410002` | Text on `error-container`. |
+| `success-container` | `success 95` | `#C7FED0` | Verified payment / present badge fill. |
+| `on-success-container` | `success 10` | `#00210A` | Text on `success-container`. |
+| `warning-container` | `warning 90` | `#FFDCC2` | Late / partial payment badge fill. |
+| `on-warning-container` | `warning 10` | `#2E1500` | Text on `warning-container`. |
+
+| Role Foreground | Role Background | Hex FG | Hex BG | Measured Ratio | WCAG AA Status | Intended Use / Restriction |
+| :--- | :--- | :--- | :--- | :---: | :---: | :--- |
+| `on-secondary-container` | `secondary-container` | `#270044` | `#EEDBFF` | **13.86:1** | **PASS (AAA)** | Grade track chips. |
+| `on-error-container` | `error-container` | `#410002` | `#FFDAD6` | **13.26:1** | **PASS (AAA)** | Report restriction banner copy. |
+| `on-success-container` | `success-container` | `#00210A` | `#C7FED0` | **15.15:1** | **PASS (AAA)** | Verified / present badges. |
+| `on-warning-container` | `warning-container` | `#2E1500` | `#FFDCC2` | **13.30:1** | **PASS (AAA)** | Late / partial badges. |
+| `secondary` | `surface` | `#752FB6` | `#F8F7FA` | **6.93:1** | **PASS (AA)** | Secondary emphasis text. |
+| `on-surface-variant` | `surface-container-high` | `#49454E` | `#E6E1E5` | **7.25:1** | **PASS (AAA)** | Metadata inside neutral chips. |
+| `outline-variant` | `surface` | `#C9C4D0` | `#F8F7FA` | **1.60:1** | **DECORATIVE ONLY** | Fails WCAG 1.4.11 (3:1). Permitted only for dividers between content that is already separated by spacing. **Never the sole boundary of an input or control** — use `outline`. |
+
+## 8. Dimension System (4-Point Grid, Hybrid rem/em)
+Every layout dimension is an integer multiple of 4px, expressed in `rem` (n × 0.25rem at the 16px root) so it scales when a parent enlarges Android system font size.
+
+| Token | Value | px @16 | Grid |
+| :--- | :--- | :---: | :---: |
+| `--spacing-1` … `--spacing-12` | 0.25rem … 3rem | 4 … 48 | n × 4 |
+| `--spacing-small / medium / large` | `var(--spacing-2 / 4 / 6)` | 8 / 16 / 24 | 2 / 4 / 6 × 4 |
+| `--radius-small / medium / large` | 0.5 / 0.75 / 1rem | 8 / 12 / 16 | 2 / 3 / 4 × 4 |
+| `--radius-full` | 9999px | — | keyword (pill) |
+| `--size-touch-target` | 2.75rem | 44 | 11 × 4 |
+| `--inset-1 … --inset-4` | 0.25em … 1em | 4 … 16 at 16px text | text-relative |
+
+**Hybrid trade-off (accepted):** `--inset-*` tokens are `em`, so button and pill padding tracks the element's own font size. They land exactly on the 4px grid only when the element's text is 16px; on a 12px label `--inset-2` resolves to 6px. Layout spacing (`--spacing-*`) is `rem` and always on-grid.

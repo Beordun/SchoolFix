@@ -108,7 +108,7 @@ export default async function AdminPortalPage() {
             <Link
               href="/portal/dashboard"
               style={{
-                padding: '0.625rem 1.25rem',
+                padding: '0.75rem 1.25rem',
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-on-primary)',
                 borderRadius: 'var(--radius-small)',

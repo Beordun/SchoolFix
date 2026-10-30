@@ -94,7 +94,7 @@ export default function AccountView({
                 color: user.isVerified
                   ? 'var(--color-on-success-container)'
                   : 'var(--color-on-warning-container)',
-                padding: '0.2rem 0.5rem',
+                padding: '0.25rem 0.5rem',
                 borderRadius: 'var(--radius-full)',
                 fontWeight: 'bold',
               }}
@@ -133,7 +133,7 @@ export default function AccountView({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>👨‍👧‍👦</span>�‍👦</span>
+              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>👨‍👧‍👦</span>
               <div>
                 <strong className="type-title-small" style={{ display: 'block' }}>
                   Linked Children
@@ -216,7 +216,7 @@ export default function AccountView({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>🏫</span>
+              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>🏫</span>
               <div>
                 <strong className="type-title-small" style={{ display: 'block' }}>
                   School Information
@@ -236,7 +236,7 @@ export default function AccountView({
                 backgroundColor: 'var(--color-surface-container-low)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.375rem',
+                gap: '0.5rem',
               }}
             >
               <div>Institution: <strong>SchoolFix Demonstration Academy</strong></div>
@@ -265,7 +265,7 @@ export default function AccountView({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>📖</span>
+              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>📖</span>
               <div>
                 <strong className="type-title-small" style={{ display: 'block' }}>
                   School Policies & Grading
@@ -316,7 +316,7 @@ export default function AccountView({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>🔒</span>
+              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>🔒</span>
               <div>
                 <strong className="type-title-small" style={{ display: 'block' }}>
                   Security & Session Tokens
@@ -346,7 +346,7 @@ export default function AccountView({
                   href="/portal/session-inspector"
                   className="type-label-medium"
                   style={{
-                    padding: '0.5rem 0.875rem',
+                    padding: '0.5rem 1rem',
                     backgroundColor: 'var(--color-primary-container)',
                     color: 'var(--color-on-primary-container)',
                     borderRadius: 'var(--radius-small)',
@@ -379,7 +379,7 @@ export default function AccountView({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>⚖️</span>
+              <span style={{ fontSize: 'var(--type-title-medium-size)' }}>⚖️</span>
               <div>
                 <strong className="type-title-small" style={{ display: 'block', color: 'var(--color-error)' }}>
                   NDPA 2023 Account Erasure Rights

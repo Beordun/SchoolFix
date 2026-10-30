@@ -353,28 +353,21 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--color-surface)',
-        color: 'var(--color-on-surface)',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: 'var(--type-font-family)',
+    <Navigation
+      activeTab={activeTab}
+      onTabChange={(tab) => {
+        setActiveTab(tab);
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       }}
+      selectedChild={selectedChild}
+      totalChildrenCount={childrenList.length}
+      onOpenChildModal={() => setIsChildModalOpen(true)}
+      userFullName={user.fullName}
+      onLogout={handleLogout}
+      isLoggingOut={isLoggingOut}
     >
-      {/* Primary Responsive Navigation */}
-      <Navigation
-        activeTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab)}
-        selectedChild={selectedChild}
-        totalChildrenCount={childrenList.length}
-        onOpenChildModal={() => setIsChildModalOpen(true)}
-        userFullName={user.fullName}
-        onLogout={handleLogout}
-        isLoggingOut={isLoggingOut}
-      />
-
       {/* Main Content Area */}
       <main
         style={{
@@ -382,11 +375,12 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
           width: '100%',
           maxWidth: '56rem',
           margin: '0 auto',
-          padding: 'var(--spacing-medium)',
+          padding: 'var(--spacing-medium) var(--spacing-5)',
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--spacing-medium)',
           paddingBottom: '5.5rem', // Space for fixed mobile bottom navigation
+          boxSizing: 'border-box',
         }}
       >
         {/* Logout Failure Edge-Case Alert */}
@@ -511,6 +505,6 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
         onSelectChild={(id) => setSelectedChildId(id)}
         onLinkChild={handleLinkChild}
       />
-    </div>
+    </Navigation>
   );
 }

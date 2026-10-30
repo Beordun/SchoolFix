@@ -119,7 +119,7 @@ export default function ChildSelectorModal({
               borderRadius: 'var(--radius-full)',
               color: 'var(--color-on-surface)',
               cursor: 'pointer',
-              fontSize: '1.25rem',
+              fontSize: 'var(--type-title-medium-size)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -224,7 +224,7 @@ export default function ChildSelectorModal({
                           style={{
                             backgroundColor: 'var(--color-primary)',
                             color: 'var(--color-on-primary)',
-                            padding: '0.25rem 0.625rem',
+                            padding: '0.25rem 0.75rem',
                             borderRadius: 'var(--radius-full)',
                             fontWeight: 'bold',
                           }}
@@ -232,7 +232,7 @@ export default function ChildSelectorModal({
                           Active
                         </span>
                       ) : (
-                        <span style={{ color: 'var(--color-on-surface-variant)', fontSize: '1.25rem' }}>
+                        <span style={{ color: 'var(--color-on-surface-variant)', fontSize: 'var(--type-title-medium-size)' }}>
                           →
                         </span>
                       )}

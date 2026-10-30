@@ -55,7 +55,15 @@ export default function ReportsView({ child, onNavigateTab }: ReportsViewProps) 
               gap: 'var(--spacing-small)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+              }}
+            >
               <div>
                 <strong className="type-title-small">{report.term}</strong>
                 <div className="type-label-small" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -71,9 +79,14 @@ export default function ReportsView({ child, onNavigateTab }: ReportsViewProps) 
                   color: report.isRestricted
                     ? 'var(--color-on-error-container)'
                     : 'var(--color-on-success-container)',
-                  padding: '0.2rem 0.6rem',
+                  padding: '0.25rem 0.75rem',
                   borderRadius: 'var(--radius-full)',
                   fontWeight: 'bold',
+                  textAlign: 'center',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  lineHeight: '1.25',
                 }}
               >
                 {report.isRestricted ? 'Restricted (Unsettled Balance)' : 'Cleared & Available'}

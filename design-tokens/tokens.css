@@ -148,6 +148,19 @@
   --color-on-warning: var(--_primitive-warning-100);
   --color-success: var(--_primitive-success-40);
   --color-on-success: var(--_primitive-success-100);
+  --color-outline-variant: var(--_primitive-neutral-variant-80);
+  --color-surface-container-lowest: var(--_primitive-neutral-100);
+  --color-surface-container-low: var(--_primitive-neutral-95);
+  --color-surface-container-high: var(--_primitive-neutral-90);
+  --color-secondary: var(--_primitive-secondary-40);
+  --color-secondary-container: var(--_primitive-secondary-90);
+  --color-on-secondary-container: var(--_primitive-secondary-10);
+  --color-error-container: var(--_primitive-error-90);
+  --color-on-error-container: var(--_primitive-error-10);
+  --color-success-container: var(--_primitive-success-95);
+  --color-on-success-container: var(--_primitive-success-10);
+  --color-warning-container: var(--_primitive-warning-90);
+  --color-on-warning-container: var(--_primitive-warning-10);
 
   /* ==========================================================================
      ELEVATION & SHADOW SYSTEM (Tinted with Primary Brand)
@@ -158,6 +171,36 @@
   --shadow-medium-shadow: var(--shadow-medium);
   --shadow-hard: 6px 10px 10px 0px rgba(75, 0, 130, 0.20);
   --shadow-hard-shadow: var(--shadow-hard);
+
+  /* ==========================================================================
+     DIMENSION SYSTEM (4-Point Grid: rem layout + em text-relative insets)
+     ========================================================================== */
+  /* Spacing scale: --spacing-{n} = n x 4px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-10: 2.5rem; /* 40px */
+  --spacing-12: 3rem; /* 48px */
+  /* Semantic spacing aliases */
+  --spacing-small: var(--spacing-2);
+  --spacing-medium: var(--spacing-4);
+  --spacing-large: var(--spacing-6);
+  /* Corner radius */
+  --radius-small: 0.5rem; /* 8px */
+  --radius-medium: 0.75rem; /* 12px */
+  --radius-large: 1rem; /* 16px */
+  --radius-full: 9999px; /* pill / circle keyword, not a measurement */
+  /* Interaction sizing */
+  --size-touch-target: 2.75rem; /* 44px */
+  /* Text-relative insets (em): button / pill / chip padding and icon gaps */
+  --inset-1: 0.25em; /* 4px at 16px text */
+  --inset-2: 0.5em; /* 8px at 16px text */
+  --inset-3: 0.75em; /* 12px at 16px text */
+  --inset-4: 1em; /* 16px at 16px text */
 
   /* ==========================================================================
      TYPOGRAPHY TOKENS (15 Styles, Bricolage Grotesque, 1.4x Line-Height)

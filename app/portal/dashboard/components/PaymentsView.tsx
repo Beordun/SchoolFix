@@ -456,7 +456,7 @@ export default function PaymentsView({ child, onAddTransaction }: PaymentsViewPr
                       txn.status === 'VERIFIED'
                         ? 'var(--color-on-success-container)'
                         : 'var(--color-on-surface)',
-                    padding: '0.2rem 0.5rem',
+                    padding: '0.25rem 0.5rem',
                     borderRadius: 'var(--radius-full)',
                     fontWeight: 'bold',
                   }}

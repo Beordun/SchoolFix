@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { ChildProfile } from '../types';
 
 export type NavTab = 'home' | 'child' | 'payments' | 'reports' | 'account';
@@ -16,6 +15,7 @@ interface NavigationProps {
   userFullName: string;
   onLogout: () => void;
   isLoggingOut: boolean;
+  children: React.ReactNode;
 }
 
 export default function Navigation({
@@ -27,6 +27,7 @@ export default function Navigation({
   userFullName,
   onLogout,
   isLoggingOut,
+  children,
 }: NavigationProps) {
   const navItems: Array<{ id: NavTab; label: string; icon: string }> = [
     { id: 'home', label: 'Home', icon: '🏠' },
@@ -37,54 +38,65 @@ export default function Navigation({
   ];
 
   return (
-    <>
-      {/* Top Application Header (Desktop and Mobile) */}
-      <header
+    <div
+      className="schoolfix-app-shell"
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100%',
+        backgroundColor: 'var(--color-surface)',
+        color: 'var(--color-on-surface)',
+        fontFamily: 'var(--type-font-family)',
+      }}
+    >
+      {/* =========================================================================
+          1. Left Navigation Sidebar (Desktop Viewports >= 768px)
+          ========================================================================= */}
+      <aside
+        aria-label="Sidebar navigation"
+        className="schoolfix-desktop-sidebar"
         style={{
-          width: '100%',
-          backgroundColor: 'var(--color-surface)',
-          borderBottom: '1px solid var(--color-outline-variant)',
+          width: '16rem',
+          flexShrink: 0,
+          height: '100vh',
           position: 'sticky',
           top: 0,
-          zIndex: 100,
+          backgroundColor: 'var(--color-surface)',
+          borderRight: '1px solid var(--color-outline-variant)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          zIndex: 110,
           boxShadow: 'var(--shadow-soft)',
+          padding: 'var(--spacing-medium)',
+          boxSizing: 'border-box',
         }}
       >
-        <div
-          style={{
-            maxWidth: '68rem',
-            margin: '0 auto',
-            padding: 'var(--spacing-small) var(--spacing-medium)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '1rem',
-          }}
-        >
-          {/* Brand Identity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div
-              className="type-title-medium"
-              style={{
-                width: '2.5rem',
-                height: '2.5rem',
-                borderRadius: 'var(--radius-small)',
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-              }}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-large)' }}>
+          {/* Brand Identity with Homepage Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.25rem 0' }}>
+            <svg
+              viewBox="0 0 32 32"
+              width="40"
+              height="40"
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
             >
-              SF
-            </div>
+              <rect width="32" height="32" rx="8" fill="var(--color-primary)" />
+              <path d="M16 6 L6 11 L16 16 L26 11 Z" fill="var(--color-surface)" />
+              <path
+                d="M10 13.5 V19 C10 22 16 25 16 25 C16 25 22 22 22 19 V13.5 L16 16.5 Z"
+                fill="var(--color-primary-container)"
+                opacity="0.9"
+              />
+            </svg>
             <div>
               <div
                 className="type-title-medium"
                 style={{
                   color: 'var(--color-primary)',
                   fontWeight: 'bold',
+                  lineHeight: 1.2,
                 }}
               >
                 SchoolFix
@@ -100,15 +112,14 @@ export default function Navigation({
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
+          {/* Vertical Navigation Links */}
           <nav
             aria-label="Desktop primary"
             style={{
-              display: 'none',
-              gap: '0.25rem',
-              alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-1)',
             }}
-            className="schoolfix-desktop-nav"
           >
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
@@ -118,9 +129,10 @@ export default function Navigation({
                   onClick={() => onTabChange(item.id)}
                   className="type-label-large"
                   style={{
-                    padding: '0.5rem 1rem',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
                     minHeight: 'var(--size-touch-target)',
-                    borderRadius: 'var(--radius-small)',
+                    borderRadius: 'var(--radius-medium)',
                     border: 'none',
                     backgroundColor: isActive
                       ? 'var(--color-primary-container)'
@@ -132,20 +144,87 @@ export default function Navigation({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.15s ease',
+                    gap: '0.75rem',
+                    textAlign: 'left',
+                    transition: 'background-color 0.15s ease, color 0.15s ease',
                   }}
                 >
-                  <span>{item.icon}</span>
+                  <span style={{ fontSize: 'var(--type-title-medium-size)' }}>{item.icon}</span>
                   <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
+        </div>
 
-          {/* Child Switcher Pill & Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {/* Child Selector Button */}
+        {/* Sidebar Footer Metadata */}
+        <div
+          style={{
+            padding: 'var(--spacing-small)',
+            backgroundColor: 'var(--color-surface-container-low)',
+            borderRadius: 'var(--radius-small)',
+            border: '1px solid var(--color-outline-variant)',
+          }}
+        >
+          <div
+            className="type-label-small"
+            style={{
+              color: 'var(--color-on-surface-variant)',
+              fontWeight: 'bold',
+            }}
+          >
+            2026/2027 Academic Session
+          </div>
+          <div
+            className="type-label-small"
+            style={{
+              color: 'var(--color-primary)',
+              marginTop: '0.25rem',
+            }}
+          >
+            First Term Active
+          </div>
+        </div>
+      </aside>
+
+      {/* =========================================================================
+          2. Content Column: Top Application Header + Injected View Children
+          ========================================================================= */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+        }}
+      >
+        {/* Top Header Bar: Strictly containing ONLY Student Name, Search, and Log Out */}
+        <header
+          className="schoolfix-top-header"
+          style={{
+            width: '100%',
+            backgroundColor: 'var(--color-surface)',
+            borderBottom: '1px solid var(--color-outline-variant)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+            boxShadow: 'var(--shadow-soft)',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '56rem',
+              margin: '0 auto',
+              padding: 'var(--spacing-small) var(--spacing-5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.75rem',
+              boxSizing: 'border-box',
+            }}
+          >
+            {/* 1. Left: Student Name / Child Selector Button */}
             <button
               onClick={onOpenChildModal}
               title="Click to switch active student"
@@ -156,10 +235,10 @@ export default function Navigation({
                 alignItems: 'center',
                 gap: '0.5rem',
                 minHeight: 'var(--size-touch-target)',
-                padding: '0.375rem 0.875rem',
+                padding: '0.5rem 1rem',
                 backgroundColor: 'var(--color-surface-container-high)',
                 border: '1px solid var(--color-primary)',
-                borderRadius: 'var(--radius-full)',
+                borderRadius: 'var(--radius-small)',
                 color: 'var(--color-on-surface)',
                 cursor: 'pointer',
                 boxShadow: 'var(--shadow-soft)',
@@ -182,53 +261,36 @@ export default function Navigation({
               </div>
             </button>
 
-            {/* Quick Session Tools */}
-            <Link
-              href="/portal/session-inspector"
-              title="View session token & cookie diagnostic flags"
-              aria-label="Inspect session cookies"
-              style={{
-                minWidth: 'var(--size-touch-target)',
-                minHeight: 'var(--size-touch-target)',
-                backgroundColor: 'var(--color-surface-container-low)',
-                border: '1px solid var(--color-outline-variant)',
-                borderRadius: 'var(--radius-small)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                fontSize: 'var(--type-title-small-size)',
-              }}
-            >
-              🔍
-            </Link>
-
-            {/* Logout Button */}
+            {/* 2. Right: Log Out Button */}
             <button
               onClick={onLogout}
               disabled={isLoggingOut}
               aria-label="Log Out"
               title="End session"
-              className="type-label-small schoolfix-desktop-logout"
+              className="type-label-small"
               style={{
                 minHeight: 'var(--size-touch-target)',
-                padding: '0.375rem 0.75rem',
-                backgroundColor: 'var(--color-error)',
-                color: 'var(--color-on-error)',
-                border: 'none',
+                padding: '0.5rem 1rem',
+                backgroundColor: 'transparent',
+                color: 'var(--color-error)',
+                border: '1px solid var(--color-error)',
                 borderRadius: 'var(--radius-small)',
                 cursor: isLoggingOut ? 'not-allowed' : 'pointer',
                 fontWeight: 'bold',
-                display: 'none',
               }}
             >
               {isLoggingOut ? '...' : 'Log Out'}
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Bottom Navigation Bar for Mobile Viewports (< 768px) */}
+        {/* Children (e.g. main dashboard view) */}
+        {children}
+      </div>
+
+      {/* =========================================================================
+          3. Bottom Navigation Bar for Mobile Viewports (< 768px)
+          ========================================================================= */}
       <nav
         aria-label="Mobile primary"
         style={{
@@ -258,9 +320,9 @@ export default function Navigation({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.125rem',
+                gap: '0.25rem',
                 minHeight: 'var(--size-touch-target)',
-                padding: '0.375rem 0.25rem',
+                padding: '0.5rem 0.25rem',
                 backgroundColor: isActive
                   ? 'var(--color-primary-container)'
                   : 'transparent',
@@ -281,20 +343,19 @@ export default function Navigation({
         })}
       </nav>
 
-      {/* CSS Rules for Desktop vs Mobile Media Queries */}
+      {/* Responsive Visibility Rules */}
       <style jsx global>{`
+        @media (max-width: 767px) {
+          .schoolfix-desktop-sidebar {
+            display: none !important;
+          }
+        }
         @media (min-width: 768px) {
-          .schoolfix-desktop-nav {
-            display: flex !important;
-          }
-          .schoolfix-desktop-logout {
-            display: block !important;
-          }
           .schoolfix-mobile-nav {
             display: none !important;
           }
         }
       `}</style>
-    </>
+    </div>
   );
 }

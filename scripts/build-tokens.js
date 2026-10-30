@@ -70,8 +70,59 @@ const semanticRoleDefinitions = [
   { role: 'warning', group: 'warning', tone: 'warning 40' },
   { role: 'on-warning', group: 'warning', tone: 'warning 100' },
   { role: 'success', group: 'success', tone: 'success 40' },
-  { role: 'on-success', group: 'success', tone: 'success 100' }
+  { role: 'on-success', group: 'success', tone: 'success 100' },
+
+  // Container & surface-tier roles (consumed by portal dashboard cards, badges, alerts)
+  { role: 'outline-variant', group: 'neutral variant', tone: 'neutral variant 80' },
+  { role: 'surface-container-lowest', group: 'neutral', tone: 'neutral 100' },
+  { role: 'surface-container-low', group: 'neutral', tone: 'neutral 95' },
+  { role: 'surface-container-high', group: 'neutral', tone: 'neutral 90' },
+  { role: 'secondary', group: 'secondary', tone: 'secondary 40' },
+  { role: 'secondary-container', group: 'secondary', tone: 'secondary 90' },
+  { role: 'on-secondary-container', group: 'secondary', tone: 'secondary 10' },
+  { role: 'error-container', group: 'error', tone: 'error 90' },
+  { role: 'on-error-container', group: 'error', tone: 'error 10' },
+  { role: 'success-container', group: 'success', tone: 'success 95' },
+  { role: 'on-success-container', group: 'success', tone: 'success 10' },
+  { role: 'warning-container', group: 'warning', tone: 'warning 90' },
+  { role: 'on-warning-container', group: 'warning', tone: 'warning 10' }
 ];
+
+// 3b. Dimension System — 4-Point Grid (hybrid rem/em)
+// Every rem value is an integer multiple of 4px at the 16px root (n x 0.25rem), so
+// layout honours the grid AND scales when a parent enlarges Android system font size.
+// --inset-* tokens use em so padding inside buttons/pills tracks the element's own text
+// size. Trade-off (accepted): em insets land exactly on the 4px grid only at 16px text.
+const GRID_PX = 4;
+const ROOT_PX = 16;
+const remFromSteps = (steps) => `${(steps * GRID_PX) / ROOT_PX}rem`;
+
+const spacingSteps = [1, 2, 3, 4, 5, 6, 8, 10, 12];
+const spacingAliases = { small: 2, medium: 4, large: 6 };
+const radiusSteps = { small: 2, medium: 3, large: 4 };
+const touchTargetSteps = 11; // 44px WCAG 2.5.5 / AGENTS.md section 5 minimum
+const insetEm = { 1: 0.25, 2: 0.5, 3: 0.75, 4: 1 };
+
+const dimensionVars = [];
+dimensionVars.push(`  /* Spacing scale: --spacing-{n} = n x ${GRID_PX}px */`);
+spacingSteps.forEach((n) => {
+  dimensionVars.push(`  --spacing-${n}: ${remFromSteps(n)}; /* ${n * GRID_PX}px */`);
+});
+dimensionVars.push(`  /* Semantic spacing aliases */`);
+Object.entries(spacingAliases).forEach(([name, n]) => {
+  dimensionVars.push(`  --spacing-${name}: var(--spacing-${n});`);
+});
+dimensionVars.push(`  /* Corner radius */`);
+Object.entries(radiusSteps).forEach(([name, n]) => {
+  dimensionVars.push(`  --radius-${name}: ${remFromSteps(n)}; /* ${n * GRID_PX}px */`);
+});
+dimensionVars.push(`  --radius-full: 9999px; /* pill / circle keyword, not a measurement */`);
+dimensionVars.push(`  /* Interaction sizing */`);
+dimensionVars.push(`  --size-touch-target: ${remFromSteps(touchTargetSteps)}; /* ${touchTargetSteps * GRID_PX}px */`);
+dimensionVars.push(`  /* Text-relative insets (em): button / pill / chip padding and icon gaps */`);
+Object.entries(insetEm).forEach(([n, em]) => {
+  dimensionVars.push(`  --inset-${n}: ${em}em; /* ${em * ROOT_PX}px at 16px text */`);
+});
 
 // 4. Build Output Sections
 const primitiveVars = [];
@@ -191,6 +242,11 @@ ${semanticColorVars.join('\n')}
      ELEVATION & SHADOW SYSTEM (Tinted with Primary Brand)
      ========================================================================== */
 ${shadowVars.join('\n')}
+
+  /* ==========================================================================
+     DIMENSION SYSTEM (4-Point Grid: rem layout + em text-relative insets)
+     ========================================================================== */
+${dimensionVars.join('\n')}
 
   /* ==========================================================================
      TYPOGRAPHY TOKENS (15 Styles, Bricolage Grotesque, 1.4x Line-Height)

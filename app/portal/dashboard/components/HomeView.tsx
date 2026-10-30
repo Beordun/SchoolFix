@@ -102,7 +102,7 @@ export default function HomeView({
             onClick={onOpenChildModal}
             className="type-label-small"
             style={{
-              padding: '0.25rem 0.625rem',
+              padding: '0.25rem 0.75rem',
               backgroundColor: 'var(--color-primary-container)',
               color: 'var(--color-on-primary-container)',
               borderRadius: 'var(--radius-full)',
@@ -161,7 +161,7 @@ export default function HomeView({
               backgroundColor: 'transparent',
               border: '1px solid var(--color-outline-variant)',
               borderRadius: 'var(--radius-small)',
-              padding: '0.375rem 0.625rem',
+              padding: '0.5rem 0.75rem',
               fontWeight: 'bold',
               color: 'var(--color-primary)',
               cursor: 'pointer',
@@ -304,7 +304,7 @@ export default function HomeView({
             padding: 'var(--spacing-medium)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.375rem',
+            gap: '0.5rem',
             cursor: 'pointer',
             boxShadow: 'var(--shadow-soft)',
           }}
@@ -332,7 +332,7 @@ export default function HomeView({
               backgroundColor: 'var(--color-success-container)',
               color: 'var(--color-on-success-container)',
               borderRadius: 'var(--radius-full)',
-              padding: '0.125rem 0.5rem',
+              padding: '0.25rem 0.5rem',
               fontWeight: 'bold',
               alignSelf: 'flex-start',
             }}
@@ -351,7 +351,7 @@ export default function HomeView({
             padding: 'var(--spacing-medium)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.375rem',
+            gap: '0.5rem',
             cursor: 'pointer',
             boxShadow: 'var(--shadow-soft)',
           }}
@@ -378,7 +378,7 @@ export default function HomeView({
               backgroundColor: 'var(--color-primary-container)',
               color: 'var(--color-on-primary-container)',
               borderRadius: 'var(--radius-full)',
-              padding: '0.125rem 0.5rem',
+              padding: '0.25rem 0.5rem',
               fontWeight: 'bold',
               alignSelf: 'flex-start',
             }}
@@ -423,7 +423,7 @@ export default function HomeView({
                     : 'none',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ fontSize: 'var(--type-title-medium-size)' }}>
                   {activity.type === 'PAYMENT' ? '✅' : '📝'}
                 </span>
@@ -453,7 +453,7 @@ export default function HomeView({
                       activity.badgeColor === 'success'
                         ? 'var(--color-on-success-container)'
                         : 'var(--color-on-surface)',
-                    padding: '0.2rem 0.5rem',
+                    padding: '0.25rem 0.5rem',
                     borderRadius: 'var(--radius-full)',
                     fontWeight: 'bold',
                   }}
