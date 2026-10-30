@@ -8,6 +8,7 @@ import styles from './page.module.css';
 type AuthMode = 'login' | 'register' | 'reset' | 'verify';
 
 export default function AuthCard() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   
   // Read initial mode from URL query parameter (?mode=login|register|reset|verify)
