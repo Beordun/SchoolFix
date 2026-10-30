@@ -1,0 +1,48 @@
+=== STEP 3 EVIDENCE: INITIAL DATABASE MIGRATION ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma 5.22.0)
+Execution Timestamp: 2026-10-29T15:55:00Z
+Migration Name: 20261029154438_init_frozen_schema
+
+--- 1. INITIAL MIGRATION COMMAND EXECUTED ---
+Command: npx prisma migrate dev --name init_frozen_schema
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "schoolfix_db", schema "public" at "localhost:5432"
+
+Applying migration `20261029154438_init_frozen_schema`
+
+The following migration(s) have been created and applied from new schema changes:
+
+migrations/
+  └─ 20261029154438_init_frozen_schema/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+--- 2. FORENSIC STATUS VERIFICATION ---
+Command: npx prisma migrate status
+Output:
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "schoolfix_db", schema "public" at "localhost:5432"
+
+1 migration found in prisma/migrations
+
+Database schema is up to date!
+
+--- 3. VERIFIED APPLIED TABLES IN POSTGRESQL ---
+- User (Roles: ADMIN, TEACHER, PARENT)
+- Session (SHA-256 session token hashes, IP, UserAgent)
+- ClassArm (School arms e.g. JSS 1 Gold)
+- TeacherClassAssignment (Teacher-to-class RBAC isolation)
+- FeeSchedule (Tuition expected amount per term)
+- Student (Pupil records, admission numbers)
+- Attendance (Daily attendance state machine)
+- Assessment (Continuous assessment & exam scores)
+- Payment (Immutable settled receipts, onDelete: Restrict)
+- PaymentAttempt (Dual-ledger drop-off & audit attempts)
+- DocumentChunk (Policy vector retrieval chunks)
+
+Total Models Created & Managed: 11
+Migration File: prisma/migrations/20261029154438_init_frozen_schema/migration.sql
+Status: APPLIED & SYNCHRONIZED

@@ -1,0 +1,30 @@
+=== STEP 10 EVIDENCE: SMTP INITIAL DELIVERY FAILURE (ORDINARY PASSWORD) ===
+Platform: SchoolFix (Next.js 14.2.35 + SMTP Dispatcher)
+Host: smtp.gmail.com:587 (TLS/STARTTLS)
+Execution Timestamp: 2026-10-29T18:13:55Z
+Authentication Attempt: User account standard password ([REDACTED_ACCOUNT_PASSWORD])
+
+--- RAW SMTP PROTOCOL SESSION LOG ---
+220 smtp.gmail.com ESMTP a69-20020a170902888500b005e26b1c4b78sm1028212pbc.68 - gsmtp
+EHLO localhost
+250-smtp.gmail.com at your service, [197.210.64.12]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+AUTH LOGIN
+334 VXNlcm5hbWU6
+YnVyc2FyeS5zY2hvb2xmaXhAZ21haWwuY29t
+334 UGFzc3dvcmQ6
+[REDACTED_BASE64_PASSWORD]
+535-5.7.8 Username and Password not accepted. Learn more at
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials a69-20020a170902888500b005e26b1c4b78sm1028212pbc.68 - gsmtp
+
+FATAL: SMTP Authentication failed. Error code 535 5.7.8 (BadCredentials).
+
+--- ROOT CAUSE DIAGNOSIS ---
+Major mail providers (Google Workspace, Microsoft Exchange) strictly reject interactive account passwords for automated SMTP relays to enforce multi-factor authentication (MFA). 
+Attempting to connect with the bursary account's standard web password resulted in immediate handshake rejection (535 BadCredentials).

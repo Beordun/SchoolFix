@@ -1,12 +1,10 @@
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [pgvector(map: "vector")]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 enum Role {
@@ -40,6 +38,7 @@ model User {
   email            String    @unique
   passwordHash     String    // Argon2id hash (never SHA)
   fullName         String
+  nin              String    // Step 3: Added via 3-step zero-downtime migration (Expand -> Backfill -> Contract)
   role             Role      @default(PARENT)
   isVerified       Boolean   @default(false)
   verificationCode String?

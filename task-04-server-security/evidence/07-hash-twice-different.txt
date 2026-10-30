@@ -1,0 +1,26 @@
+=== STEP 4 EVIDENCE: SALT UNIQUENESS PROOF (SAME PASSWORD TWICE) ===
+Platform: SchoolFix (Next.js 14.2.35 + Argon2 v0.45.1 + Node.js v20.17.0)
+Timestamp: 2026-10-29T16:14:49Z
+Input Plaintext Password: "StMonicaSchool2026@Secure"
+
+--- ARGON2ID CONFIGURATION (PRD §8.2 & AGENTS.MD) ---
+Type: Argon2id (v=19)
+Memory Cost (m): 65,536 KiB (64 MiB)
+Time Cost (t): 3 iterations
+Parallelism (p): 4 threads
+
+--- HASH OUTPUT COMPARISON ---
+Run 1 Hash Output:
+$argon2id$v=19$m=65536,p=4,t=3$bnFP56JCLQwHYJk/Z13XNQ$Ba4McKFoyAu0tZHH/X2/XEWNYen10o6e4byloEALR8Y
+
+Run 2 Hash Output:
+$argon2id$v=19$m=65536,p=4,t=3$NTaLee4K3qxh3s4TyAEGfQ$R3pZ2pNkhcKU6Zjwit5Bt2eyoLRf08DMnfIQoOshqIc
+
+--- VERIFICATION CHECK ---
+Strict String Equality (hash1 === hash2): false
+Argon2 Verify(hash1, password): true
+Argon2 Verify(hash2, password): true
+
+--- ARCHITECTURAL CONCLUSION ---
+Despite receiving identical plaintext passwords and parameters, each call generated a cryptographically unique 16-byte random salt (`bnFP56JCLQwHYJk/Z13XNQ` vs `NTaLee4K3qxh3s4TyAEGfQ`).
+This prevents precomputed rainbow table lookups and ensures that two users (or the same user across multiple school portals) possessing identical passwords never produce identical hash records in the database.

@@ -1,0 +1,27 @@
+=== STEP 3 EVIDENCE: REQUIRED COLUMN MIGRATION FAILURE ON POPULATED TABLE ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma 5.22.0)
+Execution Timestamp: 2026-10-29T16:03:30Z
+Target Table: "User" (Populated with 1 record: Folashade Adeleke, ID: 51e2ccc9-8849-464b-a8a8-1ab18ab084e0)
+Target Column Added: nin String (Required, No Default Value)
+
+--- 1. EXACT COMMAND EXECUTED ---
+npx prisma migrate dev --name add_required_nin
+
+--- 2. EXACT TERMINAL OUTPUT & FAILURE CAPTURE ---
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "schoolfix_db", schema "public" at "localhost:5432"
+
+Error: 
+⚠️ We found changes that cannot be executed:
+
+  • Step 1 Added the required column `nin` to the `User` table without a default value. There are 1 rows in this table, it is not possible to execute this step.
+
+You can use prisma migrate dev --create-only to create the migration file, and manually modify it to address the underlying issue(s).
+Then run prisma migrate dev to apply it and verify it works.
+
+--- 3. ARCHITECTURAL ANALYSIS OF THE FAILURE ---
+- Root Cause: In relational database management systems (RDBMS) like PostgreSQL, altering an existing table to add a NOT NULL column requires every existing row to immediately possess a valid non-null value for that column.
+- The Trap: If an ORM simply issues `ALTER TABLE "User" ADD COLUMN "nin" TEXT NOT NULL;`, PostgreSQL aborts the transaction with code 23502 (not_null_violation) because existing rows contain NULL.
+- Prisma Guardrail: Prisma catches this invariant violation at the CLI layer before touching the production database, preventing downtime and aborted transactions.
+- The Resolution: You cannot add a required column to a populated table in a single atomic step. It must be executed using the Three-Step Migration Pattern (Expand -> Migrate/Backfill -> Contract).
