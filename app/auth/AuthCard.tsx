@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useId } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import styles from './page.module.css';
+import styles from './AuthCard.module.css';
 
 type AuthMode = 'login' | 'register' | 'reset' | 'verify';
 
