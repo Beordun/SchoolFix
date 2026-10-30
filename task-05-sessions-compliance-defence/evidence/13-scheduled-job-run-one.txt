@@ -1,0 +1,30 @@
+=== EVIDENCE 13: SCHEDULED DELETION JOB EXECUTION (RUN 1) ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma ORM)
+Worker: lib/security/deletion-worker.ts (runNdpaPurgeWorker)
+Execution Mode: Scheduled Cron Worker Execution (Run 1)
+Compliance Framework: Nigeria Data Protection Act (NDPA 2023) §34 Erasure Mandate
+
+--- CONSOLE START & FINISH LOG OUTPUT ---
+[NDPA Purge Job]: START execution at 2026-10-30T10:41:48.733Z
+[NDPA Purge Job]: Candidate accounts discovered for legal purge: 1
+[NDPA Purge Job]: FINISH execution at 2026-10-30T10:41:48.782Z. Duration=49ms. Candidates=1, Anonymized=1, FinancialLedgersPreserved=0
+
+--- DATABASE TRANSACTION AUDIT ---
+Purged Account ID: 2b3a9563-55e0-4dd0-b3f5-a2075d72b441
+Original Email: deletion.audit.parent@schoolfix.internal
+Original Full Name: Chief Emeka Okafor (Deletion Subject)
+
+Post-Purge Anonymized State in PostgreSQL:
+  fullName: "Anonymized Parent (NDPA Purged)"
+  email: "purged_2b3a9563-55e0-4dd0-b3f5-a2075d72b441@schoolfix.internal"
+  nin: "PURGED-2b3a9563"
+  passwordHash: "$purged$v=19$ndpa-erased$"
+  isAnonymized: true
+  deletedAt: 2026-10-30T10:41:48.433Z
+  scheduledPurgeAt: 2026-10-30T10:41:43.727Z
+
+Dependent Students Unlinked:
+  Student: Somtochukwu Okafor (Adm: DEL-STUDENT-001) -> parentId: null (Preserved educational history)
+
+Financial Records Retained:
+  CAMA 2020 §374 Compliance: All historical tuition records retained with immutable primary keys.

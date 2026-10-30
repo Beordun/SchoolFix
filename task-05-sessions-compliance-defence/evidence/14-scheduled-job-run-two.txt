@@ -1,0 +1,21 @@
+=== EVIDENCE 14: SCHEDULED DELETION JOB IDEMPOTENCY AUDIT (RUN 2) ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16 + Prisma ORM)
+Worker: lib/security/deletion-worker.ts (runNdpaPurgeWorker)
+Execution Mode: Scheduled Cron Worker Execution (Run 2 - Idempotency Validation)
+Compliance Framework: Nigeria Data Protection Act (NDPA 2023) §34
+
+--- CONSOLE START & FINISH LOG OUTPUT ---
+[NDPA Purge Job]: START execution at 2026-10-30T10:41:48.786Z
+[NDPA Purge Job]: Candidate accounts discovered for legal purge: 0
+[NDPA Purge Job]: FINISH execution at 2026-10-30T10:41:48.788Z. Duration=2ms. Candidates=0, Anonymized=0, FinancialLedgersPreserved=0
+
+--- IDEMPOTENCY AUDIT COMPARISON ---
+Run 1 Candidates: 1 | Anonymized: 1
+Run 2 Candidates: 0 | Anonymized: 0
+
+--- ARCHITECTURAL & DEFENSE EVALUATION ---
+Why start and finish lines with counts are mandatory:
+A background worker that stopped executing due to an uncaught unhandled promise rejection or memory limit looks identical to a job that had zero candidate rows to process. By logging explicit start and finish timestamps with candidate counts, site reliability monitoring (Sentry / Datadog) can reliably distinguish between an idle worker and a stalled/crashed pipeline.
+
+Idempotency Guarantee:
+Executing the purge transaction twice across the same database state modified zero rows on the second invocation. Once an account is anonymized (isAnonymized = true), it exits the candidate query filter, preventing duplicate ledger modifications or unhandled foreign key violations.

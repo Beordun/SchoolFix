@@ -211,12 +211,23 @@ SchoolFix/
 - [x] Branded transactional email with Task 1 design tokens (`evidence/23-rendered-email.png`, `docs/email-copy.md`)
 - [x] Task 4 `README.md`, 4 skipped controls (`docs/not-implemented.md`), defect log (`docs/defects.md`), and 19 interview answers (`docs/interview-answers.md`)
 
-### Task 5: Sessions, Legal Deletion & Final Defense (Status: Next)
-- Cryptographic 32-byte session tokens (stored as SHA-256 in DB, delivered in `HttpOnly`/`Secure`/`SameSite=Lax` cookies)
-- Email verification soft gating vs hard gating comparison
-- Lawful 3-stage NDPA account deletion process (soft delete $\rightarrow$ 7-day grace period $\rightarrow$ scheduled anonymization purge transaction)
-- Comprehensive Data Retention Matrix (`docs/retention-matrix.md`) & Owner Interview (`docs/interview-with-owner.md`)
-- Technical Handbook (`docs/handbook.md`) & viva defense preparation
+### Task 5: Sessions, Legal Deletion & Final Defense (Status: Completed)
+- [x] Cryptographic 32-byte CSPRNG session tokens stored as SHA-256 digests in PostgreSQL (`evidence/01-two-session-ids.txt`, `evidence/02-cookie-flags.png`, `docs/sessions.md`)
+- [x] Soft Gating (shipped) vs Hard Gating empirical evaluation and screenshots (`evidence/03`, `evidence/04`, `docs/gating.md`)
+- [x] Constant-time login with indistinguishable generic errors defeating enumeration (`evidence/05-generic-errors-both-cases.png`)
+- [x] Next.js edge middleware and shared browser multi-user session isolation test (`evidence/06-two-users-one-browser.txt`)
+- [x] Server-side logout destroying database rows (`evidence/07`, `evidence/08`) and network failure edge-case fix (`evidence/09`, `evidence/10`)
+- [x] Global password reset session invalidation revoking all devices (`evidence/11-reset-kills-other-session.txt`, `evidence/11-reset-kills-other-session.png`)
+- [x] Lawful 3-stage NDPA account deletion: immediate lock (`evidence/12`), 7-day grace period, and scheduled background purge worker proved idempotent in single transaction (`evidence/13`, `evidence/14`)
+- [x] Comprehensive Data Retention Matrix reconciling NDPA § 34 with CAMA § 374 6-year financial mandate (`docs/retention-matrix.md`)
+- [x] Plain-language NDPA privacy policy (`privacy.md`) with excised broken promise forensics (`privacy-draft-with-broken-promise.md`)
+- [x] Frontend state management without external library bloat (`evidence/15`, `docs/state-management.md`)
+- [x] RBAC administrative portal (`/portal/admin`) with copied-link 403 refusal test (`evidence/16-admin-route-refused.png`)
+- [x] Primary research interview with authentic Lagos school bursar (`docs/interview-with-owner.md`)
+- [x] Comprehensive 7-chapter Technical Handbook documenting 7 verifiable mistakes (`docs/handbook.md`)
+- [x] Published technical case study on Argon2id slowdown and background queues (`docs/article.md`, `evidence/17-published-article-screenshot.png`)
+- [x] 8 honest technical admissions in `docs/what-i-do-not-know.md`
+- [x] Task 5 `README.md`, genuine defect log (`docs/defects.md`), and all 22 interview answers (`docs/interview-answers.md`)
 
 ---
 

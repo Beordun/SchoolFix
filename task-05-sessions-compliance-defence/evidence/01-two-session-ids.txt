@@ -1,0 +1,54 @@
+=== EVIDENCE 01: CRYPTOGRAPHIC SESSION IDENTIFIER GENERATION & STORAGE ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL + Prisma ORM)
+Execution Timestamp: 2026-10-30T09:57:30.485Z
+Target Environment: Node.js (Windows NT, Local Machine)
+Test Subject: Amina Alabi (Session Test) (session.test.parent@schoolfix.internal, ID: 7daa7f6d-e8a3-440c-b8ca-f9d4baf8302f)
+
+--- 1. SIGN-IN ATTEMPT 1 ---
+HTTP Status: 200 OK
+Set-Cookie Header:
+  schoolfix_session=be4699fb1bf1416f80a24b69f0cd7de48792012fa5bd1603d8503d46be1fea14; Path=/; Expires=Fri, 06 Nov 2026 09:57:29 GMT; Max-Age=604800; HttpOnly; SameSite=lax
+Extracted Raw Cookie Token (Hex):
+  be4699fb1bf1416f80a24b69f0cd7de48792012fa5bd1603d8503d46be1fea14
+Entropy / Length: 32 bytes CSPRNG (64 hex characters)
+Database SHA-256 Digest:
+  26a44ba91189b163eca24fea0a31672fbf3055fbcdd637523d01e7d4b0a7fef1
+Database Record:
+  ID: b7ee3dc5-8aa7-48d9-9dd6-515dd676c379
+  User ID: 7daa7f6d-e8a3-440c-b8ca-f9d4baf8302f
+  Expires At: 2026-11-06T09:57:29.722Z
+  Recorded IP: 197.210.64.12
+  Recorded User-Agent: SchoolFix-SessionAudit/1.0 (Android-Test-Device)
+
+--- 2. SIGN-IN ATTEMPT 2 ---
+HTTP Status: 200 OK
+Set-Cookie Header:
+  schoolfix_session=ff146057954624008d81a6fd038726866749c959d2e8c42357ceaefd6710dd10; Path=/; Expires=Fri, 06 Nov 2026 09:57:30 GMT; Max-Age=604800; HttpOnly; SameSite=lax
+Extracted Raw Cookie Token (Hex):
+  ff146057954624008d81a6fd038726866749c959d2e8c42357ceaefd6710dd10
+Entropy / Length: 32 bytes CSPRNG (64 hex characters)
+Database SHA-256 Digest:
+  e27abc4099a69575b9742b2996554d77011be36a51c3188184caefe9d7e46bfa
+Database Record:
+  ID: 929d30fa-e294-42eb-b349-b0e54e9d9dd5
+  User ID: 7daa7f6d-e8a3-440c-b8ca-f9d4baf8302f
+  Expires At: 2026-11-06T09:57:30.471Z
+  Recorded IP: 197.210.64.12
+  Recorded User-Agent: SchoolFix-SessionAudit/1.0 (Android-Test-Device)
+
+--- 3. VERIFICATION OF INVIOLABLE REQUIREMENTS ---
+[Requirement 1] Fresh Token on Every Sign-In:
+  Token 1 !== Token 2: CONFIRMED (Zero Token Reuse)
+
+[Requirement 2] Server-Side Session Record Stored:
+  Session records active in PostgreSQL 'Session' table: CONFIRMED (2 active records)
+
+[Requirement 3] Session Cookie Hashed:
+  Raw Token Stored in DB: FALSE (Query for raw token returns null)
+  SHA-256 Digest Stored in DB: TRUE (Confirmed match against database index)
+  Defense: If database is dumped, leaked digests cannot be replayed as valid session cookies.
+
+[Requirement 4] Cookie Security Flags:
+  HttpOnly: SET (Prevents JavaScript XSS document.cookie exfiltration)
+  SameSite=Lax: SET (Prevents Cross-Site Request Forgery on external links)
+  Path=/: SET (Restricts cookie strictly to root application)

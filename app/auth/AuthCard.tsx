@@ -211,7 +211,8 @@ export default function AuthCard() {
                   if (loginEmailError || loginPasswordError) return;
                   setIsSubmitting(true);
                   try {
-                    const res = await fetch('/api/login', {
+                    const search = typeof window !== 'undefined' ? window.location.search : '';
+                    const res = await fetch(`/api/login${search}`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email, password }),
@@ -220,7 +221,15 @@ export default function AuthCard() {
                     if (res.ok && data.success) {
                       setServerFeedback({
                         type: 'success',
-                        message: `Authentication successful! Welcome, ${data.user.fullName}. Password trimmed & email normalized to lowercase.`,
+                        message: `Authentication successful! Welcome, ${data.user.fullName}. Redirecting to portal dashboard...`,
+                      });
+                      setTimeout(() => {
+                        router.push('/portal/dashboard');
+                      }, 800);
+                    } else if (res.status === 403 && data.unverified) {
+                      setServerFeedback({
+                        type: 'error',
+                        message: `🛑 Hard Gating Active: Your account must be verified by email before you can log in. Please enter the 6-digit OTP sent to ${data.email}.`,
                       });
                     } else {
                       setServerFeedback({

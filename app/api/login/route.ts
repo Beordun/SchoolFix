@@ -6,6 +6,7 @@ import argon2 from 'argon2';
 import { prisma } from '@/lib/prisma';
 import { LoginSchema } from '@/lib/security/validation';
 import { checkRateLimit } from '@/lib/security/rate-limiter';
+import { createSession, attachSessionCookie } from '@/lib/security/session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,10 +74,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Verification Check (Soft Warning per Step 3 Specification)
-    const isVerified = user.isVerified;
+    // 5. Check Account Deletion / Lock Status
+    if (user.deletedAt) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'ACCOUNT_SCHEDULED_FOR_DELETION',
+          message: 'This account has been scheduled for deletion under NDPA compliance. Contact the school bursar to reinstate.',
+        },
+        { status: 403 }
+      );
+    }
 
-    return NextResponse.json(
+    // 6. Verification Status Check (Soft Gating vs Hard Gating per Step 2/3 Specification)
+    const isVerified = user.isVerified;
+    const isHardGating = req.nextUrl.searchParams.get('gating') === 'hard' || req.headers.get('x-gating-policy') === 'hard';
+
+    if (!isVerified && isHardGating) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'HARD_GATING_VERIFICATION_REQUIRED',
+          message: 'Hard Gating Active: Your account must be verified by email before you can log in. Access is halted until your 6-digit OTP is confirmed.',
+          unverified: true,
+          email: user.email,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 7. Issue Fresh 32-Byte Cryptographic Session (Stored as SHA-256 in DB)
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    const { rawToken, expiresAt } = await createSession(user.id, clientIp, userAgent);
+
+    const response = NextResponse.json(
       {
         success: true,
         message: 'Authentication successful.',
@@ -91,6 +123,11 @@ export async function POST(req: NextRequest) {
       },
       { status: 200 }
     );
+
+    // 8. Attach Secure Session Cookie (HttpOnly, Secure, SameSite=Lax, Path=/)
+    attachSessionCookie(response, rawToken, expiresAt);
+
+    return response;
   } catch (error: any) {
     console.error('[API Login Error]:', error);
     return NextResponse.json(

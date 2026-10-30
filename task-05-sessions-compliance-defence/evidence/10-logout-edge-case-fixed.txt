@@ -1,0 +1,53 @@
+=== EVIDENCE 10: LOGOUT EDGE-CASE REMEDIATION & PRODUCTION PROTOCOL ===
+Platform: SchoolFix (Next.js 14.2.35 + PostgreSQL 16)
+Execution Timestamp: 2026-10-30T10:22:39.058Z
+Target Environment: Windows NT Local Machine
+Test Subject: Segun Adebayo (Logout Audit) (logout.audit.parent@schoolfix.internal)
+
+--- 1. THE PRODUCTION REMEDIATION PROTOCOL ---
+SchoolFix resolves the logout network failure defect across two complementary layers:
+
+Layer 1: Defensive Client Component Handling (DashboardClient.tsx:30-47):
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    setLogoutError(null);
+    try {
+      const res = await fetch('/api/logout', { method: 'POST' });
+      if (!res.ok) {
+        throw new Error('Server returned HTTP ' + res.status);
+      }
+      // Only transition UI upon verified server confirmation
+      router.push('/auth?mode=login');
+    } catch (err) {
+      // DEFECT REMEDIATION:
+      // Do NOT redirect or claim success if server invalidation failed!
+      setIsLoggingOut(false);
+      setLogoutError(
+        'Network error during logout: Server could not be reached to invalidate your session. You remain securely authenticated on this terminal. Retry when network is restored.'
+      );
+    }
+  };
+
+Layer 2: Atomic Server-Side Ledger Destruction (app/api/logout/route.ts):
+  - Database Session Revocation:
+      DELETE FROM "Session" WHERE "sessionToken" = SHA256(rawToken);
+  - Cookie Clearing Header:
+      Set-Cookie: schoolfix_session=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+
+--- 2. MACHINE VERIFICATION RESULTS ---
+Step 1: Established Active Session
+  Session ID: 4c5523ad-3d90-4fe7-b702-98512c9d588e
+  DB Record Found: true
+
+Step 2: Dispatched Logout Request
+  Endpoint: POST /api/logout
+  HTTP Status: 200 OK
+  Server Confirmation: "Session successfully revoked on server. Cookie cleared."
+
+Step 3: Database Post-Logout Audit
+  Query: prisma.session.findUnique({ where: { sessionToken: "1edfd4038962a56983ec49c22fa27b4ba93947992a4391c32ae0961dd8ed8abd" } })
+  Result: null (Zero rows found in PostgreSQL)
+  Status: PERMANENTLY DESTROYED
+
+--- 3. INTERVIEW DEFENSE SUMMARY ---
+A logout is a state mutation, not a navigation event. It must be treated as a critical database transaction. If the server cannot be reached, the application must refuse to pretend the session is terminated, alerting the user to re-attempt when connectivity recovers.
