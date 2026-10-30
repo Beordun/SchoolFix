@@ -14,11 +14,14 @@ interface UserRecord {
 export default function RegistrationForm() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [statusCode, setStatusCode] = useState<number | null>(null);
   const [createdUser, setCreatedUser] = useState<UserRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,12 +29,19 @@ export default function RegistrationForm() {
     setStatusCode(null);
     setCreatedUser(null);
     setErrorMessage(null);
+    setFieldErrors({});
 
     try {
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, password }),
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          password,
+          acceptedTerms,
+        }),
       });
 
       setStatusCode(res.status);
@@ -43,6 +53,9 @@ export default function RegistrationForm() {
         setPassword('');
       } else {
         setErrorMessage(data.message || data.error || 'Failed to submit registration');
+        if (data.issues) {
+          setFieldErrors(data.issues);
+        }
       }
     } catch (err: any) {
       setStatusCode(500);
@@ -62,7 +75,7 @@ export default function RegistrationForm() {
       <form onSubmit={handleSubmit}>
         <div className={styles.fieldGroup}>
           <label htmlFor="reg-fullname" className={styles.label}>
-            Parent / Guardian Full Name
+            Parent / Guardian Full Name (Surname First) *
           </label>
           <input
             id="reg-fullname"
@@ -74,11 +87,16 @@ export default function RegistrationForm() {
             onChange={(e) => setFullName(e.target.value)}
             disabled={loading}
           />
+          {fieldErrors.fullName && (
+            <span style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              {fieldErrors.fullName.join('. ')}
+            </span>
+          )}
         </div>
 
         <div className={styles.fieldGroup}>
           <label htmlFor="reg-email" className={styles.label}>
-            Email Address
+            Email Address *
           </label>
           <input
             id="reg-email"
@@ -90,11 +108,39 @@ export default function RegistrationForm() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
           />
+          {fieldErrors.email && (
+            <span style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              {fieldErrors.email.join('. ')}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.fieldGroup}>
+          <label htmlFor="reg-phone" className={styles.label}>
+            Nigerian Mobile Number (WhatsApp Alerts) *
+          </label>
+          <input
+            id="reg-phone"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            required
+            className={styles.input}
+            placeholder="e.g. 08031234567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            disabled={loading}
+          />
+          {fieldErrors.phone && (
+            <span style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              {fieldErrors.phone.join('. ')}
+            </span>
+          )}
         </div>
 
         <div className={styles.fieldGroup}>
           <label htmlFor="reg-password" className={styles.label}>
-            Account Password (min. 8 characters)
+            Account Password (min. 8 characters, 1 uppercase, 1 number) *
           </label>
           <input
             id="reg-password"
@@ -107,13 +153,37 @@ export default function RegistrationForm() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
+          {fieldErrors.password && (
+            <span style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              {fieldErrors.password.join('. ')}
+            </span>
+          )}
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem', marginBottom: '1.25rem' }}>
+          <input
+            type="checkbox"
+            id="reg-terms-home"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            disabled={loading}
+            style={{ marginTop: '0.25rem', width: '1.125rem', height: '1.125rem', accentColor: 'var(--color-primary)' }}
+          />
+          <label htmlFor="reg-terms-home" style={{ fontSize: '0.8rem', color: 'var(--color-on-surface-variant)', lineHeight: 1.4 }}>
+            I accept the NDPA 2023 data protection terms, student record processing policies, and fee ledgers.
+          </label>
+        </div>
+        {fieldErrors.acceptedTerms && (
+          <div style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginBottom: '1rem' }}>
+            {fieldErrors.acceptedTerms.join('. ')}
+          </div>
+        )}
 
         <button
           type="submit"
           className={styles.submitBtn}
           id="btn-submit-registration"
-          disabled={loading || !fullName || !email || !password}
+          disabled={loading || !fullName || !email || !phone || !password || !acceptedTerms}
         >
           {loading ? 'Submitting to Database...' : 'Register Parent Account'}
         </button>
