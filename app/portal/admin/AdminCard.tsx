@@ -275,7 +275,7 @@ export default function AdminCard({ user }: AdminCardProps) {
           </Link>
         </div>
 
-        {/* Center: Greenfield Academy & Term selector (Aligned with padding of main content) */}
+        {/* Center: Greenfield Academy & Term selector (Aligned with padding of main content on desktop, collapsed on tablet/mobile) */}
         <div
           className="admin-header-tabs-col"
           style={{
@@ -286,14 +286,14 @@ export default function AdminCard({ user }: AdminCardProps) {
             height: '100%',
           }}
         >
-          {/* School Selector Dropdown - Clean Tab without drop down arrow */}
-          <div style={{ position: 'relative', display: 'inline-block' }}>
+          {/* School Selector Dropdown - Clean Tab with single dropdown arrow */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
             <select
               value={selectedSchool}
               onChange={(e) => setSelectedSchool(e.target.value)}
               aria-label="Select School Branch"
               style={{
-                padding: 'var(--spacing-2) var(--spacing-4)',
+                padding: 'var(--spacing-2) 1.85rem var(--spacing-2) var(--spacing-3)',
                 backgroundColor: 'var(--color-surface-container)',
                 color: 'var(--color-on-surface)',
                 border: '1px solid var(--color-outline-variant)',
@@ -312,16 +312,31 @@ export default function AdminCard({ user }: AdminCardProps) {
               <option value="Gracefield College">Gracefield College</option>
               <option value="Crown Jewel International">Crown Jewel International</option>
             </select>
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                right: '0.65rem',
+                pointerEvents: 'none',
+                fontSize: '0.65rem',
+                color: 'var(--color-on-surface-variant)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                lineHeight: 1,
+              }}
+            >
+              ▼
+            </span>
           </div>
 
-          {/* Academic Session / Term Dropdown - Clean Tab without drop down arrow */}
-          <div style={{ position: 'relative', display: 'inline-block' }}>
+          {/* Academic Session / Term Dropdown - Clean Tab with single dropdown arrow */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
             <select
               value={selectedTerm}
               onChange={(e) => setSelectedTerm(e.target.value)}
               aria-label="Select Academic Term"
               style={{
-                padding: 'var(--spacing-2) var(--spacing-4)',
+                padding: 'var(--spacing-2) 1.85rem var(--spacing-2) var(--spacing-3)',
                 backgroundColor: 'var(--color-surface-container)',
                 color: 'var(--color-on-surface)',
                 border: '1px solid var(--color-outline-variant)',
@@ -340,6 +355,21 @@ export default function AdminCard({ user }: AdminCardProps) {
               <option value="2026/27 · Second Term">2026/27 · Second Term</option>
               <option value="2026/27 · Third Term">2026/27 · Third Term</option>
             </select>
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                right: '0.65rem',
+                pointerEvents: 'none',
+                fontSize: '0.65rem',
+                color: 'var(--color-on-surface-variant)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                lineHeight: 1,
+              }}
+            >
+              ▼
+            </span>
           </div>
         </div>
 
@@ -406,6 +436,7 @@ export default function AdminCard({ user }: AdminCardProps) {
             <form action="/api/logout" method="POST">
               <button
                 type="submit"
+                className="admin-header-logout-btn"
                 style={{
                   padding: 'var(--spacing-2) var(--spacing-3)',
                   backgroundColor: 'transparent',
@@ -513,6 +544,103 @@ export default function AdminCard({ user }: AdminCardProps) {
               </button>
             </div>
 
+            {/* Collapsed Top Nav Bar Elements (Active School & Term) for Tablet/Mobile */}
+            <div
+              style={{
+                padding: 'var(--spacing-3) var(--spacing-4)',
+                borderBottom: '1px solid var(--color-outline-variant)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-2)',
+                backgroundColor: 'var(--color-surface-container-low)',
+              }}
+            >
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-on-surface-variant)', textTransform: 'uppercase' }}>
+                Active School &amp; Term
+              </div>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+                <select
+                  value={selectedSchool}
+                  onChange={(e) => setSelectedSchool(e.target.value)}
+                  aria-label="Select School Branch"
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-2) 1.85rem var(--spacing-2) var(--spacing-3)',
+                    backgroundColor: 'var(--color-surface-container)',
+                    color: 'var(--color-on-surface)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: 'var(--radius-small)',
+                    fontWeight: 600,
+                    fontSize: 'var(--type-label-medium-size)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                  }}
+                >
+                  <option value="Greenfield Academy">Greenfield Academy</option>
+                  <option value="Gracefield College">Gracefield College</option>
+                  <option value="Crown Jewel International">Crown Jewel International</option>
+                </select>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    pointerEvents: 'none',
+                    fontSize: '0.65rem',
+                    color: 'var(--color-on-surface-variant)',
+                    lineHeight: 1,
+                  }}
+                >
+                  ▼
+                </span>
+              </div>
+
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+                <select
+                  value={selectedTerm}
+                  onChange={(e) => setSelectedTerm(e.target.value)}
+                  aria-label="Select Academic Term"
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-2) 1.85rem var(--spacing-2) var(--spacing-3)',
+                    backgroundColor: 'var(--color-surface-container)',
+                    color: 'var(--color-on-surface)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: 'var(--radius-small)',
+                    fontWeight: 600,
+                    fontSize: 'var(--type-label-medium-size)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                  }}
+                >
+                  <option value="2026/27 · First Term">2026/27 · First Term</option>
+                  <option value="2026/27 · Second Term">2026/27 · Second Term</option>
+                  <option value="2026/27 · Third Term">2026/27 · Third Term</option>
+                </select>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    pointerEvents: 'none',
+                    fontSize: '0.65rem',
+                    color: 'var(--color-on-surface-variant)',
+                    lineHeight: 1,
+                  }}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
+
             {/* Drawer Nav List */}
             <nav
               style={{
@@ -557,7 +685,7 @@ export default function AdminCard({ user }: AdminCardProps) {
             </nav>
 
             {/* Drawer Footer */}
-            <div style={{ padding: 'var(--spacing-4)', borderTop: '1px solid var(--color-outline-variant)' }}>
+            <div style={{ padding: 'var(--spacing-4)', borderTop: '1px solid var(--color-outline-variant)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
               <Link
                 href="/portal/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
@@ -567,11 +695,30 @@ export default function AdminCard({ user }: AdminCardProps) {
                   color: 'var(--color-primary)',
                   textDecoration: 'none',
                   fontWeight: 600,
-                  padding: 'var(--spacing-2) 0',
+                  padding: 'var(--spacing-1) 0',
                 }}
               >
                 ← Switch to Parent View
               </Link>
+              <form action="/api/logout" method="POST">
+                <button
+                  type="submit"
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-2) var(--spacing-3)',
+                    backgroundColor: 'transparent',
+                    color: 'var(--color-error)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: 'var(--radius-small)',
+                    fontSize: 'var(--type-label-small-size)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                >
+                  Log Out
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -2329,7 +2476,11 @@ export default function AdminCard({ user }: AdminCardProps) {
             flex-shrink: 0 !important;
           }
           .admin-header-tabs-col {
+            display: flex !important;
             padding-left: var(--spacing-6) !important;
+          }
+          .admin-header-logout-btn {
+            display: block !important;
           }
         }
         @media (max-width: 1023px) {
@@ -2346,7 +2497,10 @@ export default function AdminCard({ user }: AdminCardProps) {
             padding-right: var(--spacing-2) !important;
           }
           .admin-header-tabs-col {
-            padding-left: var(--spacing-2) !important;
+            display: none !important; /* Fully collapsed on tablet and mobile breakpoints */
+          }
+          .admin-header-logout-btn {
+            display: none !important; /* Collapsed into mobile drawer on tablet and mobile */
           }
         }
       `}</style>
