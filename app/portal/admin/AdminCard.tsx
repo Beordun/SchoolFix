@@ -247,22 +247,23 @@ export default function AdminCard({ user }: AdminCardProps) {
               color: 'var(--color-primary)',
             }}
           >
-            <span
-              style={{
-                width: '2rem',
-                height: '2rem',
-                borderRadius: 'var(--radius-small)',
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '0.875rem',
-              }}
+            <svg
+              viewBox="0 0 32 32"
+              width="32"
+              height="32"
+              aria-hidden="true"
+              style={{ flexShrink: 0, borderRadius: 'var(--radius-small)' }}
             >
-              SF
-            </span>
+              <rect width="32" height="32" rx="8" fill="var(--color-primary)" />
+              <path d="M16 6 L6 11 L16 16 L26 11 Z" fill="var(--color-surface, #FAF8FF)" />
+              <path
+                d="M10 13.5 V19 C10 22 16 25 16 25 C16 25 22 22 22 19 V13.5 L16 16.5 Z"
+                fill="var(--color-primary-container, #E6DEFF)"
+                opacity="0.9"
+              />
+              <circle cx="26" cy="14" r="1.5" fill="var(--color-surface, #FAF8FF)" />
+              <path d="M26 14 V19" stroke="var(--color-surface, #FAF8FF)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
             <span
               style={{
                 fontWeight: 800,
@@ -502,22 +503,23 @@ export default function AdminCard({ user }: AdminCardProps) {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-                <span
-                  style={{
-                    width: '2rem',
-                    height: '2rem',
-                    borderRadius: 'var(--radius-small)',
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'var(--color-on-primary)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '0.875rem',
-                  }}
+                <svg
+                  viewBox="0 0 32 32"
+                  width="32"
+                  height="32"
+                  aria-hidden="true"
+                  style={{ flexShrink: 0, borderRadius: 'var(--radius-small)' }}
                 >
-                  SF
-                </span>
+                  <rect width="32" height="32" rx="8" fill="var(--color-primary)" />
+                  <path d="M16 6 L6 11 L16 16 L26 11 Z" fill="var(--color-surface, #FAF8FF)" />
+                  <path
+                    d="M10 13.5 V19 C10 22 16 25 16 25 C16 25 22 22 22 19 V13.5 L16 16.5 Z"
+                    fill="var(--color-primary-container, #E6DEFF)"
+                    opacity="0.9"
+                  />
+                  <circle cx="26" cy="14" r="1.5" fill="var(--color-surface, #FAF8FF)" />
+                  <path d="M26 14 V19" stroke="var(--color-surface, #FAF8FF)" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
                 <span
                   style={{
                     fontWeight: 800,
