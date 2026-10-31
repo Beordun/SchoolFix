@@ -389,7 +389,7 @@ export default function AdminCard({ user }: AdminCardProps) {
 
       {/* 2. BODY LAYOUT: SIDEBAR + MAIN CONTENT */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Navigation Sidebar */}
+        {/* Left Navigation Sidebar (Sticky) */}
         <aside
           style={{
             width: '15rem',
@@ -399,6 +399,11 @@ export default function AdminCard({ user }: AdminCardProps) {
             flexDirection: 'column',
             padding: 'var(--spacing-4) 0',
             flexShrink: 0,
+            position: 'sticky',
+            top: '4rem',
+            height: 'calc(100vh - 4rem)',
+            alignSelf: 'flex-start',
+            overflowY: 'auto',
           }}
         >
           <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-1)', padding: '0 var(--spacing-3)' }}>
@@ -448,12 +453,15 @@ export default function AdminCard({ user }: AdminCardProps) {
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main Content Area (Full Width with Left Padding Maintained) */}
         <main
           style={{
             flex: 1,
             padding: 'var(--spacing-6)',
-            maxWidth: '64rem',
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
             gap: 'var(--spacing-6)',

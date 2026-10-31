@@ -215,7 +215,7 @@ export default function TeachersView() {
   const pendingInvites = teachers.filter((t) => t.status === 'INVITED').length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', width: '100%', boxSizing: 'border-box' }}>
       {/* 1. Header with Title and Add Teacher Action */}
       <div
         style={{
