@@ -200,25 +200,33 @@ export default function AdminCard({ user }: AdminCardProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 var(--spacing-5)',
+          padding: 0,
           position: 'sticky',
           top: 0,
           zIndex: 40,
           boxShadow: 'var(--shadow-soft)',
         }}
       >
-        {/* Left: Mobile hamburger + SchoolFix Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
+        {/* Left Column: Brand Logo + Mobile Hamburger (Matches 15rem sidebar on desktop) */}
+        <div
+          className="admin-header-brand-col"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-3)',
+            height: '100%',
+          }}
+        >
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation drawer"
+            className="admin-hamburger-btn"
             style={{
               background: 'none',
               border: 'none',
               fontSize: '1.25rem',
               color: 'var(--color-on-surface)',
               cursor: 'pointer',
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               width: 'var(--size-touch-target)',
@@ -265,12 +273,25 @@ export default function AdminCard({ user }: AdminCardProps) {
               SchoolFix
             </span>
           </Link>
+        </div>
 
-          {/* School Selector Dropdown (Multi-Tenant Branch Switcher) */}
+        {/* Center: Greenfield Academy & Term selector (Aligned with padding of main content) */}
+        <div
+          className="admin-header-tabs-col"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-3)',
+            flex: 1,
+            height: '100%',
+          }}
+        >
+          {/* School Selector Dropdown - Clean Tab without drop down arrow */}
           <div style={{ position: 'relative', display: 'inline-block' }}>
             <select
               value={selectedSchool}
               onChange={(e) => setSelectedSchool(e.target.value)}
+              aria-label="Select School Branch"
               style={{
                 padding: 'var(--spacing-2) var(--spacing-4)',
                 backgroundColor: 'var(--color-surface-container)',
@@ -282,19 +303,23 @@ export default function AdminCard({ user }: AdminCardProps) {
                 cursor: 'pointer',
                 fontFamily: 'inherit',
                 outline: 'none',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
               }}
             >
-              <option value="Greenfield Academy">Greenfield Academy ▾</option>
-              <option value="Gracefield College">Gracefield College ▾</option>
-              <option value="Crown Jewel International">Crown Jewel International ▾</option>
+              <option value="Greenfield Academy">Greenfield Academy</option>
+              <option value="Gracefield College">Gracefield College</option>
+              <option value="Crown Jewel International">Crown Jewel International</option>
             </select>
           </div>
 
-          {/* Academic Session / Term Dropdown */}
+          {/* Academic Session / Term Dropdown - Clean Tab without drop down arrow */}
           <div style={{ position: 'relative', display: 'inline-block' }}>
             <select
               value={selectedTerm}
               onChange={(e) => setSelectedTerm(e.target.value)}
+              aria-label="Select Academic Term"
               style={{
                 padding: 'var(--spacing-2) var(--spacing-4)',
                 backgroundColor: 'var(--color-surface-container)',
@@ -306,17 +331,29 @@ export default function AdminCard({ user }: AdminCardProps) {
                 cursor: 'pointer',
                 fontFamily: 'inherit',
                 outline: 'none',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
               }}
             >
-              <option value="2026/27 · First Term">2026/27 · First Term ▾</option>
-              <option value="2026/27 · Second Term">2026/27 · Second Term ▾</option>
-              <option value="2026/27 · Third Term">2026/27 · Third Term ▾</option>
+              <option value="2026/27 · First Term">2026/27 · First Term</option>
+              <option value="2026/27 · Second Term">2026/27 · Second Term</option>
+              <option value="2026/27 · Third Term">2026/27 · Third Term</option>
             </select>
           </div>
         </div>
 
         {/* Right: Notifications & User Avatar / Profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
+        <div
+          className="admin-header-actions-col"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-3)',
+            paddingRight: 'var(--spacing-5)',
+            flexShrink: 0,
+          }}
+        >
           {/* Notification Bell */}
           <button
             title="Notifications"
@@ -387,10 +424,164 @@ export default function AdminCard({ user }: AdminCardProps) {
         </div>
       </header>
 
+      {/* MOBILE / IPAD DRAWER OVERLAY */}
+      {mobileMenuOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            display: 'flex',
+          }}
+        >
+          {/* Backdrop */}
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(2px)',
+            }}
+          />
+
+          {/* Sliding Drawer Container */}
+          <div
+            style={{
+              position: 'relative',
+              width: '18rem',
+              maxWidth: '85vw',
+              height: '100%',
+              backgroundColor: 'var(--color-surface-container-lowest)',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: 'var(--shadow-hard)',
+              zIndex: 101,
+              padding: 'var(--spacing-4) 0',
+            }}
+          >
+            {/* Drawer Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 var(--spacing-4) var(--spacing-4) var(--spacing-4)',
+                borderBottom: '1px solid var(--color-outline-variant)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                <span
+                  style={{
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: 'var(--radius-small)',
+                    backgroundColor: 'var(--color-primary)',
+                    color: 'var(--color-on-primary)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  SF
+                </span>
+                <span
+                  style={{
+                    fontWeight: 800,
+                    fontSize: 'var(--type-title-medium-size)',
+                    color: 'var(--color-primary)',
+                  }}
+                >
+                  SchoolFix
+                </span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  color: 'var(--color-on-surface-variant)',
+                  padding: 'var(--spacing-1)',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Drawer Nav List */}
+            <nav
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+                padding: 'var(--spacing-3) var(--spacing-2)',
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              {navItems.map((item) => {
+                const isActive = activeTab === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => {
+                      setActiveTab(item.name as typeof activeTab);
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--spacing-3)',
+                      padding: 'var(--spacing-3) var(--spacing-3)',
+                      borderRadius: 'var(--radius-small)',
+                      border: 'none',
+                      backgroundColor: isActive ? 'var(--color-surface-container-high)' : 'transparent',
+                      color: isActive ? 'var(--color-primary)' : 'var(--color-on-surface)',
+                      fontWeight: isActive ? 700 : 500,
+                      fontSize: 'var(--type-label-large-size)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      minHeight: 'var(--size-touch-target)',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>{item.icon}</span>
+                    <span>{item.name}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Drawer Footer */}
+            <div style={{ padding: 'var(--spacing-4)', borderTop: '1px solid var(--color-outline-variant)' }}>
+              <Link
+                href="/portal/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--type-body-small-size)',
+                  color: 'var(--color-primary)',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  padding: 'var(--spacing-2) 0',
+                }}
+              >
+                ← Switch to Parent View
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. BODY LAYOUT: SIDEBAR + MAIN CONTENT */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Navigation Sidebar (Sticky) */}
+        {/* Left Navigation Sidebar (Sticky on Desktop, Hidden on Tablet/Mobile) */}
         <aside
+          className="admin-desktop-sidebar"
           style={{
             width: '15rem',
             backgroundColor: 'var(--color-surface-container-lowest)',
@@ -2120,6 +2311,45 @@ export default function AdminCard({ user }: AdminCardProps) {
           </div>
         </div>
       )}
+
+      {/* Responsive Visibility & Header Alignment Rules */}
+      <style jsx global>{`
+        @media (min-width: 1024px) {
+          .admin-hamburger-btn {
+            display: none !important;
+          }
+          .admin-desktop-sidebar {
+            display: flex !important;
+          }
+          .admin-header-brand-col {
+            width: 15rem !important;
+            border-right: 1px solid var(--color-outline-variant) !important;
+            padding: 0 var(--spacing-4) !important;
+            box-sizing: border-box !important;
+            flex-shrink: 0 !important;
+          }
+          .admin-header-tabs-col {
+            padding-left: var(--spacing-6) !important;
+          }
+        }
+        @media (max-width: 1023px) {
+          .admin-hamburger-btn {
+            display: flex !important;
+          }
+          .admin-desktop-sidebar {
+            display: none !important;
+          }
+          .admin-header-brand-col {
+            width: auto !important;
+            border-right: none !important;
+            padding-left: var(--spacing-3) !important;
+            padding-right: var(--spacing-2) !important;
+          }
+          .admin-header-tabs-col {
+            padding-left: var(--spacing-2) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
