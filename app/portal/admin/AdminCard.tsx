@@ -887,21 +887,31 @@ export default function AdminCard({ user }: AdminCardProps) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
+                  borderRadius: 'var(--radius-small)',
+                  border: '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
-                <span
-                  style={{
-                    color: 'var(--color-success)',
-                    fontWeight: 'bold',
-                    fontSize: '1.125rem',
-                    width: '1.25rem',
-                  }}
-                >
-                  ✓
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
+                  <span
+                    style={{
+                      color: 'var(--color-success)',
+                      fontWeight: 'bold',
+                      fontSize: '1.125rem',
+                      width: '1.25rem',
+                    }}
+                  >
+                    ✓
+                  </span>
+                  <span style={{ fontWeight: 600 }}>Create your account</span>
+                </div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600 }}>
+                  Completed
                 </span>
-                <span style={{ fontWeight: 600 }}>Create your account</span>
               </div>
 
               {/* Step 2: Add school details & term dates (Active step) */}
@@ -912,10 +922,11 @@ export default function AdminCard({ user }: AdminCardProps) {
                   justifyContent: 'space-between',
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
-                  backgroundColor: completedSteps.includes(2) ? 'transparent' : 'var(--color-surface)',
-                  padding: completedSteps.includes(2) ? '0' : 'var(--spacing-2) var(--spacing-3)',
+                  backgroundColor: !completedSteps.includes(2) && activeStep === 2 ? 'var(--color-surface)' : 'transparent',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   borderRadius: 'var(--radius-small)',
-                  border: completedSteps.includes(2) ? 'none' : '1px solid var(--color-primary)',
+                  border: !completedSteps.includes(2) && activeStep === 2 ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
@@ -935,19 +946,12 @@ export default function AdminCard({ user }: AdminCardProps) {
                 {!completedSteps.includes(2) ? (
                   <button
                     onClick={() => setShowStepModal('details')}
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-3)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-small)',
-                      fontWeight: 700,
-                      fontSize: 'var(--type-label-small-size)',
-                      cursor: 'pointer',
-                      minHeight: '2rem',
-                    }}
+                    className="step-action-btn"
+                    title="Start adding school details"
+                    aria-label="Start adding school details"
                   >
-                    [Start →]
+                    <span className="step-btn-text">Start </span>
+                    <span className="step-btn-arrow">→</span>
                   </button>
                 ) : (
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600 }}>
@@ -965,9 +969,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
                   backgroundColor: !completedSteps.includes(3) && activeStep === 3 ? 'var(--color-surface)' : 'transparent',
-                  padding: !completedSteps.includes(3) && activeStep === 3 ? 'var(--spacing-2) var(--spacing-3)' : '0',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   borderRadius: 'var(--radius-small)',
-                  border: !completedSteps.includes(3) && activeStep === 3 ? '1px solid var(--color-primary)' : 'none',
+                  border: !completedSteps.includes(3) && activeStep === 3 ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
@@ -998,19 +1003,12 @@ export default function AdminCard({ user }: AdminCardProps) {
                 {!completedSteps.includes(3) ? (
                   <button
                     onClick={() => setShowStepModal('classes')}
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-3)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-small)',
-                      fontWeight: 700,
-                      fontSize: 'var(--type-label-small-size)',
-                      cursor: 'pointer',
-                      minHeight: '2rem',
-                    }}
+                    className="step-action-btn"
+                    title="Start creating classes"
+                    aria-label="Start creating classes"
                   >
-                    [Start →]
+                    <span className="step-btn-text">Start </span>
+                    <span className="step-btn-arrow">→</span>
                   </button>
                 ) : (
                   <button
@@ -1039,9 +1037,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
                   backgroundColor: !completedSteps.includes(4) && activeStep === 4 ? 'var(--color-surface)' : 'transparent',
-                  padding: !completedSteps.includes(4) && activeStep === 4 ? 'var(--spacing-2) var(--spacing-3)' : '0',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   borderRadius: 'var(--radius-small)',
-                  border: !completedSteps.includes(4) && activeStep === 4 ? '1px solid var(--color-primary)' : 'none',
+                  border: !completedSteps.includes(4) && activeStep === 4 ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
@@ -1072,19 +1071,12 @@ export default function AdminCard({ user }: AdminCardProps) {
                 {!completedSteps.includes(4) ? (
                   <button
                     onClick={() => setShowStepModal('students')}
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-3)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-small)',
-                      fontWeight: 700,
-                      fontSize: 'var(--type-label-small-size)',
-                      cursor: 'pointer',
-                      minHeight: '2rem',
-                    }}
+                    className="step-action-btn"
+                    title="Start importing students"
+                    aria-label="Start importing students"
                   >
-                    [Start →]
+                    <span className="step-btn-text">Start </span>
+                    <span className="step-btn-arrow">→</span>
                   </button>
                 ) : (
                   <button
@@ -1113,9 +1105,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
                   backgroundColor: !completedSteps.includes(5) && activeStep === 5 ? 'var(--color-surface)' : 'transparent',
-                  padding: !completedSteps.includes(5) && activeStep === 5 ? 'var(--spacing-2) var(--spacing-3)' : '0',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   borderRadius: 'var(--radius-small)',
-                  border: !completedSteps.includes(5) && activeStep === 5 ? '1px solid var(--color-primary)' : 'none',
+                  border: !completedSteps.includes(5) && activeStep === 5 ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
@@ -1146,19 +1139,12 @@ export default function AdminCard({ user }: AdminCardProps) {
                 {!completedSteps.includes(5) ? (
                   <button
                     onClick={() => setShowStepModal('teachers')}
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-3)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-small)',
-                      fontWeight: 700,
-                      fontSize: 'var(--type-label-small-size)',
-                      cursor: 'pointer',
-                      minHeight: '2rem',
-                    }}
+                    className="step-action-btn"
+                    title="Start inviting teachers"
+                    aria-label="Start inviting teachers"
                   >
-                    [Start →]
+                    <span className="step-btn-text">Start </span>
+                    <span className="step-btn-arrow">→</span>
                   </button>
                 ) : (
                   <button
@@ -1187,9 +1173,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   gap: 'var(--spacing-3)',
                   fontSize: 'var(--type-body-medium-size)',
                   backgroundColor: !completedSteps.includes(6) && activeStep === 6 ? 'var(--color-surface)' : 'transparent',
-                  padding: !completedSteps.includes(6) && activeStep === 6 ? 'var(--spacing-2) var(--spacing-3)' : '0',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   borderRadius: 'var(--radius-small)',
-                  border: !completedSteps.includes(6) && activeStep === 6 ? '1px solid var(--color-primary)' : 'none',
+                  border: !completedSteps.includes(6) && activeStep === 6 ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
@@ -1220,19 +1207,12 @@ export default function AdminCard({ user }: AdminCardProps) {
                 {!completedSteps.includes(6) ? (
                   <button
                     onClick={() => setShowStepModal('fees')}
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-3)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-small)',
-                      fontWeight: 700,
-                      fontSize: 'var(--type-label-small-size)',
-                      cursor: 'pointer',
-                      minHeight: '2rem',
-                    }}
+                    className="step-action-btn"
+                    title="Start setting fee schedule"
+                    aria-label="Start setting fee schedule"
                   >
-                    [Start →]
+                    <span className="step-btn-text">Start </span>
+                    <span className="step-btn-arrow">→</span>
                   </button>
                 ) : (
                   <button
@@ -2463,6 +2443,15 @@ export default function AdminCard({ user }: AdminCardProps) {
 
       {/* Responsive Visibility & Header Alignment Rules */}
       <style jsx global>{`
+        .step-action-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+          border: none;
+          cursor: pointer;
+        }
         @media (min-width: 1024px) {
           .admin-hamburger-btn {
             display: none !important;
@@ -2484,6 +2473,26 @@ export default function AdminCard({ user }: AdminCardProps) {
           .admin-header-logout-btn {
             display: block !important;
           }
+          .step-action-btn {
+            padding: var(--spacing-1) var(--spacing-3) !important;
+            background-color: var(--color-primary) !important;
+            color: var(--color-on-primary) !important;
+            border-radius: var(--radius-small) !important;
+            font-weight: 700 !important;
+            font-size: var(--type-label-small-size) !important;
+            min-height: 2rem !important;
+            white-space: nowrap !important;
+          }
+          .step-action-btn:hover {
+            opacity: 0.92;
+          }
+          .step-action-btn .step-btn-text {
+            display: inline !important;
+          }
+          .step-action-btn .step-btn-arrow {
+            display: inline !important;
+            font-size: 1rem !important;
+          }
         }
         @media (max-width: 1023px) {
           .admin-hamburger-btn {
@@ -2503,6 +2512,27 @@ export default function AdminCard({ user }: AdminCardProps) {
           }
           .admin-header-logout-btn {
             display: none !important; /* Collapsed into mobile drawer on tablet and mobile */
+          }
+          .step-action-btn {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            color: var(--color-primary) !important;
+            min-width: 2.75rem !important;
+            min-height: 2.75rem !important;
+            box-shadow: none !important;
+          }
+          .step-action-btn:active {
+            transform: scale(1.15);
+          }
+          .step-action-btn .step-btn-text {
+            display: none !important; /* Remove the button label on tablet/mobile */
+          }
+          .step-action-btn .step-btn-arrow {
+            display: inline-block !important;
+            font-size: 1.35rem !important;
+            font-weight: 800 !important;
+            line-height: 1 !important;
           }
         }
       `}</style>
