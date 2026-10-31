@@ -795,9 +795,9 @@ export default function AdminCard({ user }: AdminCardProps) {
 
         {/* Main Content Area (Full Width with Left Padding Maintained) */}
         <main
+          className="admin-main-container"
           style={{
             flex: 1,
-            padding: 'var(--spacing-6)',
             width: '100%',
             maxWidth: '100%',
             minWidth: 0,
@@ -813,11 +813,12 @@ export default function AdminCard({ user }: AdminCardProps) {
           <div>
             <h1
               style={{
-                fontSize: 'var(--type-headline-medium-size)',
+                fontSize: 'clamp(1.35rem, 4vw, var(--type-headline-medium-size))',
                 lineHeight: 'var(--type-headline-medium-line-height)',
                 fontWeight: 700,
                 margin: 0,
                 color: 'var(--color-on-surface)',
+                wordBreak: 'break-word',
               }}
             >
               Welcome, {adminDisplayName} 👋
@@ -835,6 +836,7 @@ export default function AdminCard({ user }: AdminCardProps) {
 
           {/* 6-STEP SETUP PROGRESS CARD */}
           <section
+            className="admin-card-surface"
             style={{
               backgroundColor: 'var(--color-surface-container-lowest)',
               borderRadius: 'var(--radius-medium)',
@@ -1309,9 +1311,10 @@ export default function AdminCard({ user }: AdminCardProps) {
               </div>
               <button
                 onClick={() => (configuredFees ? setActiveTab('Fees') : setShowStepModal('fees'))}
+                className="admin-metric-btn"
                 style={{
                   marginTop: 'auto',
-                  padding: 'var(--spacing-2)',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   backgroundColor: 'var(--color-surface-container-high)',
                   color: 'var(--color-primary)',
                   border: '1px solid var(--color-outline-variant)',
@@ -1319,6 +1322,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   fontSize: 'var(--type-label-small-size)',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  minHeight: 'var(--size-touch-target)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {configuredFees ? 'View fee schedule →' : 'Set fees'}
@@ -1361,9 +1368,10 @@ export default function AdminCard({ user }: AdminCardProps) {
               </div>
               <button
                 onClick={() => (configuredFees ? setActiveTab('Students') : setShowStepModal('fees'))}
+                className="admin-metric-btn"
                 style={{
                   marginTop: 'auto',
-                  padding: 'var(--spacing-2)',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   backgroundColor: 'var(--color-surface-container-high)',
                   color: 'var(--color-primary)',
                   border: '1px solid var(--color-outline-variant)',
@@ -1371,6 +1379,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   fontSize: 'var(--type-label-small-size)',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  minHeight: 'var(--size-touch-target)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {configuredFees ? 'View student debts →' : 'Set fees'}
@@ -1413,9 +1425,10 @@ export default function AdminCard({ user }: AdminCardProps) {
               </div>
               <button
                 onClick={() => setActiveTab('Payments')}
+                className="admin-metric-btn"
                 style={{
                   marginTop: 'auto',
-                  padding: 'var(--spacing-2)',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   backgroundColor: completedSteps.includes(4) ? 'var(--color-warning-container)' : 'var(--color-surface-container-high)',
                   color: completedSteps.includes(4) ? 'var(--color-on-warning-container)' : 'var(--color-primary)',
                   border: '1px solid var(--color-outline-variant)',
@@ -1424,6 +1437,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   fontWeight: 700,
                   cursor: 'pointer',
                   textAlign: 'center',
+                  minHeight: 'var(--size-touch-target)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {completedSteps.includes(4) ? 'Verify 3 payments →' : 'Reconciliation queue →'}
@@ -1466,9 +1483,10 @@ export default function AdminCard({ user }: AdminCardProps) {
               </div>
               <button
                 onClick={() => (completedSteps.includes(3) ? setActiveTab('Classes') : setShowStepModal('classes'))}
+                className="admin-metric-btn"
                 style={{
                   marginTop: 'auto',
-                  padding: 'var(--spacing-2)',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
                   backgroundColor: 'var(--color-surface-container-high)',
                   color: 'var(--color-primary)',
                   border: '1px solid var(--color-outline-variant)',
@@ -1476,6 +1494,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   fontSize: 'var(--type-label-small-size)',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  minHeight: 'var(--size-touch-target)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {completedSteps.includes(3) ? `${classArmList.length} arms active →` : 'Add class'}
@@ -2443,6 +2465,13 @@ export default function AdminCard({ user }: AdminCardProps) {
 
       {/* Responsive Visibility & Header Alignment Rules */}
       <style jsx global>{`
+        /* Mobile-First Layout & Touch Rules */
+        button, a, select {
+          -webkit-tap-highlight-color: transparent;
+        }
+        .admin-main-container {
+          padding: var(--spacing-6);
+        }
         .step-action-btn {
           display: inline-flex;
           align-items: center;
@@ -2513,6 +2542,10 @@ export default function AdminCard({ user }: AdminCardProps) {
           .admin-header-logout-btn {
             display: none !important; /* Collapsed into mobile drawer on tablet and mobile */
           }
+          .admin-main-container {
+            padding: var(--spacing-4) !important;
+            gap: var(--spacing-4) !important;
+          }
           .step-action-btn {
             background: transparent !important;
             border: none !important;
@@ -2534,6 +2567,23 @@ export default function AdminCard({ user }: AdminCardProps) {
             font-weight: 800 !important;
             line-height: 1 !important;
           }
+        }
+        @media (max-width: 640px) {
+          .admin-main-container {
+            padding: var(--spacing-3) !important;
+            gap: var(--spacing-3) !important;
+          }
+          .admin-card-surface {
+            padding: var(--spacing-4) var(--spacing-3) !important;
+          }
+          /* Prevent mobile browser viewport auto-zoom when tapping inputs */
+          input, select, textarea {
+            font-size: 1rem !important;
+          }
+        }
+        /* Mobile touch inertia scrolling for data tables */
+        table, .admin-table-container {
+          -webkit-overflow-scrolling: touch;
         }
       `}</style>
     </div>
