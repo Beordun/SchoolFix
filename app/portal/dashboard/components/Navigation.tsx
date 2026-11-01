@@ -164,26 +164,57 @@ export default function Navigation({
             backgroundColor: 'var(--color-surface-container-low)',
             borderRadius: 'var(--radius-small)',
             border: '1px solid var(--color-outline-variant)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
           }}
         >
-          <div
-            className="type-label-small"
+          <div>
+            <div
+              className="type-label-small"
+              style={{
+                color: 'var(--color-on-surface-variant)',
+                fontWeight: 'bold',
+              }}
+            >
+              2026/2027 Academic Session
+            </div>
+            <div
+              className="type-label-small"
+              style={{
+                color: 'var(--color-primary)',
+                marginTop: '0.25rem',
+              }}
+            >
+              First Term Active
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            disabled={isLoggingOut}
+            aria-label="Log Out"
+            title="Log out and return to homepage"
             style={{
-              color: 'var(--color-on-surface-variant)',
+              width: '100%',
+              padding: '0.35rem 0.5rem',
+              backgroundColor: 'transparent',
+              color: 'var(--color-error)',
+              border: '1px solid var(--color-outline-variant)',
+              borderRadius: 'var(--radius-small)',
+              fontSize: 'var(--type-label-small-size)',
               fontWeight: 'bold',
+              cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
             }}
           >
-            2026/2027 Academic Session
-          </div>
-          <div
-            className="type-label-small"
-            style={{
-              color: 'var(--color-primary)',
-              marginTop: '0.25rem',
-            }}
-          >
-            First Term Active
-          </div>
+            <span>🚪</span>
+            <span>{isLoggingOut ? 'Logging out...' : 'Log Out'}</span>
+          </button>
         </div>
       </aside>
 

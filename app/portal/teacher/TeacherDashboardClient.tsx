@@ -84,6 +84,18 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
     'Tola is a focused student who leads the class in Mathematics. Keep challenging yourself.'
   );
 
+  // Logout state
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/';
+    }
+  };
+
   // Rotate attendance state: PRESENT -> ABSENT -> LATE -> EXCUSED
   const handleToggleAttendance = (studentId: string) => {
     setAttendance((prev) =>
@@ -341,7 +353,7 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
         <div className={styles.sidebarFooter}>
           <div className={styles.sidebarTeacherName}>{user.fullName} · Teacher</div>
           <div>Greenfield Academy</div>
-          <div style={{ marginTop: '0.5rem' }}>
+          <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <Link
               href="/portal/dashboard"
               style={{
@@ -353,6 +365,23 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
             >
               Switch to Parent Portal →
             </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '0.2rem 0',
+                color: 'var(--color-error, #BA1A1A)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textAlign: 'left',
+                cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {isLoggingOut ? 'Logging out...' : '🚪 Log out'}
+            </button>
           </div>
         </div>
       </aside>
@@ -407,6 +436,31 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                 <span>▲</span> {pendingSyncCount} pending
               </span>
             )}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              title="Log out and return to homepage"
+              aria-label="Log out"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--color-outline-variant, #D8D8E2)',
+                borderRadius: 'var(--radius-small, 0.375rem)',
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--color-error, #BA1A1A)',
+                cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                minHeight: '2rem',
+              }}
+            >
+              <span>🚪</span>
+              <span>{isLoggingOut ? '...' : 'Log out'}</span>
+            </button>
           </div>
         </header>
 
@@ -945,6 +999,28 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                 <p style={{ fontSize: '0.8125rem', lineHeight: 1.5, margin: 0 }}>
                   A (70-100% Distinction), B (60-69% Credit), C (50-59% Merit), D (40-49% Pass), F (0-39% Fail). Grades are derived deterministically on the server.
                 </p>
+              </div>
+
+              <div className={styles.attentionCard}>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-primary, #4B0082)' }}>Account & Session</h4>
+                <p style={{ fontSize: '0.8125rem', lineHeight: 1.5, margin: '0 0 0.75rem 0' }}>
+                  Logged in as <strong>{user.fullName}</strong> ({user.email}). Active teacher session.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className={styles.secondaryButton}
+                  style={{
+                    color: 'var(--color-error, #BA1A1A)',
+                    borderColor: 'var(--color-error, #BA1A1A)',
+                    fontWeight: 700,
+                    width: '100%',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {isLoggingOut ? 'Logging out...' : '🚪 Log Out to Homepage'}
+                </button>
               </div>
             </div>
           </div>

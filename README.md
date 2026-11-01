@@ -1,4 +1,4 @@
-# SchoolFix
+# <img src="public/icon.svg" alt="SchoolFix Logo" width="32" height="32" align="center" /> SchoolFix
 
 ## 1. What This Is
 SchoolFix is a mobile-first school management and tuition reconciliation web application designed for Nigerian private primary and secondary school teachers and bursars operating on budget smartphones over metered networks, where daily attendance capture and audit-compliant fee clearance must never lose data during network partitions.

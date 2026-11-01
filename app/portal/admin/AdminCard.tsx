@@ -41,6 +41,18 @@ export default function AdminCard({ user }: AdminCardProps) {
   // Mobile Drawer State
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Logout State & Handler
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const handleLogout = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/';
+    }
+  };
+
   // Tenant & Academic Term State
   const [selectedSchool, setSelectedSchool] = useState('Greenfield Academy');
   const [selectedTerm, setSelectedTerm] = useState('2026/27 · First Term');
@@ -434,9 +446,11 @@ export default function AdminCard({ user }: AdminCardProps) {
             >
               👤
             </div>
-            <form action="/api/logout" method="POST">
+            <form action="/api/logout" method="POST" onSubmit={handleLogout}>
               <button
                 type="submit"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
                 className="admin-header-logout-btn"
                 style={{
                   padding: 'var(--spacing-2) var(--spacing-3)',
@@ -446,10 +460,10 @@ export default function AdminCard({ user }: AdminCardProps) {
                   borderRadius: 'var(--radius-small)',
                   fontSize: 'var(--type-label-small-size)',
                   fontWeight: 600,
-                  cursor: 'pointer',
+                  cursor: isLoggingOut ? 'not-allowed' : 'pointer',
                 }}
               >
-                Log Out
+                {isLoggingOut ? 'Logging out...' : 'Log Out'}
               </button>
             </form>
           </div>
@@ -702,9 +716,11 @@ export default function AdminCard({ user }: AdminCardProps) {
               >
                 ← Switch to Parent View
               </Link>
-              <form action="/api/logout" method="POST">
+              <form action="/api/logout" method="POST" onSubmit={handleLogout}>
                 <button
                   type="submit"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   style={{
                     width: '100%',
                     padding: 'var(--spacing-2) var(--spacing-3)',
@@ -714,11 +730,11 @@ export default function AdminCard({ user }: AdminCardProps) {
                     borderRadius: 'var(--radius-small)',
                     fontSize: 'var(--type-label-small-size)',
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: isLoggingOut ? 'not-allowed' : 'pointer',
                     textAlign: 'center',
                   }}
                 >
-                  Log Out
+                  {isLoggingOut ? 'Logging out...' : 'Log Out'}
                 </button>
               </form>
             </div>
@@ -777,7 +793,7 @@ export default function AdminCard({ user }: AdminCardProps) {
             })}
           </nav>
 
-          <div style={{ marginTop: 'auto', padding: 'var(--spacing-4)', borderTop: '1px solid var(--color-outline-variant)' }}>
+          <div style={{ marginTop: 'auto', padding: 'var(--spacing-4)', borderTop: '1px solid var(--color-outline-variant)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
             <Link
               href="/portal/dashboard"
               style={{
@@ -790,6 +806,27 @@ export default function AdminCard({ user }: AdminCardProps) {
             >
               ← Switch to Parent View
             </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: 'var(--spacing-1) 0',
+                color: 'var(--color-error)',
+                fontSize: 'var(--type-body-small-size)',
+                fontWeight: 600,
+                cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <span>🚪</span>
+              <span>{isLoggingOut ? 'Logging out...' : 'Log Out'}</span>
+            </button>
           </div>
         </aside>
 

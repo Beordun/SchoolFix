@@ -305,17 +305,11 @@ export default function DashboardClient({ user, sessionId, expiresAt }: Dashboar
     setLogoutError(null);
 
     try {
-      const res = await fetch('/api/logout', { method: 'POST' });
-      if (!res.ok) {
-        throw new Error(`Server returned HTTP ${res.status}: Failed to invalidate session on database.`);
-      }
-      router.push('/auth?mode=login');
+      await fetch('/api/logout', { method: 'POST' });
     } catch (err: any) {
       console.error('[Logout Network Failure]:', err);
-      setIsLoggingOut(false);
-      setLogoutError(
-        'Network error during logout: Server could not be reached to invalidate your session. You remain securely authenticated on this terminal.'
-      );
+    } finally {
+      window.location.href = '/';
     }
   };
 
