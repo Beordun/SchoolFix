@@ -89,7 +89,60 @@ export const VerifyOtpSchema = z.object({
     .regex(/^\d{6}$/, 'Verification code must be exactly 6 numeric digits'),
 });
 
+// 5. Teacher Activation Schema (Strict Non-Repudiation Staff Invitation)
+export const TeacherActivationSchema = z.object({
+  code: z
+    .string({ required_error: 'Setup code is required' })
+    .trim()
+    .min(4, 'Setup code must be at least 4 characters')
+    .max(16, 'Setup code cannot exceed 16 characters'),
+
+  fullName: z
+    .string({ required_error: 'Full name is required' })
+    .min(3, 'Full name must be at least 3 characters')
+    .max(60, 'Full name cannot exceed 60 characters')
+    .refine((val) => {
+      const parts = val.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 2);
+    }, {
+      message: 'Full name must contain at least two words (e.g. Adeleke Folashade)',
+    }),
+
+  email: z
+    .string({ required_error: 'Staff email address is required' })
+    .trim()
+    .toLowerCase()
+    .email('Please enter a valid email address'),
+
+  phone: z
+    .string({ required_error: 'Nigerian phone number is required' })
+    .trim()
+    .regex(NIGERIAN_PHONE_REGEX, 'Must be an 11-digit Nigerian phone number starting with 070, 080, 081, 090, or 091'),
+
+  assignedClassArm: z
+    .string()
+    .trim()
+    .optional(),
+
+  password: z
+    .string({ required_error: 'Private password is required' })
+    .transform((val) => val.trim())
+    .pipe(
+      z
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .regex(/[0-9]/, 'Password must contain at least one number')
+    ),
+
+  acceptedTerms: z.literal(true, {
+    errorMap: () => ({ message: 'You must confirm that your attendance & grading actions will be non-repudiable under NDPA' }),
+  }),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ResetRequestInput = z.infer<typeof ResetRequestSchema>;
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;
+export type TeacherActivationInput = z.infer<typeof TeacherActivationSchema>;

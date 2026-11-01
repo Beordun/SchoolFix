@@ -13,6 +13,8 @@ export interface Teacher {
   subjects: string;
   assignedClassArm: string | null;
   status: 'ACTIVE' | 'INVITED';
+  inviteCode?: string;
+  inviteExpiresAt?: string;
   attendanceSubmittedToday: boolean;
   attendanceTime?: string;
 }
@@ -22,6 +24,12 @@ export default function TeachersView() {
   const [assignmentFilter, setAssignmentFilter] = useState<'ALL' | 'ASSIGNED' | 'UNASSIGNED'>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [reassignTeacher, setReassignTeacher] = useState<Teacher | null>(null);
+  const [activeInviteModal, setActiveInviteModal] = useState<{
+    teacher: Teacher;
+    inviteLink: string;
+    setupCode: string;
+    copied: boolean;
+  } | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
   // Available class arms for assignment
@@ -131,6 +139,8 @@ export default function TeachersView() {
       subjects: 'Computer Studies & ICT',
       assignedClassArm: null, // Subject teacher across multiple classes
       status: 'INVITED',
+      inviteCode: 'SF-7812',
+      inviteExpiresAt: 'In 72 hours',
       attendanceSubmittedToday: false,
     },
   ]);
@@ -145,20 +155,25 @@ export default function TeachersView() {
   // Form State for Reassigning Teacher
   const [targetClassArm, setTargetClassArm] = useState('');
 
-  // Handle Add Teacher Form Submission
+  // Handle Invite Teacher Form Submission
   const handleAddTeacher = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFullName || !newEmail) return;
+    if (!newFullName || !newPhone) return;
+
+    const setupCode = `SF-${Math.floor(1000 + Math.random() * 9000)}`;
+    const derivedEmail = newEmail.trim() || `${newPhone.trim()}@greenfield.internal`;
 
     const newTeacherRecord: Teacher = {
       id: `TEA-${Date.now().toString().slice(-4)}`,
       staffId: `SF-TEA-${(teachers.length + 1).toString().padStart(3, '0')}`,
       fullName: newFullName.trim(),
-      email: newEmail.trim().toLowerCase(),
+      email: derivedEmail.toLowerCase(),
       phone: newPhone.trim(),
       subjects: newSubjects.trim() || 'General Studies',
       assignedClassArm: newClassArm || null,
-      status: 'ACTIVE',
+      status: 'INVITED',
+      inviteCode: setupCode,
+      inviteExpiresAt: 'In 72 hours',
       attendanceSubmittedToday: false,
     };
 
@@ -170,9 +185,30 @@ export default function TeachersView() {
     setNewSubjects('');
     setNewClassArm('');
 
-    const classMsg = newClassArm ? ` and assigned to ${newClassArm}` : '';
-    setSuccessToast(`✓ ${newTeacherRecord.fullName} added successfully${classMsg}! Welcome invite dispatched to ${newTeacherRecord.email}.`);
-    setTimeout(() => setSuccessToast(null), 5000);
+    // Generate activation link
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const inviteLink = `${origin}/auth?mode=activate&code=${setupCode}&name=${encodeURIComponent(newTeacherRecord.fullName)}&phone=${encodeURIComponent(newTeacherRecord.phone)}&email=${encodeURIComponent(newTeacherRecord.email)}&arm=${encodeURIComponent(newTeacherRecord.assignedClassArm || 'Unassigned')}`;
+
+    setActiveInviteModal({
+      teacher: newTeacherRecord,
+      inviteLink,
+      setupCode,
+      copied: false,
+    });
+  };
+
+  // Re-open invite sharing modal for existing invited teacher
+  const handleShareInvite = (teacher: Teacher) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const setupCode = teacher.inviteCode || `SF-${Math.floor(1000 + Math.random() * 9000)}`;
+    const inviteLink = `${origin}/auth?mode=activate&code=${setupCode}&name=${encodeURIComponent(teacher.fullName)}&phone=${encodeURIComponent(teacher.phone)}&email=${encodeURIComponent(teacher.email)}&arm=${encodeURIComponent(teacher.assignedClassArm || 'Unassigned')}`;
+
+    setActiveInviteModal({
+      teacher,
+      inviteLink,
+      setupCode,
+      copied: false,
+    });
   };
 
   // Handle Reassign Class Form Submission
@@ -701,9 +737,25 @@ export default function TeachersView() {
                     )}
                   </td>
 
-                  {/* Daily Attendance State */}
+                  {/* Daily Attendance State / Invite Status */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
-                    {teacher.assignedClassArm ? (
+                    {teacher.status === 'INVITED' ? (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          borderRadius: 'var(--radius-small)',
+                          backgroundColor: 'var(--color-primary-container)',
+                          color: 'var(--color-on-primary-container)',
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        ✉️ Invite Pending ({teacher.inviteCode || '72h'})
+                      </span>
+                    ) : teacher.assignedClassArm ? (
                       teacher.attendanceSubmittedToday ? (
                         <span
                           style={{
@@ -742,27 +794,53 @@ export default function TeachersView() {
                     )}
                   </td>
 
-                  {/* Actions: Reassign Class */}
+                  {/* Actions: Share Invite & Reassign Class */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', textAlign: 'right' }}>
-                    <button
-                      onClick={() => {
-                        setReassignTeacher(teacher);
-                        setTargetClassArm(teacher.assignedClassArm || '');
-                      }}
-                      style={{
-                        padding: 'var(--spacing-1) var(--spacing-3)',
-                        backgroundColor: 'var(--color-surface-container-high)',
-                        color: 'var(--color-primary)',
-                        border: '1px solid var(--color-outline-variant)',
-                        borderRadius: 'var(--radius-small)',
-                        fontWeight: 700,
-                        fontSize: 'var(--type-label-small-size)',
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Reassign Class ⇄
-                    </button>
+                    <div style={{ display: 'inline-flex', gap: 'var(--spacing-2)', alignItems: 'center', justifyContent: 'flex-end' }}>
+                      {teacher.status === 'INVITED' && (
+                        <button
+                          onClick={() => handleShareInvite(teacher)}
+                          style={{
+                            padding: 'var(--spacing-1) var(--spacing-3)',
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'var(--color-on-primary)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-small)',
+                            fontWeight: 700,
+                            fontSize: 'var(--type-label-small-size)',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            minHeight: '2.25rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                          }}
+                        >
+                          <span>Share Invite</span>
+                          <span>↗</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setReassignTeacher(teacher);
+                          setTargetClassArm(teacher.assignedClassArm || '');
+                        }}
+                        style={{
+                          padding: 'var(--spacing-1) var(--spacing-3)',
+                          backgroundColor: 'var(--color-surface-container-high)',
+                          color: 'var(--color-primary)',
+                          border: '1px solid var(--color-outline-variant)',
+                          borderRadius: 'var(--radius-small)',
+                          fontWeight: 700,
+                          fontSize: 'var(--type-label-small-size)',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          minHeight: '2.25rem',
+                        }}
+                      >
+                        Reassign Class ⇄
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -787,7 +865,7 @@ export default function TeachersView() {
         </div>
       </div>
 
-      {/* 5. Modal: Add New Teacher */}
+      {/* 5. Modal: Invite New Teacher */}
       {showAddModal && (
         <div
           style={{
@@ -813,6 +891,8 @@ export default function TeachersView() {
               display: 'flex',
               flexDirection: 'column',
               gap: 'var(--spacing-4)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -825,7 +905,7 @@ export default function TeachersView() {
                     color: 'var(--color-primary)',
                   }}
                 >
-                  ＋ Add New Teacher
+                  ✉️ Invite New Teacher
                 </h3>
                 <p
                   style={{
@@ -834,7 +914,7 @@ export default function TeachersView() {
                     margin: 'var(--spacing-1) 0 0 0',
                   }}
                 >
-                  Staff member will receive credentials and class attendance permissions.
+                  Admins never set teacher passwords. Generate a 72-hour invite link or 6-digit setup code for WhatsApp sharing.
                 </p>
               </div>
               <button
@@ -845,6 +925,11 @@ export default function TeachersView() {
                   fontSize: '1.25rem',
                   cursor: 'pointer',
                   color: 'var(--color-on-surface-variant)',
+                  minWidth: '2.75rem',
+                  minHeight: '2.75rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 ✕
@@ -878,29 +963,6 @@ export default function TeachersView() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="teacher.name@schoolfix.internal"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: 'var(--spacing-2) var(--spacing-3)',
-                      borderRadius: 'var(--radius-small)',
-                      border: '1px solid var(--color-outline)',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-on-surface)',
-                      fontSize: 'var(--type-body-medium-size)',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
                     Nigerian Phone Number *
                   </label>
                   <input
@@ -922,6 +984,28 @@ export default function TeachersView() {
                     }}
                   />
                 </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
+                    Email Address (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="teacher.name@schoolfix.internal"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--spacing-2) var(--spacing-3)',
+                      borderRadius: 'var(--radius-small)',
+                      border: '1px solid var(--color-outline)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-on-surface)',
+                      fontSize: 'var(--type-body-medium-size)',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
               </div>
 
               <div>
@@ -930,7 +1014,7 @@ export default function TeachersView() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Mathematics & Basic Science"
+                  placeholder="e.g. Mathematics &amp; Basic Science"
                   value={newSubjects}
                   onChange={(e) => setNewSubjects(e.target.value)}
                   style={{
@@ -988,6 +1072,7 @@ export default function TeachersView() {
                     borderRadius: 'var(--radius-small)',
                     fontWeight: 600,
                     cursor: 'pointer',
+                    minHeight: 'var(--size-touch-target)',
                   }}
                 >
                   Cancel
@@ -1002,12 +1087,204 @@ export default function TeachersView() {
                     borderRadius: 'var(--radius-small)',
                     fontWeight: 700,
                     cursor: 'pointer',
+                    minHeight: 'var(--size-touch-target)',
                   }}
                 >
-                  Save &amp; Invite Teacher
+                  Generate Invite &amp; Share ↗
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Modal: Teacher Invite Dispatched & WhatsApp Share */}
+      {activeInviteModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'var(--spacing-4)',
+            zIndex: 60,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--color-surface-container-lowest)',
+              borderRadius: 'var(--radius-medium)',
+              border: '1px solid var(--color-outline-variant)',
+              padding: 'var(--spacing-6)',
+              maxWidth: '32rem',
+              width: '100%',
+              boxShadow: 'var(--shadow-hard)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-4)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                <span style={{ fontSize: '1.5rem' }}>✉️</span>
+                <h3
+                  style={{
+                    fontSize: 'var(--type-title-medium-size)',
+                    fontWeight: 700,
+                    margin: 0,
+                    color: 'var(--color-primary)',
+                  }}
+                >
+                  Teacher Invite Dispatched
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveInviteModal(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  color: 'var(--color-on-surface-variant)',
+                  minWidth: '2.75rem',
+                  minHeight: '2.75rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div
+              style={{
+                padding: 'var(--spacing-3)',
+                borderRadius: 'var(--radius-small)',
+                backgroundColor: 'var(--color-surface-container)',
+                border: '1px solid var(--color-outline-variant)',
+                fontSize: 'var(--type-body-small-size)',
+              }}
+            >
+              <div><strong>Teacher:</strong> {activeInviteModal.teacher.fullName}</div>
+              <div style={{ marginTop: 'var(--spacing-1)' }}>
+                <strong>Role:</strong> <span style={{ padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--color-primary-container)', color: 'var(--color-on-primary-container)', fontWeight: 700, fontSize: '0.75rem' }}>TEACHER (Staff)</span>
+              </div>
+              <div style={{ marginTop: 'var(--spacing-1)' }}>
+                <strong>Assigned Class Arm:</strong> {activeInviteModal.teacher.assignedClassArm || 'Unassigned (Subject Teacher)'}
+              </div>
+            </div>
+
+            {/* 6-Digit Setup Code Callout (Paper slip / Offline fallback) */}
+            <div
+              style={{
+                backgroundColor: 'var(--color-primary-container)',
+                borderRadius: 'var(--radius-small)',
+                padding: 'var(--spacing-4)',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+              }}
+            >
+              <span style={{ fontSize: 'var(--type-label-small-size)', color: 'var(--color-on-primary-container)', fontWeight: 600, textTransform: 'uppercase' }}>
+                One-Time 6-Digit Setup Code (Valid 72 hrs)
+              </span>
+              <div
+                style={{
+                  fontSize: '2rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.2em',
+                  color: 'var(--color-on-primary-container)',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {activeInviteModal.setupCode}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-on-primary-container)', opacity: 0.85 }}>
+                Admin can hand this code to the teacher on paper or via phone call if they have limited data.
+              </span>
+            </div>
+
+            {/* Sharing Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-1)' }}>
+              {/* WhatsApp Share Button */}
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `Hello ${activeInviteModal.teacher.fullName}, you have been invited to join Greenfield Academy on SchoolFix as Teacher for ${activeInviteModal.teacher.assignedClassArm || 'your classes'}.\n\nActivate your account and set your private password here:\n${activeInviteModal.inviteLink}\n\nOr enter 6-digit setup code: ${activeInviteModal.setupCode} on the SchoolFix portal. (Link expires in 72 hours).`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 'var(--spacing-2)',
+                  padding: 'var(--spacing-3)',
+                  backgroundColor: 'var(--color-success)',
+                  color: 'var(--color-on-primary)',
+                  borderRadius: 'var(--radius-small)',
+                  fontWeight: 700,
+                  fontSize: 'var(--type-label-large-size)',
+                  textDecoration: 'none',
+                  minHeight: 'var(--size-touch-target)',
+                  textAlign: 'center',
+                }}
+              >
+                <span>💬 Share via WhatsApp</span>
+              </a>
+
+              {/* Copy Activation Link */}
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(activeInviteModal.inviteLink);
+                  setActiveInviteModal((prev) => (prev ? { ...prev, copied: true } : null));
+                  setTimeout(() => {
+                    setActiveInviteModal((prev) => (prev ? { ...prev, copied: false } : null));
+                  }, 3000);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 'var(--spacing-2)',
+                  padding: 'var(--spacing-3)',
+                  backgroundColor: 'var(--color-surface-container-high)',
+                  color: 'var(--color-primary)',
+                  border: '1px solid var(--color-outline-variant)',
+                  borderRadius: 'var(--radius-small)',
+                  fontWeight: 700,
+                  fontSize: 'var(--type-label-large-size)',
+                  cursor: 'pointer',
+                  minHeight: 'var(--size-touch-target)',
+                }}
+              >
+                <span>{activeInviteModal.copied ? '✓ Activation Link Copied!' : '📋 Copy Activation Link'}</span>
+              </button>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--color-outline-variant)', paddingTop: 'var(--spacing-3)', textAlign: 'right' }}>
+              <button
+                onClick={() => setActiveInviteModal(null)}
+                style={{
+                  padding: 'var(--spacing-2) var(--spacing-4)',
+                  backgroundColor: 'var(--color-surface-container)',
+                  color: 'var(--color-on-surface)',
+                  border: '1px solid var(--color-outline-variant)',
+                  borderRadius: 'var(--radius-small)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  minHeight: 'var(--size-touch-target)',
+                }}
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

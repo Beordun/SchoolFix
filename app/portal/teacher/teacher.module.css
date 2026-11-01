@@ -1,0 +1,712 @@
+/* app/portal/teacher/teacher.module.css */
+/* SchoolFix Teacher Portal Stylesheet — Pure Semantic Token Consumption */
+
+.portalContainer {
+  min-height: 100vh;
+  background-color: var(--color-surface, #F9F9FC);
+  color: var(--color-on-surface, #1A1A24);
+  font-family: var(--type-font-family, 'Bricolage Grotesque', sans-serif);
+  display: flex;
+  position: relative;
+}
+
+/* ==========================================================================
+   DESKTOP / TABLET SIDEBAR (>= 768px)
+   ========================================================================== */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 15rem;
+    min-width: 15rem;
+    background-color: var(--color-surface-container-lowest, #FFFFFF);
+    border-right: 1px solid var(--color-outline-variant, #E0E0E6);
+    padding: var(--spacing-medium, 1.25rem);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    box-sizing: border-box;
+    z-index: 20;
+  }
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--type-headline-small-size, 1.5rem);
+  font-weight: 800;
+  color: var(--color-primary, #4B0082);
+  margin-bottom: var(--spacing-large, 2rem);
+  text-decoration: none;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-small, 0.5rem);
+  border: none;
+  background: transparent;
+  color: var(--color-on-surface-variant, #4E4E61);
+  font-size: var(--type-body-medium-size, 0.9375rem);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  min-height: var(--size-touch-target, 2.75rem);
+  transition: all 0.15s ease-in-out;
+}
+
+.navButton:hover {
+  background-color: var(--color-surface-container, #F0F0F5);
+  color: var(--color-on-surface, #1A1A24);
+}
+
+.navButtonActive {
+  background-color: var(--color-primary-container, #EADDFF);
+  color: var(--color-on-primary-container, #21005D);
+  font-weight: 700;
+}
+
+.sidebarFooter {
+  padding-top: var(--spacing-medium, 1rem);
+  border-top: 1px solid var(--color-outline-variant, #E0E0E6);
+  font-size: var(--type-body-small-size, 0.8125rem);
+  color: var(--color-on-surface-variant, #4E4E61);
+}
+
+.sidebarTeacherName {
+  font-weight: 700;
+  color: var(--color-on-surface, #1A1A24);
+}
+
+/* ==========================================================================
+   MAIN CONTENT AREA
+   ========================================================================== */
+.mainContent {
+  flex: 1;
+  padding: var(--spacing-medium, 1rem);
+  max-width: 80rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  padding-bottom: 5.5rem; /* Space for mobile nav */
+}
+
+@media (min-width: 768px) {
+  .mainContent {
+    padding: var(--spacing-large, 2rem);
+    padding-bottom: 2rem;
+  }
+}
+
+/* Header & Greeting */
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-medium, 1.25rem);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.greetingTitle {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  color: var(--color-on-surface, #1A1A24);
+  margin: 0 0 0.25rem 0;
+}
+
+.greetingSubtitle {
+  font-size: var(--type-body-small-size, 0.875rem);
+  color: var(--color-on-surface-variant, #5F5F73);
+  margin: 0;
+}
+
+.headerRightCluster {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.syncPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background-color: #E8F5E9;
+  color: #1B5E20;
+}
+
+.syncPillPending {
+  background-color: #FFF3E0;
+  color: #B26A00;
+}
+
+/* Class Arm Pill Selector */
+.classSelectorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  margin-bottom: var(--spacing-medium, 1.25rem);
+}
+
+.classPill {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--color-outline-variant, #D8D8E2);
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  color: var(--color-on-surface, #1A1A24);
+  font-size: var(--type-label-medium-size, 0.875rem);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: var(--size-touch-target, 2.75rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.classPillActive {
+  background-color: var(--color-primary, #4B0082);
+  color: var(--color-on-primary, #FFFFFF);
+  border-color: var(--color-primary, #4B0082);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Top 4 KPI Metrics Row (Web Desktop) */
+.metricsStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+  margin-bottom: var(--spacing-medium, 1.5rem);
+}
+
+.metricCard {
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: var(--spacing-medium, 1rem);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metricTitle {
+  font-size: var(--type-label-small-size, 0.8125rem);
+  color: var(--color-on-surface-variant, #5F5F73);
+  margin-bottom: 0.35rem;
+}
+
+.metricValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-on-surface, #1A1A24);
+  margin-bottom: 0.25rem;
+}
+
+.metricValueHighlight {
+  color: #B26A00;
+}
+
+.metricValueSuccess {
+  color: #1B5E20;
+}
+
+.metricSubtitle {
+  font-size: var(--type-body-small-size, 0.8125rem);
+  color: var(--color-on-surface-variant, #5F5F73);
+}
+
+/* Hero Attendance Card (Mobile & Tablet) */
+.heroCard {
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: var(--spacing-large, 1.25rem);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: var(--spacing-medium, 1.25rem);
+}
+
+.heroHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.heroClassTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-on-surface, #1A1A24);
+  margin: 0;
+}
+
+.heroSubtext {
+  font-size: var(--type-body-small-size, 0.875rem);
+  color: var(--color-on-surface-variant, #5F5F73);
+  margin: 0 0 1rem 0;
+}
+
+.primaryButton {
+  background-color: var(--color-primary, #4B0082);
+  color: var(--color-on-primary, #FFFFFF);
+  border: none;
+  border-radius: var(--radius-small, 0.5rem);
+  padding: 0.75rem 1.25rem;
+  font-size: var(--type-label-large-size, 0.9375rem);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  min-height: var(--size-touch-target, 2.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+}
+
+.primaryButton:hover {
+  opacity: 0.92;
+}
+
+.primaryButton:active {
+  transform: scale(0.99);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: var(--color-primary, #4B0082);
+  border: 1.5px solid var(--color-primary, #4B0082);
+  border-radius: var(--radius-small, 0.5rem);
+  padding: 0.65rem 1.25rem;
+  font-size: var(--type-label-large-size, 0.9375rem);
+  font-weight: 700;
+  cursor: pointer;
+  min-height: var(--size-touch-target, 2.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.secondaryButton:hover {
+  background-color: var(--color-surface-container, #F0F0F5);
+}
+
+/* ==========================================================================
+   WORK AREA & TWO-COLUMN LAYOUT (Desktop & Tablet)
+   ========================================================================== */
+.twoColLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1100px) {
+  .twoColLayout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+}
+
+/* Work Area Card */
+.workCard {
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: var(--spacing-medium, 1.25rem);
+  box-shadow: var(--shadow-soft);
+}
+
+.workCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.workCardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-on-surface, #1A1A24);
+  margin: 0;
+}
+
+.workCardSubtext {
+  font-size: var(--type-body-small-size, 0.8125rem);
+  color: var(--color-on-surface-variant, #5F5F73);
+  margin: 0.25rem 0 0 0;
+}
+
+/* ==========================================================================
+   ATTENDANCE REGISTER STYLES
+   ========================================================================== */
+.attendanceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .attendanceList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.studentCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+  border-radius: var(--radius-small, 0.5rem);
+  min-height: var(--size-touch-target, 2.75rem);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.1s ease-in-out;
+}
+
+.studentCard:hover {
+  background-color: var(--color-surface-container, #F4F4F8);
+  border-color: var(--color-primary, #4B0082);
+}
+
+.studentName {
+  font-weight: 600;
+  color: var(--color-on-surface, #1A1A24);
+  font-size: 0.9375rem;
+}
+
+.studentAdmission {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant, #767688);
+}
+
+/* 4-State Attendance Status Pills */
+.statusPill {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  min-width: 4.5rem;
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.05s ease;
+}
+
+.statusPill:active {
+  transform: scale(0.95);
+}
+
+.pillPresent {
+  background-color: #E8F5E9;
+  color: #1B5E20;
+}
+
+.pillAbsent {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+.pillLate {
+  background-color: #FFF3E0;
+  color: #B26A00;
+}
+
+.pillExcused {
+  background-color: #E3F2FD;
+  color: #1565C0;
+}
+
+/* Sticky Bottom Save Bar (Mobile & Tablet) */
+.stickyBottomBar {
+  position: fixed;
+  bottom: 3.75rem; /* above mobile nav */
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border-top: 1px solid var(--color-outline-variant, #D8D8E2);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 15;
+}
+
+@media (min-width: 768px) {
+  .stickyBottomBar {
+    position: static;
+    border-top: none;
+    box-shadow: none;
+    padding: 1rem 0 0 0;
+  }
+}
+
+.tallyText {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #4E4E61);
+  text-align: center;
+}
+
+/* ==========================================================================
+   GRADEBOOK MATRIX (TABLE LAYOUT)
+   ========================================================================== */
+.tableContainer {
+  overflow-x: auto;
+  border-radius: var(--radius-small, 0.5rem);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+}
+
+.scoresTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.scoresTable th {
+  background-color: var(--color-surface-container, #F0F0F5);
+  color: var(--color-on-surface-variant, #4E4E61);
+  font-weight: 700;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--color-outline-variant, #E4E4EB);
+}
+
+.scoresTable td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--color-outline-variant, #E4E4EB);
+  vertical-align: middle;
+}
+
+.scoresTable tr:hover td {
+  background-color: var(--color-surface-container-low, #F8F8FC);
+}
+
+.scoreInput {
+  width: 3.5rem;
+  padding: 0.45rem 0.35rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid var(--color-outline-variant, #D0D0DC);
+  border-radius: var(--radius-small, 0.375rem);
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  color: var(--color-on-surface, #1A1A24);
+  font-family: inherit;
+}
+
+.scoreInput:focus {
+  outline: 2px solid var(--color-primary, #4B0082);
+  border-color: transparent;
+}
+
+.gradeBadge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-small, 0.375rem);
+  font-weight: 800;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.gradeA { background-color: #E8F5E9; color: #1B5E20; }
+.gradeB { background-color: #E3F2FD; color: #1565C0; }
+.gradeC { background-color: #FFF3E0; color: #B26A00; }
+.gradeD { background-color: #FFFDE7; color: #F57F17; }
+.gradeF { background-color: #FFEBEE; color: #C62828; }
+
+/* Status Badges */
+.badgeSaved {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #E8F5E9;
+  color: #1B5E20;
+}
+
+.badgeWaiting {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #FFF3E0;
+  color: #B26A00;
+}
+
+.badgeNotEntered {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--color-surface-container, #EAEAEF);
+  color: var(--color-on-surface-variant, #707080);
+}
+
+/* ==========================================================================
+   ATTENTION & REMARKS RAIL (RIGHT COLUMN)
+   ========================================================================== */
+.attentionCard {
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border: 1px solid var(--color-outline-variant, #E4E4EB);
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: var(--spacing-medium, 1.25rem);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 1.25rem;
+}
+
+.attentionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-on-surface, #1A1A24);
+  margin: 0 0 0.75rem 0;
+}
+
+.attentionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-outline-variant, #EAEAEF);
+  font-size: 0.875rem;
+}
+
+.attentionRow:last-child {
+  border-bottom: none;
+}
+
+.warningBadge {
+  background-color: #FFEBEE;
+  color: #C62828;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.retryButton {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--color-outline-variant, #C4C4D0);
+  background-color: transparent;
+  color: var(--color-on-surface, #1A1A24);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  min-height: var(--size-touch-target, 2.75rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retryButton:hover {
+  background-color: var(--color-surface-container, #EFEFF4);
+}
+
+/* Remark Draft Box */
+.remarkBox {
+  background-color: var(--color-surface-container-low, #F9F9FD);
+  border: 1px solid var(--color-outline-variant, #E0E0EA);
+  border-radius: var(--radius-small, 0.5rem);
+  padding: 0.85rem;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-on-surface, #1A1A24);
+}
+
+.remarkActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION BAR (< 768px)
+   ========================================================================== */
+.mobileNavBar {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.75rem;
+  background-color: var(--color-surface-container-lowest, #FFFFFF);
+  border-top: 1px solid var(--color-outline-variant, #E0E0E6);
+  z-index: 30;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .mobileNavBar {
+    display: none;
+  }
+}
+
+.mobileNavTab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-on-surface-variant, #5F5F73);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  min-height: var(--size-touch-target, 2.75rem);
+}
+
+.mobileNavTabActive {
+  color: var(--color-primary, #4B0082);
+  font-weight: 800;
+}
+
+.mobileNavIndicator {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background-color: var(--color-primary, #4B0082);
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}

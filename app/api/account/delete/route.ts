@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSession, revokeAllUserSessions, clearSessionCookie, SESSION_COOKIE_NAME } from '@/lib/security/session';
 
-export const GRACE_PERIOD_DAYS = 7;
-export const GRACE_PERIOD_MS = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+const GRACE_PERIOD_DAYS = 7;
+const GRACE_PERIOD_MS = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   try {

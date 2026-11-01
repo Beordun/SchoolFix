@@ -46,7 +46,7 @@ export function getClientIp(req: NextRequest): string {
  */
 export function checkRateLimit(
   req: NextRequest,
-  action: 'register' | 'login' | 'reset',
+  action: 'register' | 'login' | 'reset' | 'teacher-activate',
   config: RateLimitConfig = { maxRequests: 5, windowMs: 60000 }
 ): RateLimitResult {
   const clientIp = getClientIp(req);

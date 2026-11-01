@@ -2,6 +2,26 @@
 // Asynchronous background email verification worker and token-styled HTML templates
 
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpSecure = process.env.SMTP_SECURE === 'true';
+const smtpUser = process.env.SMTP_USER || 'beordunmichael@gmail.com';
+const smtpPass = process.env.SMTP_PASS || '';
+const smtpFrom = process.env.SMTP_FROM || `SchoolFix Portal <${smtpUser}>`;
+
+export const mailTransporter = nodemailer.createTransport({
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpSecure,
+  auth: smtpPass
+    ? {
+        user: smtpUser,
+        pass: smtpPass,
+      }
+    : undefined,
+});
 
 export interface VerificationJob {
   userId: string;
@@ -157,10 +177,24 @@ class EmailQueueWorker {
       console.log(`[Email Worker]: START processing dispatch to ${job.email} (OTP=${job.code})`);
       
       try {
-        // Simulate real SMTP network dispatch latency (250ms)
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        const duration = Date.now() - startTime;
-        console.log(`[Email Worker]: FINISH dispatch to ${job.email} in ${duration}ms [STATUS=SENT]`);
+        const html = renderVerificationEmailHtml(job.fullName, job.code);
+
+        if (smtpPass) {
+          // Live SMTP dispatch via Nodemailer
+          await mailTransporter.sendMail({
+            from: smtpFrom,
+            to: job.email,
+            subject: 'Confirm Your SchoolFix Account — 6-Digit Code',
+            html,
+          });
+          const duration = Date.now() - startTime;
+          console.log(`[Email Worker]: DISPATCHED live SMTP email to ${job.email} via Nodemailer in ${duration}ms [STATUS=SENT]`);
+        } else {
+          // Development / Test fallback when SMTP_PASS is empty
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          const duration = Date.now() - startTime;
+          console.log(`[Email Worker]: SMTP_PASS not set. Simulated dispatch to ${job.email} (OTP=${job.code}) in ${duration}ms [STATUS=LOCAL_DEV]`);
+        }
       } catch (err: any) {
         console.error(`[Email Worker]: FAILED dispatch to ${job.email}:`, err.message);
       } finally {
@@ -181,8 +215,23 @@ export const emailQueue = new EmailQueueWorker();
 export async function sendVerificationEmailSync(job: VerificationJob): Promise<number> {
   const startTime = Date.now();
   console.log(`[Sync Email]: Blocking request thread to send verification email to ${job.email}...`);
-  // Simulate standard blocking SMTP handshake + TLS negotiation + payload transmission (1,850ms)
-  await new Promise((resolve) => setTimeout(resolve, 1850));
+
+  try {
+    const html = renderVerificationEmailHtml(job.fullName, job.code);
+    if (smtpPass) {
+      await mailTransporter.sendMail({
+        from: smtpFrom,
+        to: job.email,
+        subject: 'Confirm Your SchoolFix Account — 6-Digit Code',
+        html,
+      });
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 1850));
+    }
+  } catch (err: any) {
+    console.error(`[Sync Email]: Dispatch error for ${job.email}:`, err.message);
+  }
+
   const elapsed = Date.now() - startTime;
   console.log(`[Sync Email]: Finished synchronous dispatch in ${elapsed}ms.`);
   return elapsed;

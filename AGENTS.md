@@ -74,6 +74,7 @@ The agent is **strictly prohibited** from scaffolding, proposing, or generating 
 | **Security & Auth** | Argon2id + Cryptographic Sessions | Passwords hashed strictly with Argon2id (memory: 65,536 KiB, time: 3 iterations, parallelism: 4). Session tokens are 32 random bytes, stored as SHA-256 hashes in DB, transmitted in `HttpOnly`, `Secure`, `SameSite=Lax` cookies. |
 | **Payment Gateway** | Flutterwave (Hosted / Inline Checkout) | Webhook signature verification via secret hash header. All electronic settlements (Cards, Bank Transfer, USSD) route via Flutterwave; dual-ledger tracking required. |
 | **Validation** | Zod | Strictly enforced at API route boundaries and server actions before database or service layer calls. |
+| **Email & Notifications** | Nodemailer + SMTP (Gmail TLS 587) | Asynchronous background dispatch worker (`setImmediate`). Sender: `beordunmichael@gmail.com`. Transactional 6-digit OTP delivery with 10-minute expiry and token-styled HTML templates. |
 | **Styling** | Vanilla CSS / CSS Modules | Responsive type using `clamp()`, button padding in `rem`, mobile-first touch targets using tokenized minimums (`var(--size-touch-target)` or `2.75rem`). |
 
 ---
@@ -118,6 +119,20 @@ The agent is **strictly prohibited** from scaffolding, proposing, or generating 
   1. **Soft Delete:** Sets `deletedAt` and revocates active sessions.
   2. **7-Day Grace Period:** Account is locked and inactive in the database.
   3. **Scheduled Purge Transaction:** Background worker sets `isAnonymized: true`, clears personal identifiers, and sets `Student.parentId = null`, while retaining financial records for legal tax compliance.
+
+### 7. Teacher Onboarding & Non-Repudiation Invite Flow
+- **Prohibition on Open Self-Registration:** Teachers cannot self-register with role `TEACHER` at `/auth?mode=register` (which strictly defaults to `PARENT`). Role assignment is strictly locked by the school administrator.
+- **Prohibition on Admin-Assigned Passwords:** Administrators must never choose, set, or distribute passwords to teachers. Shared passwords undermine non-repudiation and audit log veracity regarding continuous assessment score modifications.
+- **Cryptographic Invite & WhatsApp Distribution:** The administrator enters the teacher's name, phone, optional email, and assigned `ClassArm`(s). The system generates a single-use, 72-hour invite token and a prominent **"Share via WhatsApp"** link with pre-filled message text.
+- **6-Digit Setup Code Fallback:** For teachers with constrained devices or low digital literacy, the admin is provided a 6-digit setup code (`SF-XXXX`, valid 72 hours) that can be delivered physically on paper.
+- **Teacher Activation (`/auth?mode=activate`):** The teacher accesses the activation gateway via link or code, verifies their identity, sets their own private password (validated against breach corpora and hashed strictly with Argon2id), and lands directly on their assigned class attendance register.
+
+### 8. Teacher Dashboard Responsive Architecture & Operational Controls
+- **Cross-Form-Factor Consistency:** Responsive multi-device layout adhering strictly to SchoolFix Primary 40 Indigo brand tokens:
+  1. **Mobile (`390px`):** 4-tab bottom navigation (`Home`, `Attendance`, `Scores`, `More`), quick one-thumb "Mark attendance" hero card, To-Do list with pending sync counter and retry action, 4-state tap attendance register with sticky bottom save bar (`N present · N absent · N late · N excused`), and class switcher pills (`JSS 2A`, `JSS 1B`, `JSS 3C`).
+  2. **Tablet Landscape (`1024px`):** Left persistent sidebar navigation (`Home`, `Attendance`, `Scores`, `Remarks`, `School handbook`), 2-column attendance card grid, right status rail (`To do`, `My classes`, `This week 94% present`).
+  3. **Web Desktop (`1440px`):** Left persistent sidebar, top 4-card metric strip (`Today's attendance`, `This week 94%`, `Maths exam scores 22 of 38`, `Remarks 0 of 38`), side-by-side work area with Continuous Assessment Matrix (40 CA / 60 Exam live auto-sum and position ranking) and right attention rail (`Needs your attention` chronic absence alerts + `< 30-word` AI remark draft approval).
+- **Offline Durability & Client-Edge Queuing:** Offline attendance and assessment mutations queue into client `localStorage` with `PENDING_SYNC` status and trigger automated or manual retry upon reconnection.
 
 ---
 

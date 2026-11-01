@@ -82,24 +82,41 @@ Private primary and secondary schools in emerging African markets face chronic a
 3. **Password Security:** All passwords are hashed using Argon2id with memory cost 65536 KiB, time cost 3 iterations, and parallelism 4. Passwords must never be hashed with plain SHA algorithms.
 4. **Session Hardening:** Successful authentication returns a 32-byte cryptographically random session token generated via `crypto.randomBytes(32)`. The server stores only the SHA-256 hash of this token in the database, delivering the raw token over an `HttpOnly`, `Secure`, `SameSite=Lax` cookie.
 5. **Global Invalidation:** A password reset must terminate all active database sessions tied to the user account.
+6. **Teacher Onboarding & Non-Repudiation Invite Flow:**
+   * **Prohibition on Self-Registration:** Teachers cannot self-register with role `TEACHER` at `/auth?mode=register` (which strictly defaults to `PARENT`). Role assignment is exclusively controlled by the school administrator.
+   * **Prohibition on Admin-Assigned Passwords:** Administrators must never choose, set, or distribute passwords to teachers. Shared passwords undermine non-repudiation and audit log veracity regarding continuous assessment score modifications.
+   * **Cryptographic Invite & WhatsApp Distribution:** The administrator enters the teacher's name, phone, optional email, and assigned `ClassArm`(s). The system generates a single-use, 72-hour invite token and a prominent **"Share via WhatsApp"** link with pre-filled message text.
+   * **6-Digit Setup Code Fallback:** For teachers with constrained devices or low digital literacy, the admin is provided a 6-digit setup code (`SF-XXXX`, valid 72 hours) that can be delivered physically on paper.
+   * **Teacher Activation (`/auth?mode=activate`):** The teacher accesses the activation gateway via link or code, verifies their identity, sets their own private password (validated against breach corpora), and lands directly on their assigned class attendance register.
+7. **Transactional Email & Nodemailer SMTP Transport:**
+   * **Transport Layer:** Nodemailer configured with standard SMTP over TLS port 587 (`smtp.gmail.com`).
+   * **Sender Origin:** Authenticated user email `beordunmichael@gmail.com` (`SchoolFix Portal <beordunmichael@gmail.com>`).
+   * **Asynchronous Non-Blocking Dispatch:** Verification OTPs (6-digit CSPRNG numeric tokens with 10-minute expiry) and password recovery emails are queued and dispatched in the background to guarantee sub-500ms API response latency on budget smartphones.
 
-### 6.2 Attendance Management
+### 6.2 Attendance Management & Morning Teacher Cockpit
 1. **RBAC Scope Check:** Teachers can only view and mutate registers for classes where a valid `TeacherClassAssignment` exists.
-2. **Single-Screen Register:** Class teachers see an alphabetical roster of students in their assigned `ClassArm`.
-3. **Attendance Toggle:** Tapping a student rotates status (`PRESENT` $\rightarrow$ `ABSENT` $\rightarrow$ `LATE` $\rightarrow$ `EXCUSED`).
-4. **Write Deduplication:** The database enforces a composite unique constraint (`studentId` + `date`) to prevent duplicate registers.
-5. **Offline Durability:** When a network drop occurs during register marking, the client saves entries into `localStorage` with a `syncPending` flag and syncs automatically when connectivity returns.
+2. **Multi-Form-Factor Teacher Dashboard:**
+   * **Mobile Viewport (390px):** Bottom 4-tab bar (`Home`, `Attendance`, `Scores`, `More`), compact morning cockpit with active class hero card (`JSS 2A · 38 students · Mark attendance`), To-do list with pending sync counts (`Waiting to sync · Retry`), class arm switcher pills (`JSS 2A`, `JSS 1B`, `JSS 3C`), and weekly attendance summary (`94% present`).
+   * **Tablet Landscape (1024px):** Persistent left sidebar (`Home`, `Attendance`, `Scores`, `Remarks`, `School handbook`), 2-column attendance card grid, right status rail (`To do`, `My classes`, `This week`).
+   * **Web Desktop (1440px):** Persistent left sidebar, 4 KPI summary cards (`Today's attendance`, `This week 94%`, `Maths exam scores 22 of 38`, `Remarks 0 of 38`), wide work area with side attention rail (`Needs your attention` chronic absence alerts + `< 30-word` AI remark draft approval).
+3. **Single-Screen Register & Quick Actions:** Class teachers see an alphabetical roster with a top `"Mark all present"` bulk action and single-tap status rotation.
+4. **Attendance State Machine:** Tapping a student rotates status strictly through 4 states: `PRESENT` $\rightarrow$ `ABSENT` $\rightarrow$ `LATE` $\rightarrow$ `EXCUSED`.
+5. **Sticky Tally & Save Bar:** Mobile and tablet displays feature a sticky bottom tally (`N present · N absent · N late · N excused`) with a full-width `"Save register"` action.
+6. **Write Deduplication:** The database enforces a composite unique constraint (`studentId` + `date`) to prevent duplicate registers.
+7. **Offline Durability & Client-Edge Queuing:** When a network drop occurs, mutations are stored in `localStorage` under `schoolfix_attendance_queue` with a `PENDING_SYNC` flag and a visible retry pill (`Retry N`) allowing manual or background re-sync upon connectivity recovery.
 
-### 6.3 Continuous Assessment & Gradebook
-1. **Weighting Enforcement:** The system accepts CA scores (maximum 40 marks) and Examination scores (maximum 60 marks) [ASSUMPTION: Default assessment split is 40% Continuous Assessment and 60% Terminal Examination].
+### 6.3 Continuous Assessment & Gradebook Matrix
+1. **Weighting Enforcement:** The system accepts CA scores (maximum 40.00 marks) and Examination scores (maximum 60.00 marks) with a strict 40/60 split.
 2. **Decimal Precision:** All score calculations use fixed two-digit decimals (`Decimal(5, 2)`) to eliminate floating-point rounding errors.
-3. **Automatic Computation:** Server calculates `totalScore` ($caScore + examScore$) and derives letter grades:
+3. **Interactive Matrix (Desktop/Tablet):** Spreadsheet-style inline input matrix with live auto-summing ($caScore + examScore$), dynamic class position calculation, and save state pills (`Saved`, `Waiting to sync`, `Not entered`).
+4. **Automatic Computation & Deterministic Letter Grades:**
    * 70.00 – 100.00: `A` (Distinction)
    * 60.00 – 69.99: `B` (Credit)
    * 50.00 – 59.99: `C` (Merit)
    * 40.00 – 49.99: `D` (Pass)
    * 0.00 – 39.99: `F` (Fail)
-4. **Input Sanitation:** Numeric fields reject non-digit characters at the input boundary and enforce a clamp range between `0.00` and `100.00`.
+5. **Input Sanitation & Clamp:** Numeric fields reject non-digit characters at the input boundary and enforce clamp limits ($0.00 \le caScore \le 40.00$, $0.00 \le examScore \le 60.00$).
+6. **Chronic Absence Alerts & Attention Rail:** Displays students absent for $\ge 3$ days (`Absent 3+ days: Chukwu Emeka, Garba Musa`) to flag intervention needs before terminal grading.
 
 ### 6.4 Fee Ledger & Terminal Clearance
 1. **Fee Schedule Definition:** Admins configure standard tuition fees per `ClassArm` and `term` via the `FeeSchedule` model.

@@ -21,6 +21,11 @@ export default async function DashboardPage() {
     redirect('/auth?mode=login');
   }
 
+  // Teachers land directly on their class attendance register & cockpit
+  if (session.user.role === 'TEACHER') {
+    redirect('/portal/teacher');
+  }
+
   return (
     <DashboardClient
       user={session.user}

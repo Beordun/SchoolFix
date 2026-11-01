@@ -5,15 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './AuthCard.module.css';
 
-type AuthMode = 'login' | 'register' | 'reset' | 'verify';
+type AuthMode = 'login' | 'register' | 'reset' | 'verify' | 'activate';
 
 export default function AuthCard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Read initial mode from URL query parameter (?mode=login|register|reset|verify)
+  // Read initial mode from URL query parameter (?mode=login|register|reset|verify|activate)
   const queryMode = searchParams.get('mode') as AuthMode;
-  const initialMode: AuthMode = (queryMode === 'register' || queryMode === 'reset' || queryMode === 'verify') ? queryMode : 'login';
+  const initialMode: AuthMode = (queryMode === 'register' || queryMode === 'reset' || queryMode === 'verify' || queryMode === 'activate') ? queryMode : 'login';
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
   
@@ -25,6 +25,12 @@ export default function AuthCard() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+
+  // Teacher Activation Flow State (PRD §6.1.6 & AGENTS.md §4.7)
+  const [inviteCode, setInviteCode] = useState('');
+  const [assignedClassArm, setAssignedClassArm] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Field focus tracking for Category 1 (Empty Field) blur detection
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -41,13 +47,24 @@ export default function AuthCard() {
   const showAnnoyingNumberInput = searchParams.get('test_input') === 'number';
   const hideDisabledButton = searchParams.get('test_button') === 'hidden';
 
-  // Sync mode with URL without triggering server document reloads
+  // Sync mode and query parameters with state
   useEffect(() => {
-    if (queryMode && ['login', 'register', 'reset', 'verify'].includes(queryMode)) {
+    if (queryMode && ['login', 'register', 'reset', 'verify', 'activate'].includes(queryMode)) {
       setMode(queryMode as AuthMode);
       setButtonNotice(null);
     }
-  }, [queryMode]);
+    const codeParam = searchParams.get('code');
+    const nameParam = searchParams.get('name');
+    const phoneParam = searchParams.get('phone');
+    const emailParam = searchParams.get('email');
+    const armParam = searchParams.get('arm');
+
+    if (codeParam) setInviteCode(codeParam);
+    if (nameParam) setFullName(nameParam);
+    if (phoneParam) setPhone(phoneParam);
+    if (emailParam) setEmail(emailParam);
+    if (armParam) setAssignedClassArm(armParam);
+  }, [queryMode, searchParams]);
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
@@ -110,6 +127,18 @@ export default function AuthCard() {
     validateEmailFormat(email) === null &&
     validatePhone(phone) === null &&
     validatePassword(password) === null &&
+    acceptedTerms;
+
+  // Teacher Activation Validation States (Non-Repudiation Staff Onboarding)
+  const activateCodeError = touched.inviteCode ? (!inviteCode.trim() ? 'Setup code is required (e.g. SF-7812)' : null) : null;
+  const activateConfirmPasswordError = touched.confirmPassword ? (confirmPassword !== password ? 'Passwords do not match' : null) : null;
+  const isActivateValid =
+    inviteCode.trim().length >= 4 &&
+    validateFullName(fullName) === null &&
+    validateEmailFormat(email) === null &&
+    validatePhone(phone) === null &&
+    validatePassword(password) === null &&
+    confirmPassword === password &&
     acceptedTerms;
 
   // Login Validation States (Enforced strictly on submit or blur)
@@ -179,6 +208,17 @@ export default function AuthCard() {
             onClick={() => switchMode('register')}
           >
             Create Account
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'activate'}
+            aria-controls="auth-panel"
+            id="tab-activate"
+            className={`${styles.tab} ${mode === 'activate' ? styles.tabActive : ''}`}
+            onClick={() => switchMode('activate')}
+          >
+            Activate Staff
           </button>
           <button
             type="button"
@@ -777,6 +817,349 @@ export default function AuthCard() {
                   onClick={() => switchMode('login')}
                 >
                   Back to login
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ==================== TEACHER ACTIVATION VIEW ==================== */}
+          {mode === 'activate' && (
+            <div className={styles.formContainer}>
+              <h1 className={styles.title}>Activate Teacher Account</h1>
+              <p className={styles.subtitle}>
+                Complete your staff profile and establish private credentials to access classroom attendance registers.
+              </p>
+
+              {/* Verified Staff Invitation Badge Box */}
+              <div className={styles.activationBadgeBox}>
+                <div className={styles.activationChipRow}>
+                  <span className={styles.activationRoleBadge}>
+                    <span>🔒</span> Verified Staff Invitation
+                  </span>
+                  {assignedClassArm && (
+                    <span className={styles.activationArmBadge}>
+                      <span>🏫</span> {assignedClassArm}
+                    </span>
+                  )}
+                </div>
+                <p className={styles.activationNotice}>
+                  <strong>Non-Repudiation Rule:</strong> Administrators never set teacher passwords. Setting your own private credentials preserves audit integrity for Continuous Assessment records under the NDPA.
+                </p>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  markTouched('inviteCode');
+                  markTouched('fullName');
+                  markTouched('email');
+                  markTouched('phone');
+                  markTouched('password');
+                  markTouched('confirmPassword');
+                  markTouched('terms');
+                  setServerFeedback(null);
+
+                  if (!isActivateValid) {
+                    setServerFeedback({
+                      type: 'error',
+                      message: 'Please resolve highlighted errors and ensure passwords match before activating.',
+                    });
+                    return;
+                  }
+
+                  setIsSubmitting(true);
+                  try {
+                    const res = await fetch('/api/teachers/activate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        code: inviteCode,
+                        fullName,
+                        email,
+                        phone,
+                        assignedClassArm,
+                        password,
+                        acceptedTerms,
+                      }),
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                      setServerFeedback({
+                        type: 'success',
+                        message: `Account activated for ${data.user.fullName}! Entering classroom attendance portal...`,
+                      });
+                      setTimeout(() => {
+                        router.push(data.redirectUrl || '/portal/dashboard');
+                      }, 1000);
+                    } else {
+                      setServerFeedback({
+                        type: 'error',
+                        message: data.message || 'Teacher activation failed.',
+                      });
+                    }
+                  } catch (err: any) {
+                    setServerFeedback({
+                      type: 'error',
+                      message: err.message || 'Network error during account activation.',
+                    });
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                className={styles.form}
+                noValidate
+              >
+                {serverFeedback && (
+                  <div
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      marginBottom: '1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      backgroundColor: serverFeedback.type === 'success' ? 'var(--color-surface-container-high)' : 'var(--color-surface-container-high)',
+                      color: serverFeedback.type === 'success' ? 'var(--color-primary)' : 'var(--color-error)',
+                      border: `1px solid ${serverFeedback.type === 'success' ? 'var(--color-primary)' : 'var(--color-error)'}`,
+                    }}
+                    role="alert"
+                  >
+                    {serverFeedback.message}
+                  </div>
+                )}
+
+                {/* 1. Setup Code */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-code" className={styles.label}>
+                    6-Digit Setup Code (from Admin or WhatsApp) *
+                  </label>
+                  <input
+                    id="act-code"
+                    type="text"
+                    required
+                    aria-required="true"
+                    className={`${styles.input} ${activateCodeError ? styles.inputError : ''}`}
+                    placeholder="e.g. SF-7812"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    onBlur={() => markTouched('inviteCode')}
+                    style={{ fontWeight: 700, letterSpacing: '0.1em' }}
+                  />
+                  {activateCodeError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{activateCodeError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Full Name */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-name" className={styles.label}>
+                    Teacher Full Name (Surname First) *
+                  </label>
+                  <input
+                    id="act-name"
+                    type="text"
+                    required
+                    aria-required="true"
+                    className={`${styles.input} ${nameError ? styles.inputError : ''}`}
+                    placeholder="e.g. Okonkwo Emeka"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    onBlur={() => markTouched('fullName')}
+                  />
+                  {nameError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{nameError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Staff Email */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-email" className={styles.label}>
+                    Official Staff Email *
+                  </label>
+                  <input
+                    id="act-email"
+                    type="email"
+                    required
+                    aria-required="true"
+                    className={`${styles.input} ${regEmailError ? styles.inputError : ''}`}
+                    placeholder="teacher@greenfield.internal"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => markTouched('email')}
+                  />
+                  {regEmailError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{regEmailError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Nigerian Mobile Phone */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-phone" className={styles.label}>
+                    Nigerian Mobile Phone (WhatsApp Alerts) *
+                  </label>
+                  <input
+                    id="act-phone"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    required
+                    aria-required="true"
+                    className={`${styles.input} ${phoneError ? styles.inputError : ''}`}
+                    placeholder="08012345678"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    onBlur={() => markTouched('phone')}
+                  />
+                  {phoneError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{phoneError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Set Private Password */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-password" className={styles.label}>
+                    Set Private Password (Min 8 chars, uppercase, lowercase &amp; number) *
+                  </label>
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      id="act-password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      aria-required="true"
+                      className={`${styles.passwordInput} ${regPasswordError ? styles.inputError : ''}`}
+                      placeholder="Enter strong private password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onBlur={() => markTouched('password')}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className={styles.toggleVisibilityBtn}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {regPasswordError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{regPasswordError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Confirm Private Password */}
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="act-confirm-password" className={styles.label}>
+                    Confirm Private Password *
+                  </label>
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      id="act-confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      aria-required="true"
+                      className={`${styles.passwordInput} ${activateConfirmPasswordError ? styles.inputError : ''}`}
+                      placeholder="Re-enter password to confirm"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onBlur={() => markTouched('confirmPassword')}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className={styles.toggleVisibilityBtn}
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {activateConfirmPasswordError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{activateConfirmPasswordError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 7. Non-Repudiation NDPA Consent Checkbox */}
+                <div className={styles.checkboxGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      required
+                      aria-required="true"
+                      checked={acceptedTerms}
+                      onChange={(e) => {
+                        setAcceptedTerms(e.target.checked);
+                        markTouched('terms');
+                      }}
+                      className={styles.checkbox}
+                    />
+                    <span>
+                      I acknowledge that all attendance marking and continuous assessment score submissions will be non-repudiably attributed to my credentials under Nigeria Data Protection Act (NDPA) regulations.
+                    </span>
+                  </label>
+                  {termsError && (
+                    <div className={styles.errorMessage} role="alert">
+                      <CautionIcon />
+                      <span>{termsError}</span>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`${styles.submitBtn} ${!isActivateValid ? styles.submitBtnDisabled : ''}`}
+                >
+                  {isSubmitting ? 'Securing Credentials...' : 'Activate Account & Enter Register \u2192'}
+                </button>
+              </form>
+
+              <div className={styles.footerPrompt}>
+                <span>Already activated? </span>
+                <button
+                  type="button"
+                  className={styles.inlineAction}
+                  onClick={() => switchMode('login')}
+                >
+                  Sign in here
                 </button>
               </div>
             </div>

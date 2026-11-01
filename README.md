@@ -12,8 +12,12 @@ SchoolFix is a mobile-first school management and tuition reconciliation web app
   * **Task 3 (Client Validation, SPA Auth & Accessibility):** Collapsed multi-page auth into query state machine (`/auth?mode=login|register|reset`), 4 derived client validation categories with legitimate user costs documented, Nigerian phone `inputMode="numeric"` fix, user enumeration defense, WCAG 2.1 AA accessibility audit with NVDA/TalkBack transcripts, disabled button tab-order retention (`aria-disabled="true"`), adversarial form attack (whitespace password defect), direct endpoint bypass proof (`HTTP 201 Created` user `5d8e9b4e-76d3-4f6b-84d0-02dd50411ae5`), hard rollback experiment (`171a725`), defects log (`docs/defects.md`), and 14 viva defense answers (`docs/interview-answers.md`).
   * **Task 4 (Server Security, Hashing & Boundary Validation):** Frozen 11-model relational schema with separate `PaymentAttempt` dual-ledger, three-step zero-downtime migration pattern (Expand-Backfill-Contract) for `nin`, runtime schema drift error forensics (`evidence/06-drift-error.txt`), slow password hashing benchmark (Argon2id 82.21ms vs SHA-256 0.092ms, 894× ratio), Zod boundary validation rejecting Task 3 direct bypass attack (`HTTP 400 Bad Request` in `evidence/12-direct-request-before-and-after.txt`), lowercased email normalization, trimmed passwords, sliding window rate limiting (5 req/min, triggered 429 & defeated via IP rotation in `evidence/14-rate-limit-defeated.txt`), k-anonymity HaveIBeenPwned breach rejection (`evidence/15-breach-check-rejection.png`), CSPRNG 6-digit OTP email verification with 10-minute expiry, asynchronous queue worker (3,085ms sync vs 438ms background job), all 3 failure states evidenced (expired, wrong, code reused), branded transactional email with Task 1 tokens (`evidence/23-rendered-email.png`), defect log (`docs/defects.md`), and 19 viva answers (`docs/interview-answers.md`).
   * **Task 5 (Sessions, Compliance & Viva Defense):** Cryptographic 32-byte CSPRNG session engine with SHA-256 storage hash, strict cookie flags (`HttpOnly`, `Secure`, `SameSite=Lax`), empirical evaluation and evidence of Soft Gating (shipped) vs Hard Gating, constant-time login with generic errors, Next.js edge middleware, multi-user shared browser isolation test (`evidence/06`), true server-side logout destroying database rows, network failure edge-case fix (`evidence/09` & `10`), global password reset session invalidation, lawful 3-stage NDPA account deletion (soft delete, 7-day grace period lock, background purge worker proved idempotent in `evidence/13` & `14`), transient frontend state preservation without library bloat, RBAC administrative route with copied-link 403 refusal (`evidence/16`), primary research interview with Lagos school bursar (`docs/interview-with-owner.md`), comprehensive 7-chapter Technical Handbook (`docs/handbook.md`) documenting 7 real mistakes, 8 honest admissions in `docs/what-i-do-not-know.md`, published engineering article on Substack/Medium (`docs/article.md`, `evidence/17`), and all 22 interview defense answers (`docs/interview-answers.md`).
+  * **Teacher's Dashboard (Cockpit, Attendance, Gradebook & Remarks):** Multi-device responsive teacher portal (`/portal/teacher`) adhering to SchoolFix Primary 40 Indigo design tokens:
+    * **Mobile (390px):** 4-tab bottom navigation (`Home`, `Attendance`, `Scores`, `More`), morning cockpit hero card (`JSS 2A · 38 students · Mark attendance`), To-do list with pending sync counts and retry action, 4-state tap attendance register (`PRESENT`, `ABSENT`, `LATE`, `EXCUSED`), and sticky bottom tally bar (`Save register`).
+    * **Tablet Landscape (1024px):** Persistent left sidebar (`Home`, `Attendance`, `Scores`, `Remarks`, `School handbook`), 2-column attendance grid, right status rail (`To do`, `My classes`, `This week 94% present`).
+    * **Web Desktop (1440px):** 4-card metric strip, side-by-side Continuous Assessment Matrix (40 CA / 60 Exam live auto-sum and position ranking), chronic absence attention rail (`Absent 3+ days`), and AI-assisted terminal remark draft approval (<30 words).
 * **All Milestones Status:**
-  * All 5 curriculum milestones (Tasks 1 through 5) are 100% completed, evidenced, and documented.
+  * All 5 curriculum milestones (Tasks 1 through 5) plus authenticated multi-role dashboards (Bursar, Parent, Teacher) are 100% completed, evidenced, and documented.
 
 ---
 
@@ -25,6 +29,7 @@ SchoolFix is a mobile-first school management and tuition reconciliation web app
 * **Zod:** Provides declarative boundary validation on all incoming request bodies and route parameters before touching database queries, preventing corrupt inputs from reaching service layers.
 * **Argon2id:** Memory-hard cryptographic password hashing ($65,536\text{ KiB}$ memory, 3 iterations, 4 parallelism) protects parent accounts against GPU-accelerated dictionary attacks, unlike vulnerable fast hashes like SHA-256.
 * **Flutterwave:** Built-in support for Nigerian banking rails (debit cards, bank transfers, USSD) with webhook signature verification, unlike foreign gateways lacking direct NGN settlement.
+* **Nodemailer & SMTP Transport:** Dedicated transactional email delivery over TLS port 587 (`smtp.gmail.com`) authenticated as `beordunmichael@gmail.com` with asynchronous background queue processing to prevent holding HTTP threads open.
 
 ---
 
@@ -72,6 +77,11 @@ Open `http://localhost:3000` in your browser. The application is running.
 * `FLW_PUBLIC_KEY`: Flutterwave merchant public key for initializing checkout modals.
 * `FLW_SECRET_KEY`: Flutterwave secret key for server-to-server transaction verification requests.
 * `FLW_SECRET_HASH`: Secret hash header verified against incoming Flutterwave webhook events.
+* `SMTP_HOST`: SMTP relay server hostname (`smtp.gmail.com`).
+* `SMTP_PORT`: SMTP TLS transport port (defaults to 587).
+* `SMTP_USER`: Authenticated SMTP sender account (`beordunmichael@gmail.com`).
+* `SMTP_PASS`: Dedicated 16-character Google App Password for authenticated TLS transport.
+* `SMTP_FROM`: Branded envelope sender header (`SchoolFix Portal <beordunmichael@gmail.com>`).
 
 ---
 

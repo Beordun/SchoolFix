@@ -119,6 +119,13 @@ The agent is **strictly prohibited** from scaffolding, proposing, or generating 
   2. **7-Day Grace Period:** Account is locked and inactive in the database.
   3. **Scheduled Purge Transaction:** Background worker sets `isAnonymized: true`, clears personal identifiers, and sets `Student.parentId = null`, while retaining financial records for legal tax compliance.
 
+### 7. Teacher Onboarding & Non-Repudiation Invite Flow
+- **Prohibition on Open Self-Registration:** Teachers cannot self-register with role `TEACHER` at `/auth?mode=register` (which strictly defaults to `PARENT`). Role assignment is strictly locked by the school administrator.
+- **Prohibition on Admin-Assigned Passwords:** Administrators must never choose, set, or distribute passwords to teachers. Shared passwords undermine non-repudiation and audit log veracity regarding continuous assessment score modifications.
+- **Cryptographic Invite & WhatsApp Distribution:** The administrator enters the teacher's name, phone, optional email, and assigned `ClassArm`(s). The system generates a single-use, 72-hour invite token and a prominent **"Share via WhatsApp"** link with pre-filled message text.
+- **6-Digit Setup Code Fallback:** For teachers with constrained devices or low digital literacy, the admin is provided a 6-digit setup code (`SF-XXXX`, valid 72 hours) that can be delivered physically on paper.
+- **Teacher Activation (`/auth?mode=activate`):** The teacher accesses the activation gateway via link or code, verifies their identity, sets their own private password (validated against breach corpora and hashed strictly with Argon2id), and lands directly on their assigned class attendance register.
+
 ---
 
 ## 5. DESIGN TOKEN ENFORCEMENT & STYLING RULES
