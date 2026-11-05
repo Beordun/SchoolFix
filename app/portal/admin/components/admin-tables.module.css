@@ -1,0 +1,182 @@
+/* app/portal/admin/components/admin-tables.module.css */
+/* Responsive layout for Admin & Bursar Portal Tables: Desktop Table vs Mobile Stacked Cards */
+
+/* 1. Desktop & Tablet (Default: displays dense administrative table) */
+.desktopTableWrapper {
+  display: block;
+  overflow-x: auto;
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-soft);
+}
+
+.mobileCardsWrapper {
+  display: none;
+}
+
+/* 2. Mobile Viewport (≤ 640px: replaces horizontal-scrolling table with scannable stacked cards) */
+@media (max-width: 640px) {
+  .desktopTableWrapper {
+    display: none;
+  }
+
+  .mobileCardsWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3, 0.75rem);
+    width: 100%;
+  }
+
+  .adminCard {
+    background-color: var(--color-surface-container-lowest);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-medium);
+    padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cardTitle {
+    font-size: var(--type-title-small-size);
+    font-weight: 700;
+    color: var(--color-on-surface);
+  }
+
+  .cardSubHeader {
+    font-size: 0.75rem;
+    color: var(--color-on-surface-variant);
+    font-family: monospace;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cardGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    background-color: var(--color-surface-container-low);
+    padding: 0.625rem;
+    border-radius: var(--radius-small);
+    border: 1px solid var(--color-outline-variant);
+  }
+
+  .gridItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .gridLabel {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .gridValue {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-on-surface);
+  }
+
+  .gridValuePrimary {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .gridValueSuccess {
+    color: var(--color-success);
+    font-weight: 700;
+  }
+
+  .gridValueError {
+    color: var(--color-error);
+    font-weight: 700;
+  }
+
+  .cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border-top: 1px dashed var(--color-outline-variant);
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .badgeSuccess {
+    background-color: var(--color-success-container);
+    color: var(--color-on-success-container);
+  }
+
+  .badgeWarning {
+    background-color: var(--color-warning-container);
+    color: var(--color-on-warning-container);
+  }
+
+  .badgeError {
+    background-color: var(--color-error-container);
+    color: var(--color-on-error-container);
+  }
+
+  .badgeNeutral {
+    background-color: var(--color-surface-container-high);
+    color: var(--color-on-surface-variant);
+  }
+
+  .badgePrimary {
+    background-color: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+  }
+
+  .actionButton {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.875rem;
+    border-radius: var(--radius-small);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border: none;
+    width: 100%;
+  }
+
+  .actionButtonPrimary {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+
+  .actionButtonOutline {
+    background-color: var(--color-surface-container-high);
+    color: var(--color-primary);
+    border: 1px solid var(--color-outline-variant);
+  }
+}

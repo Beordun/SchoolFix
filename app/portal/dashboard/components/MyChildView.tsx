@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { ChildProfile } from '../types';
+import styles from './MyChildView.module.css';
 
 interface MyChildViewProps {
   child: ChildProfile;
@@ -233,7 +234,8 @@ export default function MyChildView({ child }: MyChildViewProps) {
             </p>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          {/* Desktop & Tablet View: Dense Data Table */}
+          <div className={styles.desktopTableWrapper}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr className="type-label-small" style={{ backgroundColor: 'var(--color-surface-container)' }}>
@@ -293,6 +295,53 @@ export default function MyChildView({ child }: MyChildViewProps) {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile View (≤ 640px): Stacked Responsive Cards (Zero Horizontal Scroll) */}
+          <div className={styles.mobileCardsWrapper}>
+            {child.subjects.map((sub) => (
+              <div key={sub.id} className={styles.subjectCard}>
+                <div className={styles.cardHeader}>
+                  <span className={styles.subjectName}>{sub.subject}</span>
+                  <span
+                    className={styles.gradeBadge}
+                    style={{
+                      backgroundColor:
+                        sub.grade === 'A'
+                          ? 'var(--color-success-container)'
+                          : sub.grade === 'B'
+                          ? 'var(--color-primary-container)'
+                          : 'var(--color-surface-container-high)',
+                      color:
+                        sub.grade === 'A'
+                          ? 'var(--color-on-success-container)'
+                          : sub.grade === 'B'
+                          ? 'var(--color-on-primary-container)'
+                          : 'var(--color-on-surface)',
+                    }}
+                  >
+                    Grade {sub.grade}
+                  </span>
+                </div>
+
+                <div className={styles.metricsGrid}>
+                  <div className={styles.metricCell}>
+                    <span className={styles.metricLabel}>CA (/40)</span>
+                    <span className={styles.metricValue}>{sub.caScore.toFixed(2)}</span>
+                  </div>
+                  <div className={styles.metricCell}>
+                    <span className={styles.metricLabel}>Exam (/60)</span>
+                    <span className={styles.metricValue}>{sub.examScore.toFixed(2)}</span>
+                  </div>
+                  <div className={styles.metricCell}>
+                    <span className={styles.metricLabel}>Total (/100)</span>
+                    <span className={`${styles.metricValue} ${styles.metricValueTotal}`}>
+                      {sub.totalScore.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

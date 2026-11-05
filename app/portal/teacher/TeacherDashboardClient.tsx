@@ -830,6 +830,83 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile View (≤ 640px): Stacked Responsive Grading Cards */}
+              <div className={styles.mobileScoresCards}>
+                {computedScores.map((student) => (
+                  <div key={student.studentId} className={styles.studentScoreCard}>
+                    <div className={styles.studentScoreCardHeader}>
+                      <span className={styles.studentScoreName}>{student.fullName}</span>
+                      <div className={styles.studentScoreBadges}>
+                        <span
+                          className={`${styles.gradeBadge} ${
+                            student.grade === 'A'
+                              ? styles.gradeA
+                              : student.grade === 'B'
+                              ? styles.gradeB
+                              : student.grade === 'C'
+                              ? styles.gradeC
+                              : student.grade === 'D'
+                              ? styles.gradeD
+                              : student.grade === 'F'
+                              ? styles.gradeF
+                              : ''
+                          }`}
+                        >
+                          Grade {student.grade}
+                        </span>
+                        <span className={styles.studentPositionPill}>#{student.position}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.studentInputsRow}>
+                      <div className={styles.scoreInputGroup}>
+                        <label className={styles.scoreInputLabel}>CA (/40)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="40"
+                          inputMode="numeric"
+                          className={styles.scoreInputMobile}
+                          value={student.caScore}
+                          onChange={(e) => handleScoreChange(student.studentId, 'caScore', e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className={styles.scoreInputGroup}>
+                        <label className={styles.scoreInputLabel}>Exam (/60)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="60"
+                          inputMode="numeric"
+                          className={styles.scoreInputMobile}
+                          value={student.examScore}
+                          onChange={(e) => handleScoreChange(student.studentId, 'examScore', e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.studentScoreCardFooter}>
+                      <div>
+                        Total: <span className={styles.studentTotalScore}>{student.total !== null ? `${student.total} / 100` : '—'}</span>
+                      </div>
+                      <span
+                        className={
+                          student.status === 'Saved'
+                            ? styles.badgeSaved
+                            : student.status === 'Waiting to sync'
+                            ? styles.badgeWaiting
+                            : styles.badgeNotEntered
+                        }
+                      >
+                        {student.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
               <p style={{ fontSize: '0.8125rem', color: '#666', marginTop: '0.75rem' }}>
                 Showing {computedScores.length} students · Grades derived: 70+ A, 60-69 B, 50-59 C, 40-49 D, 0-39 F
               </p>

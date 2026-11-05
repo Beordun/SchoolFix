@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './admin-tables.module.css';
 
 interface StudentReport {
   studentId: string;
@@ -154,72 +155,127 @@ export default function ReportsAdminView() {
           </div>
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Admission No</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Student Name</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Class Arm</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Tuition Balance</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Report Card Visibility</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((report) => (
-              <tr key={report.studentId} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontFamily: 'monospace' }}>{report.admissionNo}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 600 }}>{report.name}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>{report.classArm}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>
-                  {report.balance === 0 ? (
-                    <span style={{ color: 'var(--color-success)' }}>₦0</span>
-                  ) : (
-                    <span style={{ color: 'var(--color-error)' }}>₦{report.balance.toLocaleString()}</span>
-                  )}
-                </td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.125rem 0.5rem',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor:
-                        report.clearanceStatus === 'UNLOCKED'
-                          ? 'var(--color-success-container)'
-                          : 'var(--color-error-container)',
-                      color:
-                        report.clearanceStatus === 'UNLOCKED'
-                          ? 'var(--color-on-success-container)'
-                          : 'var(--color-on-error-container)',
-                    }}
-                  >
-                    {report.clearanceStatus === 'UNLOCKED' ? '✅ Unlocked & Visible' : '🔒 Redacted & Gated'}
-                  </span>
-                </td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
-                  <button
-                    onClick={() => setSelectedReport(report)}
-                    style={{
-                      padding: '0.25rem 0.625rem',
-                      backgroundColor: 'var(--color-surface-container-high)',
-                      border: '1px solid var(--color-outline-variant)',
-                      borderRadius: 'var(--radius-small)',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: 'var(--color-primary)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Preview Card →
-                  </button>
-                </td>
+        {/* Desktop & Tablet View: Full Dense Table */}
+        <div className={styles.desktopTableWrapper}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
+            <thead>
+              <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Admission No</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Student Name</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Class Arm</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Tuition Balance</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Report Card Visibility</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((report) => (
+                <tr key={report.studentId} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontFamily: 'monospace' }}>{report.admissionNo}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 600 }}>{report.name}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>{report.classArm}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>
+                    {report.balance === 0 ? (
+                      <span style={{ color: 'var(--color-success)' }}>₦0</span>
+                    ) : (
+                      <span style={{ color: 'var(--color-error)' }}>₦{report.balance.toLocaleString()}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        backgroundColor:
+                          report.clearanceStatus === 'UNLOCKED'
+                            ? 'var(--color-success-container)'
+                            : 'var(--color-error-container)',
+                        color:
+                          report.clearanceStatus === 'UNLOCKED'
+                            ? 'var(--color-on-success-container)'
+                            : 'var(--color-on-error-container)',
+                      }}
+                    >
+                      {report.clearanceStatus === 'UNLOCKED' ? '✅ Unlocked & Visible' : '🔒 Redacted & Gated'}
+                    </span>
+                  </td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
+                    <button
+                      onClick={() => setSelectedReport(report)}
+                      style={{
+                        padding: '0.25rem 0.625rem',
+                        backgroundColor: 'var(--color-surface-container-high)',
+                        border: '1px solid var(--color-outline-variant)',
+                        borderRadius: 'var(--radius-small)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: 'var(--color-primary)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Preview Card →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile View (≤ 640px): Stacked Responsive Report Clearance Cards */}
+        <div className={styles.mobileCardsWrapper}>
+          {filtered.map((report) => (
+            <div key={report.studentId} className={styles.adminCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTitle}>{report.name}</span>
+                <span
+                  className={`${styles.badge} ${
+                    report.clearanceStatus === 'UNLOCKED' ? styles.badgeSuccess : styles.badgeError
+                  }`}
+                >
+                  {report.clearanceStatus === 'UNLOCKED' ? '✅ Unlocked' : '🔒 Gated'}
+                </span>
+              </div>
+
+              <div className={styles.cardSubHeader}>
+                <span>{report.admissionNo}</span>
+                <span>·</span>
+                <span className={`${styles.badge} ${styles.badgePrimary}`}>{report.classArm}</span>
+              </div>
+
+              <div className={styles.cardGrid}>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Outstanding Balance</span>
+                  <span
+                    className={`${styles.gridValue} ${
+                      report.balance === 0 ? styles.gridValueSuccess : styles.gridValueError
+                    }`}
+                  >
+                    {report.balance === 0 ? '₦0 (Cleared)' : `₦${report.balance.toLocaleString()}`}
+                  </span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Report Status</span>
+                  <span className={styles.gridValue}>
+                    {report.clearanceStatus === 'UNLOCKED' ? 'Full Access' : 'Scores Redacted'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.cardFooter}>
+                <button
+                  onClick={() => setSelectedReport(report)}
+                  className={`${styles.actionButton} ${styles.actionButtonOutline}`}
+                >
+                  Preview Terminal Report Card ↗
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Report Card Preview Modal */}

@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './admin-tables.module.css';
 
 interface FeeItem {
   id: string;
@@ -165,15 +166,8 @@ export default function FeesView() {
       </div>
 
       {/* Fee Schedules Table */}
-      <div
-        style={{
-          backgroundColor: 'var(--color-surface-container-lowest)',
-          borderRadius: 'var(--radius-medium)',
-          border: '1px solid var(--color-outline-variant)',
-          boxShadow: 'var(--shadow-soft)',
-          overflowX: 'auto',
-        }}
-      >
+      {/* Desktop & Tablet View: Full Dense Table */}
+      <div className={styles.desktopTableWrapper}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
@@ -224,6 +218,58 @@ export default function FeesView() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile View (≤ 640px): Stacked Responsive Fee Cards */}
+      <div className={styles.mobileCardsWrapper}>
+        {feeSchedules.map((schedule) => {
+          const rate = Math.round((schedule.collectedTotal / schedule.expectedTotal) * 100);
+          return (
+            <div key={schedule.id} className={styles.adminCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTitle}>{schedule.section}</span>
+                <span className={`${styles.badge} ${rate >= 80 ? styles.badgeSuccess : styles.badgeWarning}`}>
+                  {rate}% Collected
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div
+                style={{
+                  width: '100%',
+                  height: '0.375rem',
+                  backgroundColor: 'var(--color-surface-container-high)',
+                  borderRadius: 'var(--radius-full)',
+                  overflow: 'hidden',
+                  margin: '0.25rem 0',
+                }}
+              >
+                <div style={{ width: `${rate}%`, height: '100%', backgroundColor: 'var(--color-success)' }} />
+              </div>
+
+              <div className={styles.cardGrid}>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Core Tuition</span>
+                  <span className={styles.gridValue}>₦{schedule.coreTuition.toLocaleString()}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Dev Levy</span>
+                  <span className={styles.gridValue}>₦{schedule.devLevy.toLocaleString()}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Books & Uniform</span>
+                  <span className={styles.gridValue}>₦{schedule.booksAndUniform.toLocaleString()}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Total / Student</span>
+                  <span className={`${styles.gridValue} ${styles.gridValuePrimary}`}>
+                    ₦{schedule.totalPerStudent.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

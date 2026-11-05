@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './admin-tables.module.css';
 
 export interface Teacher {
   id: string;
@@ -608,17 +609,9 @@ export default function TeachersView() {
       </div>
 
       {/* 4. Teachers Directory Table */}
-      <div
-        style={{
-          backgroundColor: 'var(--color-surface-container-lowest)',
-          borderRadius: 'var(--radius-medium)',
-          border: '1px solid var(--color-outline-variant)',
-          boxShadow: 'var(--shadow-soft)',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      {/* Desktop & Tablet View: Full Multi-Column Table */}
+      <div className={styles.desktopTableWrapper}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr
                 style={{
@@ -627,19 +620,13 @@ export default function TeachersView() {
                 }}
               >
                 <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)' }}>
-                  Teacher
+                  Teacher &amp; Contact
                 </th>
                 <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)' }}>
-                  Contact Information
+                  Assigned Class &amp; Subject
                 </th>
                 <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)' }}>
-                  Subject Specialization
-                </th>
-                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)' }}>
-                  Assigned Class Arm
-                </th>
-                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)' }}>
-                  Attendance Today
+                  Attendance / Status
                 </th>
                 <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-label-small-size)', fontWeight: 700, color: 'var(--color-on-surface)', textAlign: 'right' }}>
                   Actions
@@ -655,7 +642,7 @@ export default function TeachersView() {
                     backgroundColor: idx % 2 === 0 ? 'transparent' : 'var(--color-surface-container-low)',
                   }}
                 >
-                  {/* Teacher Name & Staff ID */}
+                  {/* 1. Teacher Name, Staff ID & Contact Information */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
                       <div
@@ -679,65 +666,64 @@ export default function TeachersView() {
                           .slice(-2)
                           .join('')}
                       </div>
-                      <div>
-                        <div style={{ fontWeight: 700, color: 'var(--color-on-surface)', fontSize: 'var(--type-body-medium-size)' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, color: 'var(--color-on-surface)', fontSize: 'var(--type-body-medium-size)', lineHeight: 1.3 }}>
                           {teacher.fullName}
                         </div>
-                        <div style={{ fontSize: 'var(--type-label-small-size)', color: 'var(--color-on-surface-variant)', fontFamily: 'monospace' }}>
-                          {teacher.staffId}
+                        <div style={{ fontSize: 'var(--type-label-small-size)', color: 'var(--color-on-surface-variant)', marginTop: '0.15rem' }}>
+                          <span style={{ fontFamily: 'monospace' }}>{teacher.staffId}</span>
+                          <span style={{ margin: '0 0.35rem' }}>·</span>
+                          <span>{teacher.phone}</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)', wordBreak: 'break-all', marginTop: '0.1rem' }}>
+                          {teacher.email}
                         </div>
                       </div>
                     </div>
                   </td>
 
-                  {/* Contact */}
-                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-body-small-size)' }}>
-                    <div style={{ color: 'var(--color-on-surface)' }}>{teacher.email}</div>
-                    <div style={{ color: 'var(--color-on-surface-variant)', marginTop: '0.2rem' }}>{teacher.phone}</div>
-                  </td>
-
-                  {/* Subjects */}
-                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontSize: 'var(--type-body-small-size)', color: 'var(--color-on-surface)' }}>
-                    {teacher.subjects}
-                  </td>
-
-                  {/* Assigned Class Arm (RBAC) */}
+                  {/* 2. Assigned Class Arm & Subject Specialization */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
-                    {teacher.assignedClassArm ? (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                          padding: 'var(--spacing-1) var(--spacing-3)',
-                          borderRadius: 'var(--radius-small)',
-                          backgroundColor: 'var(--color-primary-container)',
-                          color: 'var(--color-on-primary-container)',
-                          fontWeight: 700,
-                          fontSize: 'var(--type-label-small-size)',
-                        }}
-                      >
-                        🏫 {teacher.assignedClassArm}
-                      </span>
-                    ) : (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: 'var(--spacing-1) var(--spacing-2)',
-                          borderRadius: 'var(--radius-small)',
-                          backgroundColor: 'var(--color-surface-container)',
-                          color: 'var(--color-on-surface-variant)',
-                          fontWeight: 600,
-                          fontSize: 'var(--type-label-small-size)',
-                        }}
-                      >
-                        Unassigned (Subject Teacher)
-                      </span>
-                    )}
+                    <div>
+                      {teacher.assignedClassArm ? (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            padding: 'var(--spacing-1) var(--spacing-2)',
+                            borderRadius: 'var(--radius-small)',
+                            backgroundColor: 'var(--color-primary-container)',
+                            color: 'var(--color-on-primary-container)',
+                            fontWeight: 700,
+                            fontSize: 'var(--type-label-small-size)',
+                          }}
+                        >
+                          🏫 {teacher.assignedClassArm}
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: 'var(--spacing-1) var(--spacing-2)',
+                            borderRadius: 'var(--radius-small)',
+                            backgroundColor: 'var(--color-surface-container)',
+                            color: 'var(--color-on-surface-variant)',
+                            fontWeight: 600,
+                            fontSize: 'var(--type-label-small-size)',
+                          }}
+                        >
+                          Unassigned (Subject Teacher)
+                        </span>
+                      )}
+                      <div style={{ fontSize: 'var(--type-body-small-size)', color: 'var(--color-on-surface-variant)', marginTop: '0.25rem' }}>
+                        {teacher.subjects}
+                      </div>
+                    </div>
                   </td>
 
-                  {/* Daily Attendance State / Invite Status */}
+                  {/* 3. Daily Attendance State / Invite Status */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
                     {teacher.status === 'INVITED' ? (
                       <span
@@ -794,26 +780,25 @@ export default function TeachersView() {
                     )}
                   </td>
 
-                  {/* Actions: Share Invite & Reassign Class */}
+                  {/* 4. Actions: Share Invite & Reassign Class */}
                   <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: 'var(--spacing-2)', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 'var(--spacing-1)', alignItems: 'flex-end', justifyContent: 'center' }}>
                       {teacher.status === 'INVITED' && (
                         <button
                           onClick={() => handleShareInvite(teacher)}
                           style={{
-                            padding: 'var(--spacing-1) var(--spacing-3)',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'var(--color-on-primary)',
-                            border: 'none',
-                            borderRadius: 'var(--radius-small)',
-                            fontWeight: 700,
-                            fontSize: 'var(--type-label-small-size)',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                            minHeight: '2.25rem',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '0.25rem',
+                            padding: 'var(--spacing-1) var(--spacing-2)',
+                            borderRadius: 'var(--radius-small)',
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'var(--color-on-primary)',
+                            border: 'none',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
                           }}
                         >
                           <span>Share Invite</span>
@@ -826,16 +811,18 @@ export default function TeachersView() {
                           setTargetClassArm(teacher.assignedClassArm || '');
                         }}
                         style={{
-                          padding: 'var(--spacing-1) var(--spacing-3)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          borderRadius: 'var(--radius-small)',
                           backgroundColor: 'var(--color-surface-container-high)',
                           color: 'var(--color-primary)',
-                          border: '1px solid var(--color-outline-variant)',
-                          borderRadius: 'var(--radius-small)',
+                          border: 'none',
                           fontWeight: 700,
-                          fontSize: 'var(--type-label-small-size)',
+                          fontSize: '0.75rem',
                           cursor: 'pointer',
                           whiteSpace: 'nowrap',
-                          minHeight: '2.25rem',
                         }}
                       >
                         Reassign Class ⇄
@@ -848,7 +835,7 @@ export default function TeachersView() {
               {filteredTeachers.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={4}
                     style={{
                       padding: 'var(--spacing-8)',
                       textAlign: 'center',
@@ -863,7 +850,104 @@ export default function TeachersView() {
             </tbody>
           </table>
         </div>
-      </div>
+
+        {/* Mobile View (≤ 640px): Stacked Responsive Teacher Cards */}
+        <div className={styles.mobileCardsWrapper}>
+          {filteredTeachers.map((teacher) => (
+            <div key={teacher.id} className={styles.adminCard}>
+              <div className={styles.cardHeader}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <div
+                    style={{
+                      width: '2.25rem',
+                      height: '2.25rem',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-primary-container)',
+                      color: 'var(--color-on-primary-container)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      fontSize: '0.8125rem',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {teacher.fullName
+                      .split(' ')
+                      .map((n) => n[0])
+                      .slice(-2)
+                      .join('')}
+                  </div>
+                  <div>
+                    <div className={styles.cardTitle}>{teacher.fullName}</div>
+                    <div className={styles.cardSubHeader}>
+                      <span>{teacher.staffId}</span>
+                      <span>·</span>
+                      <span>{teacher.subjects}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  {teacher.status === 'INVITED' ? (
+                    <span className={`${styles.badge} ${styles.badgePrimary}`}>
+                      ✉️ Invited
+                    </span>
+                  ) : teacher.attendanceSubmittedToday ? (
+                    <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+                      ✓ Att. Submitted
+                    </span>
+                  ) : teacher.assignedClassArm ? (
+                    <span className={`${styles.badge} ${styles.badgeWarning}`}>
+                      ⏳ Att. Pending
+                    </span>
+                  ) : (
+                    <span className={`${styles.badge} ${styles.badgeNeutral}`}>
+                      Subject Teacher
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.cardGrid}>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Assigned Class</span>
+                  <span className={styles.gridValue}>
+                    {teacher.assignedClassArm ? `🏫 ${teacher.assignedClassArm}` : 'Unassigned'}
+                  </span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Contact Info</span>
+                  <span className={styles.gridValue}>{teacher.phone}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-on-surface-variant)', wordBreak: 'break-all' }}>
+                    {teacher.email}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.cardFooter}>
+                {teacher.status === 'INVITED' && (
+                  <button
+                    onClick={() => handleShareInvite(teacher)}
+                    className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+                  >
+                    <span>Share WhatsApp Invite</span>
+                    <span>↗</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setReassignTeacher(teacher);
+                    setTargetClassArm(teacher.assignedClassArm || '');
+                  }}
+                  className={`${styles.actionButton} ${styles.actionButtonOutline}`}
+                >
+                  Reassign Class Arm ⇄
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
 
       {/* 5. Modal: Invite New Teacher */}
       {showAddModal && (

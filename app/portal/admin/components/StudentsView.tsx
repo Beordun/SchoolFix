@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './admin-tables.module.css';
 
 interface Student {
   admissionNo: string;
@@ -207,15 +208,8 @@ export default function StudentsView() {
       </div>
 
       {/* Students Data Table */}
-      <div
-        style={{
-          backgroundColor: 'var(--color-surface-container-lowest)',
-          borderRadius: 'var(--radius-medium)',
-          border: '1px solid var(--color-outline-variant)',
-          boxShadow: 'var(--shadow-soft)',
-          overflowX: 'auto',
-        }}
-      >
+      {/* Desktop & Tablet View: Full Dense Table */}
+      <div className={styles.desktopTableWrapper}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
@@ -255,10 +249,11 @@ export default function StudentsView() {
                   <span
                     style={{
                       display: 'inline-block',
-                      padding: '0.125rem 0.5rem',
-                      borderRadius: 'var(--radius-full)',
+                      padding: '0.25rem 0.625rem',
+                      borderRadius: 'var(--radius-small)',
                       fontSize: '0.75rem',
                       fontWeight: 700,
+                      whiteSpace: 'nowrap',
                       backgroundColor:
                         student.status === 'CLEARED'
                           ? 'var(--color-success-container)'
@@ -269,13 +264,61 @@ export default function StudentsView() {
                           : 'var(--color-on-error-container)',
                     }}
                   >
-                    {student.status === 'CLEARED' ? 'Cleared (Report Card Unlocked)' : 'Gated (Arrears Due)'}
+                    {student.status === 'CLEARED' ? 'Cleared' : 'Arrears Due'}
                   </span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile View (≤ 640px): Stacked Responsive Cards */}
+      <div className={styles.mobileCardsWrapper}>
+        {filteredStudents.map((student) => (
+          <div key={student.admissionNo} className={styles.adminCard}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>{student.fullName}</span>
+              <span
+                className={`${styles.badge} ${
+                  student.status === 'CLEARED' ? styles.badgeSuccess : styles.badgeError
+                }`}
+                style={{ borderRadius: 'var(--radius-small)', whiteSpace: 'nowrap' }}
+              >
+                {student.status === 'CLEARED' ? 'Cleared' : 'Arrears Due'}
+              </span>
+            </div>
+
+            <div className={styles.cardSubHeader}>
+              <span>{student.admissionNo}</span>
+              <span>·</span>
+              <span className={`${styles.badge} ${styles.badgePrimary}`}>{student.classArm}</span>
+            </div>
+
+            <div className={styles.cardGrid}>
+              <div className={styles.gridItem}>
+                <span className={styles.gridLabel}>Parent / Contact</span>
+                <span className={styles.gridValue}>{student.parentName}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)' }}>
+                  {student.parentPhone}
+                </span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.gridLabel}>Tuition Balance</span>
+                <span
+                  className={`${styles.gridValue} ${
+                    student.balance === 0 ? styles.gridValueSuccess : styles.gridValueError
+                  }`}
+                >
+                  {student.balance === 0 ? '₦0 (Settled)' : `₦${student.balance.toLocaleString()}`}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)' }}>
+                  Paid: ₦{student.paidFee.toLocaleString()} / ₦{student.expectedFee.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Add Student Modal */}

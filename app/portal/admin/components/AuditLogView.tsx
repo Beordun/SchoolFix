@@ -3,6 +3,7 @@
 'use client';
 
 import React from 'react';
+import styles from './admin-tables.module.css';
 
 interface AuditRecord {
   id: string;
@@ -116,15 +117,8 @@ export default function AuditLogView() {
       </div>
 
       {/* Audit Log Table */}
-      <div
-        style={{
-          backgroundColor: 'var(--color-surface-container-lowest)',
-          borderRadius: 'var(--radius-medium)',
-          border: '1px solid var(--color-outline-variant)',
-          boxShadow: 'var(--shadow-soft)',
-          overflowX: 'auto',
-        }}
-      >
+      {/* Desktop & Tablet View: Full Dense Table */}
+      <div className={styles.desktopTableWrapper}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
@@ -166,6 +160,55 @@ export default function AuditLogView() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile View (≤ 640px): Stacked Responsive Audit Cards */}
+      <div className={styles.mobileCardsWrapper}>
+        {auditRecords.map((rec) => (
+          <div key={rec.id} className={styles.adminCard}>
+            <div className={styles.cardHeader}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  backgroundColor: 'var(--color-surface-container-high)',
+                  color: 'var(--color-primary)',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {rec.action}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)' }}>
+                {rec.timestamp}
+              </span>
+            </div>
+
+            <div className={styles.cardSubHeader}>
+              <span>{rec.id}</span>
+            </div>
+
+            <div className={styles.cardGrid}>
+              <div className={styles.gridItem}>
+                <span className={styles.gridLabel}>Target Record</span>
+                <span className={styles.gridValue}>{rec.target}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.gridLabel}>Actor</span>
+                <span className={styles.gridValue}>{rec.actor}</span>
+              </div>
+            </div>
+
+            <div className={styles.cardFooter}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--color-on-surface-variant)' }}>SHA-256 Hash:</span>
+              <code style={{ fontSize: '0.6875rem', fontFamily: 'monospace', color: 'var(--color-primary)' }}>
+                {rec.integrityHash.slice(0, 20)}...
+              </code>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

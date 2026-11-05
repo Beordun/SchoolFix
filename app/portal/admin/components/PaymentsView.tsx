@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './admin-tables.module.css';
 
 interface Transaction {
   id: string;
@@ -352,52 +353,110 @@ export default function PaymentsView({ bursarName }: PaymentsViewProps) {
           </div>
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Reference</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Student</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Channel</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Amount</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Timestamp</th>
-              <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((txn) => (
-              <tr key={txn.id} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontFamily: 'monospace' }}>{txn.reference}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 600 }}>{txn.studentName}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>{txn.channel}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-                  ₦{txn.amount.toLocaleString()}
-                </td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', color: 'var(--color-on-surface-variant)' }}>{txn.timestamp}</td>
-                <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.125rem 0.5rem',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor:
-                        txn.status === 'VERIFIED'
-                          ? 'var(--color-success-container)'
-                          : 'var(--color-warning-container)',
-                      color:
-                        txn.status === 'VERIFIED'
-                          ? 'var(--color-on-success-container)'
-                          : 'var(--color-on-warning-container)',
-                    }}
-                  >
-                    {txn.status}
-                  </span>
-                </td>
+        {/* Desktop & Tablet View: Full Dense Table */}
+        <div className={styles.desktopTableWrapper}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'var(--type-body-small-size)' }}>
+            <thead>
+              <tr style={{ backgroundColor: 'var(--color-surface-container)', borderBottom: '1px solid var(--color-outline-variant)' }}>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Reference</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Student</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Channel</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Amount</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Timestamp</th>
+                <th style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700 }}>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((txn) => (
+                <tr key={txn.id} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontFamily: 'monospace' }}>{txn.reference}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 600 }}>{txn.studentName}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>{txn.channel}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                    ₦{txn.amount.toLocaleString()}
+                  </td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)', color: 'var(--color-on-surface-variant)' }}>{txn.timestamp}</td>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-4)' }}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        backgroundColor:
+                          txn.status === 'VERIFIED'
+                            ? 'var(--color-success-container)'
+                            : 'var(--color-warning-container)',
+                        color:
+                          txn.status === 'VERIFIED'
+                            ? 'var(--color-on-success-container)'
+                            : 'var(--color-on-warning-container)',
+                      }}
+                    >
+                      {txn.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile View (≤ 640px): Stacked Responsive Payment Cards */}
+        <div className={styles.mobileCardsWrapper}>
+          {filtered.map((txn) => (
+            <div key={txn.id} className={styles.adminCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTitle}>{txn.studentName}</span>
+                <span
+                  className={`${styles.badge} ${
+                    txn.status === 'VERIFIED'
+                      ? styles.badgeSuccess
+                      : txn.status === 'PENDING'
+                      ? styles.badgeWarning
+                      : styles.badgeError
+                  }`}
+                >
+                  {txn.status}
+                </span>
+              </div>
+
+              <div className={styles.cardSubHeader}>
+                <span>{txn.reference}</span>
+                <span>·</span>
+                <span className={`${styles.badge} ${styles.badgeNeutral}`}>{txn.channel}</span>
+              </div>
+
+              <div className={styles.cardGrid}>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Settlement Amount</span>
+                  <span className={`${styles.gridValue} ${styles.gridValuePrimary}`} style={{ fontSize: '1rem' }}>
+                    ₦{txn.amount.toLocaleString()}
+                  </span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.gridLabel}>Date / Timestamp</span>
+                  <span className={styles.gridValue}>{txn.timestamp}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-on-surface-variant)' }}>
+                    {txn.classArm} · {txn.admissionNo}
+                  </span>
+                </div>
+              </div>
+
+              {txn.status === 'PENDING' && (
+                <div className={styles.cardFooter}>
+                  <button
+                    onClick={() => setSelectedTxn(txn)}
+                    className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+                  >
+                    Verify & Reconcile Payment ↗
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Deliberate Verification Modal */}
