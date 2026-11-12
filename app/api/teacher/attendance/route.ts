@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/security/session';
+import { canAccessClassArm, findOutOfScopeStudentIds } from '@/lib/security/rbac';
 import { z } from 'zod';
 
 const AttendanceRecordSchema = z.object({
@@ -39,21 +40,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'MISSING_CLASS_ARM_ID' }, { status: 400 });
     }
 
-    // RBAC Isolation: Teachers can only view class arms assigned to them
-    if (session.user.role === 'TEACHER') {
-      const assignment = await prisma.teacherClassAssignment.findFirst({
-        where: { teacherId: session.user.id, classArmId },
-      });
-
-      // If no assignment exists in DB, allow query if classArm name matches or report empty
-      if (!assignment) {
-        const anyAssignment = await prisma.teacherClassAssignment.findFirst({
-          where: { teacherId: session.user.id },
-        });
-        if (anyAssignment) {
-          return NextResponse.json({ success: false, error: 'FORBIDDEN_CLASS_ARM' }, { status: 403 });
-        }
-      }
+    // RBAC Isolation: a teacher may only view class arms assigned to them.
+    // Fail-closed: no assignment row means denial, even for a teacher with
+    // zero assignments anywhere.
+    const allowed = await canAccessClassArm(session.user.id, session.user.role, classArmId);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'FORBIDDEN_CLASS_ARM',
+          message: 'You are not assigned to this class arm.',
+        },
+        { status: 403 }
+      );
     }
 
     const targetDate = new Date(`${dateParam}T00:00:00.000Z`);
@@ -118,23 +117,32 @@ export async function POST(req: NextRequest) {
     const { classArmId, date, records } = validation.data;
     const targetDate = new Date(`${date}T00:00:00.000Z`);
 
-    // RBAC check: verify teacher is assigned to this class arm
-    if (session.user.role === 'TEACHER') {
-      const assignment = await prisma.teacherClassAssignment.findFirst({
-        where: { teacherId: session.user.id, classArmId },
-      });
+    // RBAC check: verify the teacher is assigned to this class arm (fail-closed)
+    const allowed = await canAccessClassArm(session.user.id, session.user.role, classArmId);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: 'FORBIDDEN_CLASS_ARM', message: 'You are not assigned to this class arm.' },
+        { status: 403 }
+      );
+    }
 
-      if (!assignment) {
-        const anyAssignment = await prisma.teacherClassAssignment.findFirst({
-          where: { teacherId: session.user.id },
-        });
-        if (anyAssignment) {
-          return NextResponse.json(
-            { success: false, error: 'FORBIDDEN_CLASS_ARM', message: 'You are not assigned to this class arm.' },
-            { status: 403 }
-          );
-        }
-      }
+    // Student-scope check: every studentId must belong to this class arm.
+    // Without this, a teacher could upsert attendance for another class's pupils.
+    const outOfScope = await findOutOfScopeStudentIds(
+      classArmId,
+      records.map((rec) => rec.studentId)
+    );
+
+    if (outOfScope.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'STUDENTS_OUTSIDE_CLASS_ARM',
+          message: `${outOfScope.length} submitted student record(s) do not belong to this class arm.`,
+          studentIds: outOfScope,
+        },
+        { status: 403 }
+      );
     }
 
     // Atomically upsert each student's attendance record using the composite key [studentId, date]

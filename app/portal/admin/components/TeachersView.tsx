@@ -18,6 +18,8 @@ export interface Teacher {
   inviteExpiresAt?: string;
   attendanceSubmittedToday: boolean;
   attendanceTime?: string;
+  /** True only for records actually created in PostgreSQL via /api/teachers/invite */
+  isPersisted?: boolean;
 }
 
 export default function TeachersView() {
@@ -29,9 +31,13 @@ export default function TeachersView() {
     teacher: Teacher;
     inviteLink: string;
     setupCode: string;
+    whatsappText?: string;
+    expiresAt?: string;
     copied: boolean;
   } | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   // Available class arms for assignment
   const availableClassArms = [
@@ -156,60 +162,129 @@ export default function TeachersView() {
   // Form State for Reassigning Teacher
   const [targetClassArm, setTargetClassArm] = useState('');
 
-  // Handle Invite Teacher Form Submission
-  const handleAddTeacher = (e: React.FormEvent) => {
+  // Handle Invite Teacher Form Submission — server-authoritative.
+  // The setup code is minted and hashed by /api/teachers/invite; nothing here
+  // invents a code or a class-arm assignment.
+  const handleAddTeacher = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFullName || !newPhone) return;
 
-    const setupCode = `SF-${Math.floor(1000 + Math.random() * 9000)}`;
-    const derivedEmail = newEmail.trim() || `${newPhone.trim()}@greenfield.internal`;
+    setInviteError(null);
+    setIsInviting(true);
 
-    const newTeacherRecord: Teacher = {
-      id: `TEA-${Date.now().toString().slice(-4)}`,
-      staffId: `SF-TEA-${(teachers.length + 1).toString().padStart(3, '0')}`,
-      fullName: newFullName.trim(),
-      email: derivedEmail.toLowerCase(),
-      phone: newPhone.trim(),
-      subjects: newSubjects.trim() || 'General Studies',
-      assignedClassArm: newClassArm || null,
-      status: 'INVITED',
-      inviteCode: setupCode,
-      inviteExpiresAt: 'In 72 hours',
-      attendanceSubmittedToday: false,
-    };
+    try {
+      const res = await fetch('/api/teachers/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: newFullName.trim(),
+          email: newEmail.trim(),
+          phone: newPhone.trim(),
+          classArmName: newClassArm || undefined,
+        }),
+      });
 
-    setTeachers((prev) => [newTeacherRecord, ...prev]);
-    setShowAddModal(false);
-    setNewFullName('');
-    setNewEmail('');
-    setNewPhone('080');
-    setNewSubjects('');
-    setNewClassArm('');
+      const data = await res.json().catch(() => null);
 
-    // Generate activation link
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-    const inviteLink = `${origin}/auth?mode=activate&code=${setupCode}&name=${encodeURIComponent(newTeacherRecord.fullName)}&phone=${encodeURIComponent(newTeacherRecord.phone)}&email=${encodeURIComponent(newTeacherRecord.email)}&arm=${encodeURIComponent(newTeacherRecord.assignedClassArm || 'Unassigned')}`;
+      if (!res.ok || !data?.success) {
+        setInviteError(data?.message || 'The invitation could not be created. Please try again.');
+        return;
+      }
 
-    setActiveInviteModal({
-      teacher: newTeacherRecord,
-      inviteLink,
-      setupCode,
-      copied: false,
-    });
+      const newTeacherRecord: Teacher = {
+        id: data.teacher.id,
+        staffId: `SF-TEA-${(teachers.length + 1).toString().padStart(3, '0')}`,
+        fullName: data.teacher.fullName,
+        email: data.teacher.email,
+        phone: newPhone.trim(),
+        subjects: newSubjects.trim() || 'General Studies',
+        assignedClassArm: data.teacher.classArm,
+        status: 'INVITED',
+        inviteCode: data.setupCode,
+        inviteExpiresAt: `Expires ${new Date(data.expiresAt).toLocaleString('en-NG')}`,
+        attendanceSubmittedToday: false,
+        isPersisted: true,
+      };
+
+      setTeachers((prev) => [newTeacherRecord, ...prev]);
+      setShowAddModal(false);
+      setNewFullName('');
+      setNewEmail('');
+      setNewPhone('080');
+      setNewSubjects('');
+      setNewClassArm('');
+
+      setActiveInviteModal({
+        teacher: newTeacherRecord,
+        inviteLink: data.inviteLink,
+        setupCode: data.setupCode,
+        whatsappText: data.whatsappText,
+        expiresAt: data.expiresAt,
+        copied: false,
+      });
+    } catch {
+      setInviteError('Network error. The invitation was not created.');
+    } finally {
+      setIsInviting(false);
+    }
   };
 
-  // Re-open invite sharing modal for existing invited teacher
-  const handleShareInvite = (teacher: Teacher) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-    const setupCode = teacher.inviteCode || `SF-${Math.floor(1000 + Math.random() * 9000)}`;
-    const inviteLink = `${origin}/auth?mode=activate&code=${setupCode}&name=${encodeURIComponent(teacher.fullName)}&phone=${encodeURIComponent(teacher.phone)}&email=${encodeURIComponent(teacher.email)}&arm=${encodeURIComponent(teacher.assignedClassArm || 'Unassigned')}`;
+  // Re-open invite sharing modal. Only server-created rows can be re-issued:
+  // rotating a demo row would mint a real account for a fictional teacher.
+  const handleShareInvite = async (teacher: Teacher) => {
+    if (!teacher.isPersisted) {
+      setSuccessToast(
+        'This directory row is sample data. Use "Invite New Teacher" to issue a real, server-verified invitation.'
+      );
+      setTimeout(() => setSuccessToast(null), 6000);
+      return;
+    }
 
-    setActiveInviteModal({
-      teacher,
-      inviteLink,
-      setupCode,
-      copied: false,
-    });
+    setInviteError(null);
+    setIsInviting(true);
+
+    try {
+      const res = await fetch('/api/teachers/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: teacher.fullName,
+          email: teacher.email,
+          phone: teacher.phone,
+          classArmName: teacher.assignedClassArm || undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setSuccessToast(data?.message || 'Could not re-issue this invitation.');
+        setTimeout(() => setSuccessToast(null), 6000);
+        return;
+      }
+
+      const refreshed: Teacher = {
+        ...teacher,
+        inviteCode: data.setupCode,
+        inviteExpiresAt: `Expires ${new Date(data.expiresAt).toLocaleString('en-NG')}`,
+      };
+
+      setTeachers((prev) => prev.map((t) => (t.id === teacher.id ? refreshed : t)));
+
+      setActiveInviteModal({
+        teacher: refreshed,
+        inviteLink: data.inviteLink,
+        setupCode: data.setupCode,
+        whatsappText: data.whatsappText,
+        expiresAt: data.expiresAt,
+        copied: false,
+      });
+    } catch {
+      setSuccessToast('Network error. The invitation was not re-issued.');
+      setTimeout(() => setSuccessToast(null), 6000);
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   // Handle Reassign Class Form Submission
@@ -1071,13 +1146,14 @@ export default function TeachersView() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
-                    Email Address (Optional)
+                    Email Address *
                   </label>
                   <input
                     type="email"
                     placeholder="teacher.name@schoolfix.internal"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
+                    required
                     style={{
                       width: '100%',
                       padding: 'var(--spacing-2) var(--spacing-3)',
@@ -1144,10 +1220,30 @@ export default function TeachersView() {
                 </span>
               </div>
 
+              {inviteError && (
+                <div
+                  role="alert"
+                  style={{
+                    backgroundColor: 'var(--color-error-container)',
+                    color: 'var(--color-on-error-container)',
+                    border: '1px solid var(--color-error)',
+                    borderRadius: 'var(--radius-small)',
+                    padding: 'var(--spacing-2) var(--spacing-3)',
+                    fontSize: 'var(--type-body-small-size)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {inviteError}
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end', marginTop: 'var(--spacing-2)' }}>
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setInviteError(null);
+                  }}
                   style={{
                     padding: 'var(--spacing-2) var(--spacing-4)',
                     backgroundColor: 'var(--color-surface-container)',
@@ -1163,6 +1259,8 @@ export default function TeachersView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isInviting}
+                  aria-busy={isInviting}
                   style={{
                     padding: 'var(--spacing-2) var(--spacing-5)',
                     backgroundColor: 'var(--color-primary)',
@@ -1170,11 +1268,12 @@ export default function TeachersView() {
                     border: 'none',
                     borderRadius: 'var(--radius-small)',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: isInviting ? 'progress' : 'pointer',
+                    opacity: isInviting ? 0.75 : 1,
                     minHeight: 'var(--size-touch-target)',
                   }}
                 >
-                  Generate Invite &amp; Share ↗
+                  {isInviting ? 'Creating invitation…' : 'Generate Invite & Share ↗'}
                 </button>
               </div>
             </form>
@@ -1292,6 +1391,11 @@ export default function TeachersView() {
               <span style={{ fontSize: '0.75rem', color: 'var(--color-on-primary-container)', opacity: 0.85 }}>
                 Admin can hand this code to the teacher on paper or via phone call if they have limited data.
               </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-on-primary-container)', opacity: 0.85 }}>
+                {activeInviteModal.expiresAt
+                  ? `Expires ${new Date(activeInviteModal.expiresAt).toLocaleString('en-NG')}`
+                  : 'Expires in 72 hours'}
+              </span>
             </div>
 
             {/* Sharing Actions */}
@@ -1299,7 +1403,8 @@ export default function TeachersView() {
               {/* WhatsApp Share Button */}
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `Hello ${activeInviteModal.teacher.fullName}, you have been invited to join Greenfield Academy on SchoolFix as Teacher for ${activeInviteModal.teacher.assignedClassArm || 'your classes'}.\n\nActivate your account and set your private password here:\n${activeInviteModal.inviteLink}\n\nOr enter 6-digit setup code: ${activeInviteModal.setupCode} on the SchoolFix portal. (Link expires in 72 hours).`
+                  activeInviteModal.whatsappText ||
+                    `Hello ${activeInviteModal.teacher.fullName}, you have been invited to join the school on SchoolFix as a class teacher. Activate your account here: ${activeInviteModal.inviteLink} — setup code ${activeInviteModal.setupCode} (single use, expires in 72 hours).`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -86,8 +86,19 @@ export default function AdminCard({ user }: AdminCardProps) {
   // Form State for Step 5: Invite Teachers
   const [teacherName, setTeacherName] = useState('Mr. Ibrahim Danladi');
   const [teacherEmail, setTeacherEmail] = useState('teacher.ibrahim@schoolfix.internal');
+  const [teacherPhone, setTeacherPhone] = useState('08031234567');
   const [teacherClassArm, setTeacherClassArm] = useState('Primary 4 Blue');
   const [invitedTeachers, setInvitedTeachers] = useState<string[]>([]);
+  const [isInviting, setIsInviting] = useState(false);
+  const [step5Error, setStep5Error] = useState<string | null>(null);
+  const [step5Result, setStep5Result] = useState<{
+    name: string;
+    code: string;
+    link: string;
+    waText: string;
+    expiresAt: string;
+  } | null>(null);
+  const [step5Copied, setStep5Copied] = useState(false);
 
   // Form State for Step 6: Fee Schedule
   const [tuitionFee, setTuitionFee] = useState('150000');
@@ -149,20 +160,58 @@ export default function AdminCard({ user }: AdminCardProps) {
     }, 1000);
   };
 
-  // Step 5 Handler: Invite Teachers
-  const handleCompleteStep5 = () => {
-    if (teacherName && !invitedTeachers.includes(teacherName)) {
-      setInvitedTeachers((prev) => [...prev, `${teacherName} (${teacherClassArm})`]);
+  // Step 5 Handler: Invite Teachers — the code and class arm are minted by the server.
+  const handleCompleteStep5 = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+
+    if (!teacherName.trim() || !teacherEmail.trim()) {
+      setStep5Error('Enter the teacher name and staff email before inviting.');
+      return;
     }
-    if (!completedSteps.includes(5)) {
-      setCompletedSteps((prev) => [...prev, 5]);
-      setActiveStep(6);
+
+    setStep5Error(null);
+    setIsInviting(true);
+
+    try {
+      const res = await fetch('/api/teachers/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: teacherName.trim(),
+          email: teacherEmail.trim(),
+          phone: teacherPhone.trim(),
+          classArmName: teacherClassArm || undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setStep5Error(data?.message || 'The invitation could not be created.');
+        return;
+      }
+
+      setInvitedTeachers((prev) =>
+        prev.includes(teacherName) ? prev : [...prev, `${teacherName} (${teacherClassArm})`]
+      );
+
+      if (!completedSteps.includes(5)) {
+        setCompletedSteps((prev) => [...prev, 5]);
+        setActiveStep(6);
+      }
+
+      setStep5Result({
+        name: data.teacher.fullName,
+        code: data.setupCode,
+        link: data.inviteLink,
+        waText: data.whatsappText,
+        expiresAt: data.expiresAt,
+      });
+    } catch {
+      setStep5Error('Network error. The invitation was not created.');
+    } finally {
+      setIsInviting(false);
     }
-    setSaveSuccessMsg(`Teacher account created and assigned to ${teacherClassArm}!`);
-    setTimeout(() => {
-      setShowStepModal(null);
-      setSaveSuccessMsg(null);
-    }, 1000);
   };
 
   // Step 6 Handler: Set Fee Schedule
@@ -2187,12 +2236,118 @@ export default function AdminCard({ user }: AdminCardProps) {
               >
                 ✅ {saveSuccessMsg}
               </div>
+            ) : step5Result ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-surface-container)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: 'var(--radius-small)',
+                    padding: 'var(--spacing-3)',
+                    fontSize: 'var(--type-body-small-size)',
+                  }}
+                >
+                  <strong>{step5Result.name}</strong> now exists as an unverified teacher account assigned to{' '}
+                  <strong>{teacherClassArm || 'no class arm yet'}</strong>. SchoolFix does not send messages itself:
+                  deliver this code through WhatsApp or on paper.
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-primary-container)',
+                    color: 'var(--color-on-primary-container)',
+                    borderRadius: 'var(--radius-small)',
+                    padding: 'var(--spacing-4)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 'var(--type-label-small-size)', fontWeight: 700, textTransform: 'uppercase' }}>
+                    One-time setup code
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 900,
+                      letterSpacing: '0.2em',
+                      fontFamily: 'monospace',
+                      margin: '0.25rem 0',
+                    }}
+                  >
+                    {step5Result.code}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.85 }}>
+                    Expires {new Date(step5Result.expiresAt).toLocaleString('en-NG')} · single use
+                  </div>
+                </div>
+
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(step5Result.waText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 'var(--spacing-3)',
+                    backgroundColor: 'var(--color-success)',
+                    color: 'var(--color-on-primary)',
+                    borderRadius: 'var(--radius-small)',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    minHeight: 'var(--size-touch-target)',
+                  }}
+                >
+                  💬 Share via WhatsApp
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(step5Result.link);
+                    setStep5Copied(true);
+                    setTimeout(() => setStep5Copied(false), 3000);
+                  }}
+                  style={{
+                    padding: 'var(--spacing-3)',
+                    backgroundColor: 'var(--color-surface-container-high)',
+                    color: 'var(--color-primary)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: 'var(--radius-small)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    minHeight: 'var(--size-touch-target)',
+                  }}
+                >
+                  {step5Copied ? '✓ Activation link copied' : '📋 Copy activation link'}
+                </button>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep5Result(null);
+                      setShowStepModal(null);
+                      setSaveSuccessMsg('Teacher invitation created. The setup code is single-use and expires in 72 hours.');
+                      setTimeout(() => setSaveSuccessMsg(null), 5000);
+                    }}
+                    style={{
+                      padding: 'var(--spacing-2) var(--spacing-4)',
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-on-primary)',
+                      border: 'none',
+                      borderRadius: 'var(--radius-small)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      minHeight: 'var(--size-touch-target)',
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
             ) : (
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleCompleteStep5();
-                }}
+                onSubmit={handleCompleteStep5}
                 style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}
               >
                 <div>
@@ -2241,6 +2396,33 @@ export default function AdminCard({ user }: AdminCardProps) {
 
                 <div>
                   <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
+                    Nigerian Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    value={teacherPhone}
+                    onChange={(e) => setTeacherPhone(e.target.value)}
+                    placeholder="080XXXXXXXX"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--spacing-2) var(--spacing-3)',
+                      borderRadius: 'var(--radius-small)',
+                      border: '1px solid var(--color-outline)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-on-surface)',
+                      fontSize: 'var(--type-body-small-size)',
+                      minHeight: 'var(--size-touch-target)',
+                    }}
+                    required
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)' }}>
+                    Used to address the WhatsApp invitation. Phone is not stored: the frozen schema has no phone column.
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 'var(--type-label-small-size)', fontWeight: 700, marginBottom: 'var(--spacing-1)' }}>
                     Assigned Class Arm
                   </label>
                   <select
@@ -2266,10 +2448,30 @@ export default function AdminCard({ user }: AdminCardProps) {
                   </select>
                 </div>
 
+                {step5Error && (
+                  <div
+                    role="alert"
+                    style={{
+                      backgroundColor: 'var(--color-error-container)',
+                      color: 'var(--color-on-error-container)',
+                      border: '1px solid var(--color-error)',
+                      borderRadius: 'var(--radius-small)',
+                      padding: 'var(--spacing-2) var(--spacing-3)',
+                      fontSize: 'var(--type-body-small-size)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {step5Error}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end', marginTop: 'var(--spacing-2)' }}>
                   <button
                     type="button"
-                    onClick={() => setShowStepModal(null)}
+                    onClick={() => {
+                      setShowStepModal(null);
+                      setStep5Error(null);
+                    }}
                     style={{
                       padding: 'var(--spacing-2) var(--spacing-4)',
                       backgroundColor: 'var(--color-surface-container)',
@@ -2284,6 +2486,8 @@ export default function AdminCard({ user }: AdminCardProps) {
                   </button>
                   <button
                     type="submit"
+                    disabled={isInviting}
+                    aria-busy={isInviting}
                     style={{
                       padding: 'var(--spacing-2) var(--spacing-4)',
                       backgroundColor: 'var(--color-primary)',
@@ -2291,10 +2495,11 @@ export default function AdminCard({ user }: AdminCardProps) {
                       border: 'none',
                       borderRadius: 'var(--radius-small)',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: isInviting ? 'progress' : 'pointer',
+                      opacity: isInviting ? 0.75 : 1,
                     }}
                   >
-                    Assign Teacher &amp; Continue →
+                    {isInviting ? 'Creating invitation…' : 'Create Invitation →'}
                   </button>
                 </div>
               </form>

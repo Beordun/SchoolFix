@@ -35,48 +35,53 @@ interface TeacherDashboardClientProps {
   assignedClasses?: Array<{ id: string; name: string; studentCount: number }>;
 }
 
-const DEFAULT_STUDENTS: StudentAttendance[] = [
-  { studentId: 'stu-1', admissionNum: 'SF-2026-001', fullName: 'Adeyemi Tola', status: 'PRESENT' },
-  { studentId: 'stu-2', admissionNum: 'SF-2026-002', fullName: 'Bello Aisha', status: 'PRESENT' },
-  { studentId: 'stu-3', admissionNum: 'SF-2026-003', fullName: 'Chukwu Emeka', status: 'ABSENT' },
-  { studentId: 'stu-4', admissionNum: 'SF-2026-004', fullName: 'Danjuma Ibrahim', status: 'LATE' },
-  { studentId: 'stu-5', admissionNum: 'SF-2026-005', fullName: 'Eze Ngozi', status: 'PRESENT' },
-  { studentId: 'stu-6', admissionNum: 'SF-2026-006', fullName: 'Fashola Bisi', status: 'EXCUSED' },
-  { studentId: 'stu-7', admissionNum: 'SF-2026-007', fullName: 'Garba Musa', status: 'ABSENT' },
-  { studentId: 'stu-8', admissionNum: 'SF-2026-008', fullName: 'Hassan Zainab', status: 'PRESENT' },
-];
+interface AttendancePayload {
+  classArmId: string;
+  date: string;
+  records: Array<{ studentId: string; status: StudentAttendance['status'] }>;
+}
 
-const INITIAL_SCORES: StudentScore[] = [
-  { studentId: 'stu-1', fullName: 'Adeyemi Tola', caScore: 34, examScore: 52, status: 'Saved' },
-  { studentId: 'stu-2', fullName: 'Bello Aisha', caScore: 31, examScore: 48, status: 'Saved' },
-  { studentId: 'stu-3', fullName: 'Chukwu Emeka', caScore: 28, examScore: 41, status: 'Saved' },
-  { studentId: 'stu-4', fullName: 'Danjuma Ibrahim', caScore: 25, examScore: 36, status: 'Waiting to sync' },
-  { studentId: 'stu-5', fullName: 'Eze Ngozi', caScore: 22, examScore: 30, status: 'Waiting to sync' },
-  { studentId: 'stu-6', fullName: 'Fashola Bisi', caScore: 18, examScore: 27, status: 'Waiting to sync' },
-  { studentId: 'stu-7', fullName: 'Garba Musa', caScore: '', examScore: '', status: 'Not entered' },
-  { studentId: 'stu-8', fullName: 'Hassan Zainab', caScore: '', examScore: '', status: 'Not entered' },
-];
+interface ScoresPayload {
+  classArmId: string;
+  subject: string;
+  term: string;
+  entries: Array<{ studentId: string; caScore: number; examScore: number }>;
+}
 
-export default function TeacherDashboardClient({ user, assignedClasses }: TeacherDashboardClientProps) {
+const SCORE_SUBJECT = 'Mathematics';
+const SCORE_TERM = 'First Term';
+
+export default function TeacherDashboardClient({ user, assignedClasses = [] }: TeacherDashboardClientProps) {
+  // The server decides which class arms this teacher owns; nothing here is invented.
+  const classOptions = assignedClasses;
+
   // Navigation & View state
   const [activeTab, setActiveTab] = useState<'home' | 'attendance' | 'scores' | 'remarks' | 'handbook'>('home');
-  const [activeClass, setActiveClass] = useState<string>('JSS 2A');
-  const [availableClasses] = useState<string[]>(['JSS 2A', 'JSS 1B', 'JSS 3C']);
+  const [activeClassId, setActiveClassId] = useState<string>(classOptions[0]?.id ?? '');
+  const activeClass = classOptions.find((c) => c.id === activeClassId) ?? classOptions[0] ?? null;
+  const activeClassName = activeClass?.name ?? 'No class assigned';
 
   // Attendance state
-  const [attendance, setAttendance] = useState<StudentAttendance[]>(DEFAULT_STUDENTS);
-  const [isAttendanceDirty, setIsAttendanceDirty] = useState<boolean>(true);
+  const [attendance, setAttendance] = useState<StudentAttendance[]>([]);
+  const [isAttendanceDirty, setIsAttendanceDirty] = useState<boolean>(false);
   const [isSavingAttendance, setIsSavingAttendance] = useState<boolean>(false);
   const [attendanceFeedback, setAttendanceFeedback] = useState<string>('');
 
   // Scores state
-  const [scores, setScores] = useState<StudentScore[]>(INITIAL_SCORES);
+  const [scores, setScores] = useState<StudentScore[]>([]);
   const [isSavingScores, setIsSavingScores] = useState<boolean>(false);
   const [scoreFeedback, setScoreFeedback] = useState<string>('');
 
-  // Sync state
-  const [pendingSyncCount, setPendingSyncCount] = useState<number>(3);
-  const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'syncing'>('pending');
+  // Roster loading state
+  const [isLoadingRoster, setIsLoadingRoster] = useState<boolean>(false);
+  const [rosterError, setRosterError] = useState<string>('');
+  const [todayLabel, setTodayLabel] = useState<string>('');
+
+  // Sync state — pending counts only ever reflect payloads actually waiting on this device.
+  const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'syncing'>('synced');
+  const [queuedAttendance, setQueuedAttendance] = useState<AttendancePayload | null>(null);
+  const [queuedScores, setQueuedScores] = useState<ScoresPayload | null>(null);
 
   // Remark draft state
   const [remarkAccepted, setRemarkAccepted] = useState<boolean>(false);
@@ -120,51 +125,73 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
     setSyncStatus('pending');
   };
 
-  // Save attendance
-  const handleSaveAttendance = async () => {
-    setIsSavingAttendance(true);
-    setAttendanceFeedback('Saving register...');
+  // Draft keys are per class-arm id so a renamed arm can never mis-file a register.
+  const attendanceDraftKey = activeClassId ? `schoolfix_attendance_draft_${activeClassId}` : '';
+  const scoresDraftKey = activeClassId ? `schoolfix_scores_draft_${activeClassId}` : '';
 
+  const persistAttendance = async (payload: AttendancePayload): Promise<boolean> => {
     try {
-      // Optimistic persistence to localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(
-          `schoolfix_attendance_${activeClass}_today`,
-          JSON.stringify({
-            classArm: activeClass,
-            date: new Date().toISOString().split('T')[0],
-            records: attendance,
-          })
-        );
-      }
-
       const res = await fetch('/api/teacher/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classArmId: activeClass,
-          date: new Date().toISOString().split('T')[0],
-          records: attendance.map((a) => ({ studentId: a.studentId, status: a.status })),
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        setIsAttendanceDirty(false);
-        setSyncStatus('synced');
-        setPendingSyncCount((prev) => Math.max(0, prev - 1));
-        setAttendanceFeedback('✓ Register saved & synchronized');
-      } else {
-        // Saved offline draft
-        setIsAttendanceDirty(false);
-        setAttendanceFeedback('✓ Saved locally (offline draft queued)');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setAttendanceFeedback(`✗ Not saved: ${body?.message || `server responded ${res.status}`}`);
+        return false;
       }
+
+      return true;
     } catch {
-      setIsAttendanceDirty(false);
-      setAttendanceFeedback('✓ Saved locally (offline draft queued)');
-    } finally {
-      setIsSavingAttendance(false);
-      setTimeout(() => setAttendanceFeedback(''), 3500);
+      setAttendanceFeedback('✗ Network unreachable. This register is NOT saved yet.');
+      return false;
     }
+  };
+
+  // Save attendance
+  const handleSaveAttendance = async () => {
+    if (!activeClassId) {
+      setAttendanceFeedback('Select an assigned class arm before saving.');
+      return;
+    }
+
+    setIsSavingAttendance(true);
+    setAttendanceFeedback('Saving register...');
+
+    const payload: AttendancePayload = {
+      classArmId: activeClassId,
+      date: new Date().toISOString().split('T')[0],
+      records: attendance.map((a) => ({ studentId: a.studentId, status: a.status })),
+    };
+
+    const success = await persistAttendance(payload);
+
+    if (success) {
+      setIsAttendanceDirty(false);
+      setQueuedAttendance(null);
+      setSyncStatus(queuedScores ? 'pending' : 'synced');
+      setPendingSyncCount(queuedScores ? 1 : 0);
+      setAttendanceFeedback('✓ Register saved & synchronized');
+      if (typeof window !== 'undefined' && attendanceDraftKey) {
+        window.localStorage.removeItem(attendanceDraftKey);
+      }
+    } else {
+      // Kept on this device as an unsent draft; nothing claims it reached the server.
+      setQueuedAttendance(payload);
+      setSyncStatus('pending');
+      setPendingSyncCount(1 + (queuedScores ? 1 : 0));
+      if (typeof window !== 'undefined' && attendanceDraftKey) {
+        window.localStorage.setItem(
+          attendanceDraftKey,
+          JSON.stringify({ payload, savedAt: new Date().toISOString() })
+        );
+      }
+    }
+
+    setIsSavingAttendance(false);
+    setTimeout(() => setAttendanceFeedback(''), 5000);
   };
 
   // Tally counts for sticky bottom bar
@@ -216,6 +243,13 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
     });
   }, [scores]);
 
+  // All dashboard figures are derived from the loaded roster, never hard-coded.
+  const scoredCount = computedScores.filter((s) => s.hasScores).length;
+  const notScoredCount = Math.max(0, attendance.length - scoredCount);
+  const presentCount = attendance.filter((a) => a.status === 'PRESENT').length;
+  const presentRate = attendance.length > 0 ? Math.round((presentCount / attendance.length) * 100) : 0;
+  const absentToday = attendance.filter((a) => a.status === 'ABSENT');
+
   // Update Score Input
   const handleScoreChange = (studentId: string, field: 'caScore' | 'examScore', value: string) => {
     const num = value === '' ? '' : Math.max(0, Math.min(field === 'caScore' ? 40 : 60, Number(value)));
@@ -232,57 +266,236 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
     setSyncStatus('pending');
   };
 
-  // Save Scores
-  const handleSaveScores = async () => {
-    setIsSavingScores(true);
-    setScoreFeedback('Saving scores matrix...');
-
+  const persistScores = async (payload: ScoresPayload): Promise<boolean> => {
     try {
-      const payload = scores
-        .filter((s) => s.caScore !== '' || s.examScore !== '')
-        .map((s) => ({
-          studentId: s.studentId,
-          caScore: Number(s.caScore || 0),
-          examScore: Number(s.examScore || 0),
-        }));
-
       const res = await fetch('/api/teacher/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classArmId: activeClass,
-          subject: 'Mathematics',
-          term: 'First Term',
-          entries: payload,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        setScores((prev) =>
-          prev.map((s) => (s.caScore !== '' || s.examScore !== '' ? { ...s, status: 'Saved' } : s))
-        );
-        setSyncStatus('synced');
-        setPendingSyncCount(0);
-        setScoreFeedback('✓ Scores saved & recalculated');
-      } else {
-        setScoreFeedback('✓ Scores queued locally for sync');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setScoreFeedback(`✗ Not saved: ${body?.message || `server responded ${res.status}`}`);
+        return false;
       }
+
+      return true;
     } catch {
-      setScoreFeedback('✓ Scores queued locally for sync');
-    } finally {
-      setIsSavingScores(false);
-      setTimeout(() => setScoreFeedback(''), 3500);
+      setScoreFeedback('✗ Network unreachable. These scores are NOT saved yet.');
+      return false;
     }
   };
 
-  // Manual Retry Trigger
-  const handleRetrySync = () => {
-    setSyncStatus('syncing');
-    setTimeout(() => {
+  // Save Scores
+  const handleSaveScores = async () => {
+    if (!activeClassId) {
+      setScoreFeedback('Select an assigned class arm before saving.');
+      return;
+    }
+
+    const entries = scores
+      .filter((s) => s.caScore !== '' || s.examScore !== '')
+      .map((s) => ({
+        studentId: s.studentId,
+        caScore: Number(s.caScore || 0),
+        examScore: Number(s.examScore || 0),
+      }));
+
+    if (entries.length === 0) {
+      setScoreFeedback('Enter at least one score before saving.');
+      return;
+    }
+
+    setIsSavingScores(true);
+    setScoreFeedback('Saving scores matrix...');
+
+    const payload: ScoresPayload = {
+      classArmId: activeClassId,
+      subject: SCORE_SUBJECT,
+      term: SCORE_TERM,
+      entries,
+    };
+
+    const success = await persistScores(payload);
+
+    if (success) {
+      setScores((prev) =>
+        prev.map((s) => (s.caScore !== '' || s.examScore !== '' ? { ...s, status: 'Saved' } : s))
+      );
+      setQueuedScores(null);
+      setSyncStatus(queuedAttendance ? 'pending' : 'synced');
+      setPendingSyncCount(queuedAttendance ? 1 : 0);
+      setScoreFeedback('✓ Scores saved & recalculated');
+      if (typeof window !== 'undefined' && scoresDraftKey) {
+        window.localStorage.removeItem(scoresDraftKey);
+      }
+    } else {
+      setQueuedScores(payload);
+      setSyncStatus('pending');
+      setPendingSyncCount(1 + (queuedAttendance ? 1 : 0));
+      if (typeof window !== 'undefined' && scoresDraftKey) {
+        window.localStorage.setItem(
+          scoresDraftKey,
+          JSON.stringify({ payload, savedAt: new Date().toISOString() })
+        );
+      }
+    }
+
+    setIsSavingScores(false);
+    setTimeout(() => setScoreFeedback(''), 5000);
+  };
+
+  // Manual retry: re-sends only payloads that genuinely failed on this device.
+  const handleRetrySync = async () => {
+    if (!queuedAttendance && !queuedScores) {
       setSyncStatus('synced');
       setPendingSyncCount(0);
-    }, 1000);
+      return;
+    }
+
+    setSyncStatus('syncing');
+    let remaining = 0;
+
+    if (queuedAttendance) {
+      const ok = await persistAttendance(queuedAttendance);
+      if (ok) {
+        setQueuedAttendance(null);
+        setAttendanceFeedback('✓ Queued register synchronized');
+        if (typeof window !== 'undefined' && attendanceDraftKey) {
+          window.localStorage.removeItem(attendanceDraftKey);
+        }
+      } else {
+        remaining += 1;
+      }
+    }
+
+    if (queuedScores) {
+      const ok = await persistScores(queuedScores);
+      if (ok) {
+        setQueuedScores(null);
+        setScoreFeedback('✓ Queued scores synchronized');
+        if (typeof window !== 'undefined' && scoresDraftKey) {
+          window.localStorage.removeItem(scoresDraftKey);
+        }
+      } else {
+        remaining += 1;
+      }
+    }
+
+    setPendingSyncCount(remaining);
+    setSyncStatus(remaining === 0 ? 'synced' : 'pending');
   };
+
+  // Load the real roster and any saved scores for the selected class arm.
+  useEffect(() => {
+    if (!activeClassId) {
+      setAttendance([]);
+      setScores([]);
+      setIsAttendanceDirty(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      setIsLoadingRoster(true);
+      setRosterError('');
+
+      try {
+        const [attendanceRes, scoresRes] = await Promise.all([
+          fetch(`/api/teacher/attendance?classArmId=${encodeURIComponent(activeClassId)}`),
+          fetch(
+            `/api/teacher/scores?classArmId=${encodeURIComponent(activeClassId)}&subject=${encodeURIComponent(SCORE_SUBJECT)}&term=${encodeURIComponent(SCORE_TERM)}`
+          ),
+        ]);
+
+        const attendanceBody = await attendanceRes.json().catch(() => null);
+
+        if (!attendanceRes.ok || !attendanceBody?.success) {
+          throw new Error(attendanceBody?.message || 'Could not load this class register.');
+        }
+
+        const scoresBody = scoresRes.ok ? await scoresRes.json().catch(() => null) : null;
+
+        if (cancelled) return;
+
+        const roster: StudentAttendance[] = (attendanceBody.students || []).map((s: any) => ({
+          studentId: s.studentId,
+          admissionNum: s.admissionNum,
+          fullName: s.fullName,
+          status: s.status || 'PRESENT',
+        }));
+
+        setAttendance(roster);
+        setIsAttendanceDirty(false);
+        setSyncStatus(queuedAttendance || queuedScores ? 'pending' : 'synced');
+        setPendingSyncCount((queuedAttendance ? 1 : 0) + (queuedScores ? 1 : 0));
+
+        if (scoresBody?.success) {
+          setScores(
+            (scoresBody.students || []).map((s: any) => ({
+              studentId: s.studentId,
+              fullName: s.fullName,
+              caScore: s.isSaved ? s.caScore : '',
+              examScore: s.isSaved ? s.examScore : '',
+              status: s.isSaved ? 'Saved' : 'Not entered',
+            }))
+          );
+        } else {
+          setScores(
+            roster.map((s) => ({
+              studentId: s.studentId,
+              fullName: s.fullName,
+              caScore: '',
+              examScore: '',
+              status: 'Not entered',
+            }))
+          );
+        }
+      } catch (error: any) {
+        if (!cancelled) {
+          setAttendance([]);
+          setScores([]);
+          setRosterError(error?.message || 'Could not load this class register.');
+        }
+      } finally {
+        if (!cancelled) setIsLoadingRoster(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeClassId]);
+
+  // Dates and term labels are derived at runtime, never hard-coded.
+  useEffect(() => {
+    setTodayLabel(
+      new Date().toLocaleDateString('en-NG', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    );
+  }, []);
+
+  // Opportunistic retry when the device regains connectivity.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const onOnline = () => {
+      if (queuedAttendance || queuedScores) {
+        void handleRetrySync();
+      }
+    };
+
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queuedAttendance, queuedScores]);
 
   return (
     <div className={styles.portalContainer}>
@@ -406,19 +619,19 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
               </span>
             </div>
             <h1 className={styles.greetingTitle}>Good morning, {user.fullName.split(' ')[0] || 'Teacher'}</h1>
-            <p className={styles.greetingSubtitle}>Fri 30 Oct · 2026/2027 · First Term, Week 8</p>
+            <p className={styles.greetingSubtitle}>{todayLabel || 'Today'}</p>
           </div>
 
           <div className={styles.headerRightCluster}>
             <div className={styles.classSelectorRow} style={{ margin: 0, padding: 0 }}>
-              {availableClasses.map((cls) => (
+              {classOptions.map((cls) => (
                 <button
-                  key={cls}
+                  key={cls.id}
                   type="button"
-                  className={`${styles.classPill} ${activeClass === cls ? styles.classPillActive : ''}`}
-                  onClick={() => setActiveClass(cls)}
+                  className={`${styles.classPill} ${activeClassId === cls.id ? styles.classPillActive : ''}`}
+                  onClick={() => setActiveClassId(cls.id)}
                 >
-                  {cls}
+                  {cls.name}
                 </button>
               ))}
             </div>
@@ -464,6 +677,71 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
           </div>
         </header>
 
+        {/* Server-derived state banners — no invented pupils, no silent failures */}
+        {classOptions.length === 0 && (
+          <div
+            role="status"
+            style={{
+              backgroundColor: 'var(--color-surface-container-high)',
+              color: 'var(--color-on-surface)',
+              border: '1px solid var(--color-outline-variant)',
+              borderRadius: 'var(--radius-small)',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              lineHeight: 1.5,
+            }}
+          >
+            <strong>No class arm assigned yet.</strong> Ask your school administrator to assign a class arm
+            from the admin portal. Your register will appear here as soon as the assignment is saved.
+          </div>
+        )}
+
+        {rosterError && (
+          <div
+            role="alert"
+            style={{
+              backgroundColor: 'var(--color-error-container)',
+              color: 'var(--color-on-error-container)',
+              border: '1px solid var(--color-error)',
+              borderRadius: 'var(--radius-small)',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+            }}
+          >
+            {rosterError}
+          </div>
+        )}
+
+        {isLoadingRoster && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{ fontSize: '0.875rem', color: 'var(--color-on-surface-variant)', marginBottom: '1rem' }}
+          >
+            Loading {activeClassName} register…
+          </div>
+        )}
+
+        {!isLoadingRoster && !rosterError && activeClassId && attendance.length === 0 && (
+          <div
+            role="status"
+            style={{
+              backgroundColor: 'var(--color-surface-container-low)',
+              border: '1px dashed var(--color-outline-variant)',
+              borderRadius: 'var(--radius-small)',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              color: 'var(--color-on-surface-variant)',
+            }}
+          >
+            No pupils are enrolled in {activeClassName} yet.
+          </div>
+        )}
+
         {/* ==================================================================
             TAB 1: HOME COCKPIT VIEW (Matching Mobile & Tablet Home)
             ================================================================== */}
@@ -487,21 +765,25 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
               </div>
 
               <div className={styles.metricCard}>
-                <div className={styles.metricTitle}>This week</div>
-                <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>94% present</div>
-                <div className={styles.metricSubtitle}>38 students enrolled</div>
+                <div className={styles.metricTitle}>Present today</div>
+                <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>{presentRate}%</div>
+                <div className={styles.metricSubtitle}>{attendance.length} students on register</div>
               </div>
 
               <div className={styles.metricCard}>
                 <div className={styles.metricTitle}>Maths exam scores</div>
-                <div className={styles.metricValue}>22 of 38</div>
-                <div className={styles.metricSubtitle}>16 still to enter</div>
+                <div className={styles.metricValue}>
+                  {scoredCount} of {attendance.length}
+                </div>
+                <div className={styles.metricSubtitle}>{notScoredCount} still to enter</div>
               </div>
 
               <div className={styles.metricCard}>
                 <div className={styles.metricTitle}>Remarks</div>
-                <div className={styles.metricValue}>0 of 38</div>
-                <div className={styles.metricSubtitle}>AI drafts ready to review</div>
+                <div className={styles.metricValue}>
+                  0 of {attendance.length}
+                </div>
+                <div className={styles.metricSubtitle}>Drafts are not yet persisted</div>
               </div>
             </div>
 
@@ -511,7 +793,9 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                 {/* Hero Card */}
                 <div className={styles.heroCard}>
                   <div className={styles.heroHeader}>
-                    <h2 className={styles.heroClassTitle}>{activeClass} · 38 students</h2>
+                    <h2 className={styles.heroClassTitle}>
+                      {activeClassName} · {attendance.length} students
+                    </h2>
                     <span className={isAttendanceDirty ? styles.pillLate : styles.pillPresent} style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}>
                       {isAttendanceDirty ? 'Not marked' : 'Saved'}
                     </span>
@@ -597,13 +881,13 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                   <div className={styles.attentionRow}>
                     <span>Maths exam scores</span>
                     <span className={styles.warningBadge} style={{ backgroundColor: '#FFF3E0', color: '#B26A00' }}>
-                      22 of 38
+                      {scoredCount} of {attendance.length}
                     </span>
                   </div>
                   <div className={styles.attentionRow}>
                     <span>Write remarks</span>
                     <span className={styles.warningBadge} style={{ backgroundColor: '#F0F0F5', color: '#555' }}>
-                      0 of 38
+                      0 of {attendance.length}
                     </span>
                   </div>
                   <div className={styles.attentionRow}>
@@ -619,12 +903,14 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
                 </div>
 
                 <div className={styles.attentionCard}>
-                  <h3 className={styles.attentionTitle}>This week</h3>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1B5E20', marginBottom: '0.25rem' }}>
-                    94% present
+                  <h3 className={styles.attentionTitle}>Today&apos;s register</h3>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-success, #1B5E20)', marginBottom: '0.25rem' }}>
+                    {presentRate}% present
                   </div>
-                  <p style={{ fontSize: '0.8125rem', color: '#C62828', margin: 0, fontWeight: 600 }}>
-                    Absent 3+ days: Chukwu Emeka, Garba Musa
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--color-on-surface-variant)', margin: 0, fontWeight: 600 }}>
+                    {absentToday.length === 0
+                      ? 'No absences recorded for today.'
+                      : `Marked absent today: ${absentToday.slice(0, 3).map((s) => s.fullName).join(', ')}${absentToday.length > 3 ? '…' : ''}`}
                   </p>
                 </div>
               </div>
@@ -640,8 +926,8 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
             <div className={styles.workCard} style={{ marginBottom: '1.25rem' }}>
               <div className={styles.workCardHeader}>
                 <div>
-                  <h2 className={styles.workCardTitle}>{activeClass} attendance</h2>
-                  <p className={styles.workCardSubtext}>Fri 30 Oct · tap a student name or pill to rotate status</p>
+                  <h2 className={styles.workCardTitle}>{activeClassName} attendance</h2>
+                  <p className={styles.workCardSubtext}>{todayLabel || 'Today'} · tap a student name or pill to rotate status</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   {isAttendanceDirty && <span className={styles.badgeWaiting}>Not saved</span>}
@@ -916,14 +1202,17 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
             <div>
               <div className={styles.attentionCard}>
                 <h3 className={styles.attentionTitle}>Needs your attention</h3>
-                <div className={styles.attentionRow}>
-                  <span>Chukwu Emeka</span>
-                  <span className={styles.warningBadge}>Absent 4 days</span>
-                </div>
-                <div className={styles.attentionRow}>
-                  <span>Garba Musa</span>
-                  <span className={styles.warningBadge}>Absent 3 days</span>
-                </div>
+                {absentToday.slice(0, 3).map((student) => (
+                  <div key={student.studentId} className={styles.attentionRow}>
+                    <span>{student.fullName}</span>
+                    <span className={styles.warningBadge}>Absent today</span>
+                  </div>
+                ))}
+                {absentToday.length === 0 && (
+                  <div className={styles.attentionRow}>
+                    <span>No absences recorded today</span>
+                  </div>
+                )}
                 <div className={styles.attentionRow}>
                   <span>{pendingSyncCount} entries not synced</span>
                   <button type="button" className={styles.retryButton} onClick={handleRetrySync}>
@@ -934,10 +1223,16 @@ export default function TeacherDashboardClient({ user, assignedClasses }: Teache
 
               <div className={styles.attentionCard}>
                 <h3 className={styles.attentionTitle}>Remark draft</h3>
-                <div style={{ fontSize: '0.8125rem', color: '#666' }}>Adeyemi Tola · 16 of 30 words</div>
+                <div style={{ fontSize: '0.8125rem', color: '#666' }}>
+                  {attendance[0]?.fullName || 'No pupil selected'} ·{' '}
+                  {remarkText.trim().split(/\s+/).filter(Boolean).length} words
+                </div>
                 <div className={styles.remarkBox}>
                   {remarkText}
                 </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)', margin: '0.5rem 0 0 0' }}>
+                  Draft only — remarks are not yet saved to the server.
+                </p>
                 <div className={styles.remarkActions}>
                   {remarkAccepted ? (
                     <span className={styles.badgeSaved} style={{ padding: '0.5rem 1rem' }}>

@@ -130,10 +130,19 @@ export default function AuthCard() {
     acceptedTerms;
 
   // Teacher Activation Validation States (Non-Repudiation Staff Onboarding)
-  const activateCodeError = touched.inviteCode ? (!inviteCode.trim() ? 'Setup code is required (e.g. SF-7812)' : null) : null;
+  // Setup codes are 6 CSPRNG digits minted server-side: SF-000000 .. SF-999999.
+  const setupCodeRegex = /^SF-\d{6}$/;
+  const validateSetupCode = (val: string): string | null => {
+    if (!val.trim()) return 'Setup code is required (e.g. SF-482913).';
+    if (!setupCodeRegex.test(val.trim().toUpperCase())) {
+      return 'Setup codes look like SF-482913: the prefix SF- followed by 6 digits.';
+    }
+    return null;
+  };
+  const activateCodeError = touched.inviteCode ? validateSetupCode(inviteCode) : null;
   const activateConfirmPasswordError = touched.confirmPassword ? (confirmPassword !== password ? 'Passwords do not match' : null) : null;
   const isActivateValid =
-    inviteCode.trim().length >= 4 &&
+    validateSetupCode(inviteCode) === null &&
     validateFullName(fullName) === null &&
     validateEmailFormat(email) === null &&
     validatePhone(phone) === null &&
@@ -877,7 +886,6 @@ export default function AuthCard() {
                         fullName,
                         email,
                         phone,
-                        assignedClassArm,
                         password,
                         acceptedTerms,
                       }),
@@ -939,7 +947,7 @@ export default function AuthCard() {
                     required
                     aria-required="true"
                     className={`${styles.input} ${activateCodeError ? styles.inputError : ''}`}
-                    placeholder="e.g. SF-7812"
+                    placeholder="e.g. SF-482913"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     onBlur={() => markTouched('inviteCode')}
@@ -975,6 +983,10 @@ export default function AuthCard() {
                       <span>{nameError}</span>
                     </div>
                   )}
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-variant)' }}>
+                    Your school administrator set this name on the invitation. It is recorded server-side and cannot be
+                    changed from this screen.
+                  </span>
                 </div>
 
                 {/* 3. Staff Email */}

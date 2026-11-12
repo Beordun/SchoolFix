@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/security/session';
+import { canAccessClassArm, findOutOfScopeStudentIds } from '@/lib/security/rbac';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
@@ -49,6 +50,19 @@ export async function GET(req: NextRequest) {
 
     if (!classArmId) {
       return NextResponse.json({ success: false, error: 'MISSING_CLASS_ARM_ID' }, { status: 400 });
+    }
+
+    // RBAC Isolation (fail-closed): teachers may only read their assigned arms.
+    const allowed = await canAccessClassArm(session.user.id, session.user.role, classArmId);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'FORBIDDEN_CLASS_ARM',
+          message: 'You are not assigned to this class arm.',
+        },
+        { status: 403 }
+      );
     }
 
     const students = await prisma.student.findMany({
@@ -122,23 +136,31 @@ export async function POST(req: NextRequest) {
 
     const { classArmId, subject, term, entries } = validation.data;
 
-    // RBAC check
-    if (session.user.role === 'TEACHER') {
-      const assignment = await prisma.teacherClassAssignment.findFirst({
-        where: { teacherId: session.user.id, classArmId },
-      });
+    // RBAC check (fail-closed)
+    const allowed = await canAccessClassArm(session.user.id, session.user.role, classArmId);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: 'FORBIDDEN_CLASS_ARM', message: 'You are not assigned to this class arm.' },
+        { status: 403 }
+      );
+    }
 
-      if (!assignment) {
-        const anyAssignment = await prisma.teacherClassAssignment.findFirst({
-          where: { teacherId: session.user.id },
-        });
-        if (anyAssignment) {
-          return NextResponse.json(
-            { success: false, error: 'FORBIDDEN_CLASS_ARM', message: 'You are not assigned to this class arm.' },
-            { status: 403 }
-          );
-        }
-      }
+    // Student-scope check: a teacher must not write scores for another class's pupils
+    const outOfScope = await findOutOfScopeStudentIds(
+      classArmId,
+      entries.map((entry) => entry.studentId)
+    );
+
+    if (outOfScope.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'STUDENTS_OUTSIDE_CLASS_ARM',
+          message: `${outOfScope.length} submitted student record(s) do not belong to this class arm.`,
+          studentIds: outOfScope,
+        },
+        { status: 403 }
+      );
     }
 
     // Upsert each assessment in an atomic transaction

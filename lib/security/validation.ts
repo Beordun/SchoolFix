@@ -141,7 +141,41 @@ export const TeacherActivationSchema = z.object({
   }),
 });
 
+// 6. Teacher Invitation Schema (Administrator-initiated, never self-service)
+export const TeacherInviteSchema = z.object({
+  fullName: z
+    .string({ required_error: 'Teacher full name is required' })
+    .min(3, 'Teacher full name must be at least 3 characters')
+    .max(60, 'Teacher full name cannot exceed 60 characters')
+    .refine((val) => {
+      const parts = val.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 2);
+    }, {
+      message: 'Teacher full name must contain at least two words (e.g. Ibrahim Musa)',
+    }),
+
+  email: z
+    .string({ required_error: 'Staff email address is required' })
+    .trim()
+    .toLowerCase()
+    .email('Please enter a valid staff email address'),
+
+  phone: z
+    .string({ required_error: 'Nigerian phone number is required' })
+    .trim()
+    .regex(NIGERIAN_PHONE_REGEX, 'Must be an 11-digit Nigerian phone number starting with 070, 080, 081, 090, or 091'),
+
+  classArmName: z
+    .string()
+    .trim()
+    .min(2, 'Class arm name is too short')
+    .max(40, 'Class arm name cannot exceed 40 characters')
+    .regex(/^[A-Za-z0-9][A-Za-z0-9 .'\-]*$/, 'Class arm may only contain letters, numbers, spaces, dots, apostrophes and hyphens')
+    .optional(),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type TeacherInviteInput = z.infer<typeof TeacherInviteSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ResetRequestInput = z.infer<typeof ResetRequestSchema>;
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;

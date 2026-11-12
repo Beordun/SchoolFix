@@ -1,0 +1,55 @@
+﻿BEFORE-STATE EXCERPTS (git show HEAD) - generated 2026-11-12T14:28:30.0417970+01:00
+
+===== app/api/teachers/activate/route.ts @ HEAD =====
+3: // Validates 72-hour invitation token / setup code, enforces private password selection,
+54: const { code, fullName, email, phone, assignedClassArm, password } = validationResult.data;
+79: let user = await prisma.user.findUnique({
+105: role: 'TEACHER',
+106: isVerified: true,
+113: user = await prisma.user.create({
+119: role: 'TEACHER',
+120: isVerified: true,
+128: if (assignedClassArm && assignedClassArm !== 'Unassigned' && assignedClassArm.trim() !== '') {
+131: where: { name: assignedClassArm.trim() },
+136: data: { name: assignedClassArm.trim() },
+172: assignedClassArm: assignedClassArm || null,
+
+===== app/api/teacher/attendance/route.ts @ HEAD =====
+50: const anyAssignment = await prisma.teacherClassAssignment.findFirst({
+53: if (anyAssignment) {
+128: const anyAssignment = await prisma.teacherClassAssignment.findFirst({
+131: if (anyAssignment) {
+146: studentId: rec.studentId,
+154: studentId: rec.studentId,
+
+===== app/api/teacher/scores/route.ts @ HEAD =====
+41: if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') {
+109: if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') {
+126: if (session.user.role === 'TEACHER') {
+132: const anyAssignment = await prisma.teacherClassAssignment.findFirst({
+135: if (anyAssignment) {
+
+===== app/portal/teacher/TeacherDashboardClient.tsx @ HEAD =====
+38: const DEFAULT_STUDENTS: StudentAttendance[] = [
+63: const [activeClass, setActiveClass] = useState<string>('JSS 2A');
+64: const [availableClasses] = useState<string[]>(['JSS 2A', 'JSS 1B', 'JSS 3C']);
+67: const [attendance, setAttendance] = useState<StudentAttendance[]>(DEFAULT_STUDENTS);
+145: classArmId: activeClass,
+253: classArmId: activeClass,
+
+===== app/portal/admin/components/TeachersView.tsx @ HEAD =====
+164: const setupCode = `SF-${Math.floor(1000 + Math.random() * 9000)}`;
+204: const setupCode = teacher.inviteCode || `SF-${Math.floor(1000 + Math.random() * 9000)}`;
+
+===== app/portal/admin/AdminCard.tsx @ HEAD =====
+90: const [invitedTeachers, setInvitedTeachers] = useState<string[]>([]);
+153: const handleCompleteStep5 = () => {
+154: if (teacherName && !invitedTeachers.includes(teacherName)) {
+155: setInvitedTeachers((prev) => [...prev, `${teacherName} (${teacherClassArm})`]);
+1174: Invite teachers &amp; assign classes {invitedTeachers.length > 0 && `(${invitedTeachers.length} assigned)`}
+1201: Assigned ({invitedTeachers.length || 1})
+2194: handleCompleteStep5();
+
+===== app/auth/AuthCard.tsx @ HEAD =====
+31: const [assignedClassArm, setAssignedClassArm] = useState('');
+880: assignedClassArm,
